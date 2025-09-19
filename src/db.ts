@@ -68,7 +68,7 @@ export class TalentFlowDB extends Dexie {
     super('TalentFlowDB');
     this.version(1).stores({
       jobs: '++id, &slug, status, order', // &slug for unique
-      candidates: '++id, jobId, stage, [jobId+stage]', // Compound index for filtering
+      candidates: '++id, jobId, stage, email, createdAt, [jobId+stage]', // Added email and createdAt indexes
       assessments: 'jobId', // 1:1 with job
       candidateResponses: '++id, [candidateId+jobId]', // Unique per candidate-job
     });
