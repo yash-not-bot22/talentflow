@@ -16,12 +16,14 @@ export interface CreateJobRequest {
   title: string;
   status?: 'active' | 'archived';
   tags?: string[];
+  order?: number;
 }
 
 export interface UpdateJobRequest {
   title?: string;
   status?: 'active' | 'archived';
   tags?: string[];
+  order?: number;
 }
 
 export interface ReorderJobRequest {

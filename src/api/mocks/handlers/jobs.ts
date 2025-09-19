@@ -22,12 +22,14 @@ interface CreateJobRequest {
   title: string;
   status?: 'active' | 'archived';
   tags?: string[];
+  order?: number;
 }
 
 interface UpdateJobRequest {
   title?: string;
   status?: 'active' | 'archived';
   tags?: string[];
+  order?: number;
 }
 
 interface ReorderJobRequest {
@@ -153,9 +155,32 @@ export const jobsHandlers = [
         );
       }
 
-      // Get the highest order number for new job positioning
-      const highestOrderJob = await db.jobs.orderBy('order').reverse().first();
-      const newOrder = (highestOrderJob?.order || 0) + 1;
+      // Handle order assignment
+      let newOrder: number;
+      if (body.order !== undefined) {
+        // Validate the provided order
+        if (typeof body.order !== 'number' || body.order < 1) {
+          return HttpResponse.json(
+            { error: 'Order must be a positive integer' },
+            { status: 400 }
+          );
+        }
+        
+        // Check if the order is already taken
+        const existingJobWithOrder = await db.jobs.where('order').equals(body.order).first();
+        if (existingJobWithOrder) {
+          // Shift existing jobs to make room
+          const jobsToShift = await db.jobs.where('order').aboveOrEqual(body.order).toArray();
+          for (const job of jobsToShift) {
+            await db.jobs.update(job.id, { order: job.order + 1, updatedAt: Date.now() });
+          }
+        }
+        newOrder = body.order;
+      } else {
+        // Get the highest order number for new job positioning
+        const highestOrderJob = await db.jobs.orderBy('order').reverse().first();
+        newOrder = (highestOrderJob?.order || 0) + 1;
+      }
 
       const newJob: Omit<Job, 'id'> = {
         title: body.title.trim(),
@@ -232,6 +257,46 @@ export const jobsHandlers = [
 
       if (body.tags !== undefined) {
         updates.tags = body.tags;
+      }
+
+      // Handle order update
+      if (body.order !== undefined) {
+        if (typeof body.order !== 'number' || body.order < 1) {
+          return HttpResponse.json(
+            { error: 'Order must be a positive integer' },
+            { status: 400 }
+          );
+        }
+        
+        // Only update order if it's different from current order
+        if (body.order !== existingJob.order) {
+          const targetOrder = body.order;
+          const currentOrder = existingJob.order;
+          
+          if (targetOrder > currentOrder) {
+            // Moving down: shift jobs between currentOrder+1 and targetOrder down by 1
+            const jobsToShift = await db.jobs
+              .where('order')
+              .between(currentOrder + 1, targetOrder, true, true)
+              .toArray();
+            
+            for (const job of jobsToShift) {
+              await db.jobs.update(job.id, { order: job.order - 1, updatedAt: Date.now() });
+            }
+          } else {
+            // Moving up: shift jobs between targetOrder and currentOrder-1 up by 1
+            const jobsToShift = await db.jobs
+              .where('order')
+              .between(targetOrder, currentOrder - 1, true, true)
+              .toArray();
+            
+            for (const job of jobsToShift) {
+              await db.jobs.update(job.id, { order: job.order + 1, updatedAt: Date.now() });
+            }
+          }
+          
+          updates.order = targetOrder;
+        }
       }
 
       await db.jobs.update(jobId, updates);
