@@ -40,14 +40,6 @@ interface ReorderJobRequest {
 export const jobsHandlers = [
   // GET /jobs?search=&status=&page=&pageSize=&sort=
   http.get('/api/jobs', async ({ request }) => {
-    await randomDelay();
-    
-    if (shouldFail()) {
-      return HttpResponse.json(
-        { error: 'Internal server error' },
-        { status: 500 }
-      );
-    }
 
     try {
       console.log('🔍 GET /jobs - Starting handler...');
@@ -99,7 +91,10 @@ export const jobsHandlers = [
       const paginatedJobs = jobs.slice(startIndex, endIndex);
 
       return HttpResponse.json({
-        data: paginatedJobs,
+        data: paginatedJobs.map(job => ({
+          ...job,
+          tags: job.tags || [] // Ensure tags is always an array
+        })),
         pagination: {
           page,
           pageSize,
@@ -112,6 +107,65 @@ export const jobsHandlers = [
       console.error('Error fetching jobs:', error);
       return HttpResponse.json(
         { error: 'Failed to fetch jobs' },
+        { status: 500 }
+      );
+    }
+  }),
+
+  // GET /jobs/:id
+  http.get('/api/jobs/:id', async ({ params }) => {
+    await randomDelay();
+    
+    if (shouldFail()) {
+      return HttpResponse.json(
+        { error: 'Failed to fetch job' },
+        { status: 500 }
+      );
+    }
+
+    try {
+      console.log('🔍 GET /jobs/:id - Starting handler...');
+      
+      // Ensure database is open
+      if (!db.isOpen()) {
+        console.log('📂 Database not open, opening...');
+        await db.open();
+      }
+
+      const jobId = parseInt(params.id as string);
+      console.log('🔍 GET /jobs/:id with jobId:', jobId);
+
+      // Validate jobId
+      if (isNaN(jobId) || jobId <= 0) {
+        console.log('❌ Invalid jobId:', params.id);
+        return HttpResponse.json(
+          { error: 'Invalid job ID', details: 'Job ID must be a positive integer' },
+          { status: 400 }
+        );
+      }
+
+      // Fetch job
+      const job = await db.jobs.get(jobId);
+      
+      if (!job) {
+        console.log('❌ Job not found:', jobId);
+        return HttpResponse.json(
+          { error: 'Job not found', details: `No job found with ID ${jobId}` },
+          { status: 404 }
+        );
+      }
+
+      console.log('✅ Returning job:', job.title);
+      return HttpResponse.json({
+        data: {
+          ...job,
+          tags: job.tags || [] // Ensure tags is always an array
+        }
+      });
+    } catch (error) {
+      console.error('❌ Error in GET /jobs/:id:', error);
+      return HttpResponse.json(
+        { error: 'Database error', details: error instanceof Error ? error.message : 'Unknown error' },
         { status: 500 }
       );
     }
@@ -256,7 +310,7 @@ export const jobsHandlers = [
       }
 
       if (body.tags !== undefined) {
-        updates.tags = body.tags;
+        updates.tags = body.tags || [];
       }
 
       // Handle order update

@@ -10,29 +10,22 @@ const shouldError = () => Math.random() < 0.075;
 
 // Helper function to validate stage transitions
 const isValidStageTransition = (currentStage: Candidate['stage'], newStage: Candidate['stage']): boolean => {
-  const validTransitions: Record<Candidate['stage'], Candidate['stage'][]> = {
-    'applied': ['screen', 'rejected'],
-    'screen': ['tech', 'rejected'],
-    'tech': ['offer', 'rejected'],
-    'offer': ['hired', 'rejected'],
-    'hired': [], // Terminal state
-    'rejected': [] // Terminal state
-  };
+  // Allow moving to 'rejected' from any stage
+  if (newStage === 'rejected') return true;
   
-  return validTransitions[currentStage].includes(newStage);
+  // Define stage order for progression
+  const stageOrder: Candidate['stage'][] = ['applied', 'screen', 'tech', 'offer', 'hired'];
+  
+  const currentIndex = stageOrder.indexOf(currentStage);
+  const newIndex = stageOrder.indexOf(newStage);
+  
+  // Allow forward movement (including skipping stages) and staying in the same stage
+  return newIndex >= currentIndex;
 };
 
 export const candidatesHandlers = [
   // GET /candidates?search=&stage=&page=
   http.get('/api/candidates', async ({ request }) => {
-    await delay();
-    
-    if (shouldError()) {
-      return new HttpResponse(
-        JSON.stringify({ error: 'Failed to fetch candidates' }),
-        { status: 500, headers: { 'Content-Type': 'application/json' } }
-      );
-    }
 
     try {
       console.log('🔍 GET /candidates - Starting handler...');

@@ -1,7 +1,29 @@
 import { useState, useMemo } from 'react';
-import { useJobs, useJobOperations } from '../hooks/useJobs';
+import { useNavigate } from 'react-router-dom';
+import { useJobs, useJobOperations, useReorderJob } from '../hooks/useJobs';
+import { useJobsWithAssessments } from '../../assessments/hooks/useJobsWithAssessments';
 import { useForm } from 'react-hook-form';
 import toast, { Toaster } from 'react-hot-toast';
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragOverlay,
+  type DragStartEvent,
+  type DragEndEvent,
+} from '@dnd-kit/core';
+import {
+  SortableContext,
+  sortableKeyboardCoordinates,
+  verticalListSortingStrategy,
+} from '@dnd-kit/sortable';
+import {
+  useSortable,
+} from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 import {
   MagnifyingGlassIcon,
   PlusIcon,
@@ -15,6 +37,9 @@ import {
   TagIcon,
   ChevronLeftIcon,
   ChevronRightIcon,
+  Bars3Icon,
+  DocumentTextIcon,
+  CheckIcon,
 } from '@heroicons/react/24/outline';
 import {
   CheckCircleIcon,
@@ -36,8 +61,270 @@ interface JobFilters {
   tags: string[];
 }
 
+// Sortable Table Row Component
+interface SortableJobRowProps {
+  job: Job;
+  openEditModal: (job: Job) => void;
+  openViewModal: (job: Job) => void;
+  updateJob: (jobId: number, updates: any) => Promise<Job>;
+  getStatusBadge: (status: Job['status']) => string;
+  formatDate: (timestamp: number) => string;
+  hasAssessment: boolean;
+  onAssessmentClick: (jobId: number) => void;
+}
+
+function SortableJobRow({ job, openEditModal, openViewModal, updateJob, getStatusBadge, formatDate, hasAssessment, onAssessmentClick }: SortableJobRowProps) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: job.id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.4 : 1,
+    filter: isDragging ? 'blur(1px)' : 'none',
+  };
+
+  return (
+    <tr 
+      ref={setNodeRef} 
+      style={style}
+      onClick={() => openViewModal(job)}
+      className={`hover:bg-gray-50 transition-colors cursor-pointer ${isDragging ? 'z-50' : ''}`}
+    >
+      <td className="px-6 py-4 whitespace-nowrap">
+        <div className="flex items-center space-x-3">
+          <button
+            {...attributes}
+            {...listeners}
+            onClick={(e) => e.stopPropagation()}
+            className="text-gray-400 hover:text-gray-600 cursor-grab active:cursor-grabbing p-1 hover:bg-gray-100 rounded transition-colors"
+            title="Drag to reorder"
+          >
+            <Bars3Icon className="h-5 w-5" />
+          </button>
+          <div>
+            <div className="text-sm font-medium text-gray-900">{job.title}</div>
+            <div className="text-sm text-gray-500">{job.slug}</div>
+          </div>
+        </div>
+      </td>
+      <td className="px-6 py-4 whitespace-nowrap">
+        <span className={getStatusBadge(job.status)}>
+          {job.status === 'active' && <CheckCircleIcon className="h-3 w-3 mr-1" />}
+          {job.status === 'archived' && <ArchiveBoxSolidIcon className="h-3 w-3 mr-1" />}
+          {job.status}
+        </span>
+      </td>
+      <td className="px-6 py-4">
+        <div className="flex flex-wrap gap-1">
+          {job.tags && job.tags.slice(0, 3).map((tag) => (
+            <span
+              key={tag}
+              className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800"
+            >
+              {tag}
+            </span>
+          ))}
+          {job.tags && job.tags.length > 3 && (
+            <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800">
+              +{job.tags.length - 3}
+            </span>
+          )}
+        </div>
+      </td>
+      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+        <div className="flex items-center">
+          <CalendarIcon className="h-4 w-4 mr-1" />
+          {formatDate(job.createdAt)}
+        </div>
+      </td>
+      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+        #{job.order}
+      </td>
+      <td className="px-6 py-4 whitespace-nowrap">
+        <button
+          onClick={() => onAssessmentClick(job.id)}
+          className={`inline-flex items-center px-3 py-1.5 border shadow-sm text-xs font-medium rounded focus:outline-none focus:ring-2 focus:ring-offset-2 transition-all ${
+            hasAssessment
+              ? 'border-blue-300 text-blue-700 bg-blue-50 hover:bg-blue-100 focus:ring-blue-500'
+              : 'border-gray-300 text-gray-500 bg-gray-50 hover:bg-gray-100 focus:ring-gray-500 opacity-60'
+          }`}
+          title={hasAssessment ? 'View Assessment' : 'Create Assessment'}
+        >
+          <DocumentTextIcon className="h-3 w-3 mr-1" />
+          {hasAssessment ? 'View' : 'Create'}
+        </button>
+      </td>
+      <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+        <div className="flex items-center justify-end space-x-2">
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              openEditModal(job);
+            }}
+            className="text-blue-600 hover:text-blue-900 p-1 hover:bg-blue-50 rounded transition-colors"
+            title="Edit job"
+          >
+            <PencilIcon className="h-4 w-4" />
+          </button>
+          <button
+            onClick={async (e) => {
+              e.stopPropagation();
+              const newStatus = job.status === 'active' ? 'archived' : 'active';
+              await updateJob(job.id, { status: newStatus });
+            }}
+            className={`p-1 rounded transition-colors ${
+              job.status === 'active' 
+                ? 'text-green-600 hover:text-green-900 hover:bg-green-50' 
+                : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+            }`}
+            title={job.status === 'active' ? 'Archive job' : 'Activate job'}
+          >
+            {job.status === 'active' ? <ArchiveBoxIcon className="h-4 w-4" /> : <CheckIcon className="h-4 w-4" />}
+          </button>
+        </div>
+      </td>
+    </tr>
+  );
+}
+
+// Sortable Card Component
+interface SortableJobCardProps {
+  job: Job;
+  openEditModal: (job: Job) => void;
+  updateJob: (jobId: number, updates: any) => Promise<Job>;
+  getStatusBadge: (status: Job['status']) => string;
+  formatDate: (timestamp: number) => string;
+  hasAssessment: boolean;
+  onAssessmentClick: (jobId: number) => void;
+}
+
+function SortableJobCard({ job, openEditModal, updateJob, getStatusBadge, formatDate, hasAssessment, onAssessmentClick }: SortableJobCardProps) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: job.id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.4 : 1,
+    filter: isDragging ? 'blur(1px)' : 'none',
+  };
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={style}
+      className={`bg-white rounded-lg shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow ${isDragging ? 'z-50 shadow-lg' : ''}`}
+    >
+      <div className="flex items-start justify-between mb-4">
+        <div className="flex items-start space-x-3 flex-1">
+          <button
+            {...attributes}
+            {...listeners}
+            className="text-gray-400 hover:text-gray-600 cursor-grab active:cursor-grabbing p-1 hover:bg-gray-100 rounded transition-colors mt-1"
+            title="Drag to reorder"
+          >
+            <Bars3Icon className="h-4 w-4" />
+          </button>
+          <div className="flex-1">
+            <h3 className="text-lg font-medium text-gray-900 mb-1">{job.title}</h3>
+            <p className="text-sm text-gray-500">{job.slug}</p>
+          </div>
+        </div>
+        <span className={getStatusBadge(job.status)}>
+          {job.status === 'active' && <CheckCircleIcon className="h-3 w-3 mr-1" />}
+          {job.status === 'archived' && <ArchiveBoxSolidIcon className="h-3 w-3 mr-1" />}
+          {job.status}
+        </span>
+      </div>
+
+      {job.tags && job.tags.length > 0 && (
+        <div className="mb-4">
+          <div className="flex flex-wrap gap-1">
+            {job.tags.map((tag) => (
+              <span
+                key={tag}
+                className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800"
+              >
+                <TagIcon className="h-3 w-3 mr-1" />
+                {tag}
+              </span>
+            ))}
+          </div>
+        </div>
+      )}
+
+      <div className="flex items-center justify-between text-sm text-gray-500 mb-4">
+        <div className="flex items-center">
+          <CalendarIcon className="h-4 w-4 mr-1" />
+          {formatDate(job.createdAt)}
+        </div>
+        <div>Order #{job.order}</div>
+      </div>
+
+      <div className="flex items-center justify-between">
+        <div className="flex space-x-2">
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              openEditModal(job);
+            }}
+            className="inline-flex items-center px-3 py-1.5 border border-gray-300 shadow-sm text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+          >
+            <PencilIcon className="h-3 w-3 mr-1" />
+            Edit
+          </button>
+          <button
+            onClick={async (e) => {
+              e.stopPropagation();
+              const newStatus = job.status === 'active' ? 'archived' : 'active';
+              await updateJob(job.id, { status: newStatus });
+            }}
+            className={`inline-flex items-center px-3 py-1.5 border shadow-sm text-xs font-medium rounded focus:outline-none focus:ring-2 focus:ring-offset-2 transition-all ${
+              job.status === 'active'
+                ? 'border-green-300 text-green-700 bg-green-50 hover:bg-green-100 focus:ring-green-500'
+                : 'border-gray-300 text-gray-700 bg-white hover:bg-gray-50 focus:ring-gray-500'
+            }`}
+          >
+            {job.status === 'active' ? (
+              <><ArchiveBoxIcon className="h-3 w-3 mr-1" />Archive</>
+            ) : (
+              <><CheckIcon className="h-3 w-3 mr-1" />Activate</>
+            )}
+          </button>
+          <button
+            onClick={() => onAssessmentClick(job.id)}
+            className={`inline-flex items-center px-3 py-1.5 border shadow-sm text-xs font-medium rounded focus:outline-none focus:ring-2 focus:ring-offset-2 transition-all ${
+              hasAssessment
+                ? 'border-blue-300 text-blue-700 bg-blue-50 hover:bg-blue-100 focus:ring-blue-500'
+                : 'border-gray-300 text-gray-500 bg-gray-50 hover:bg-gray-100 focus:ring-gray-500 opacity-60'
+            }`}
+            title={hasAssessment ? 'View Assessment' : 'No Assessment'}
+          >
+            <DocumentTextIcon className="h-3 w-3 mr-1" />
+            {hasAssessment ? 'Assessment' : 'No Assessment'}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export function JobsBoard() {
   // Hooks
+  const navigate = useNavigate();
   const {
     jobs,
     pagination,
@@ -49,6 +336,11 @@ export function JobsBoard() {
   } = useJobs();
 
   const { createJob, updateJob, selectedJob, selectJob } = useJobOperations();
+  const { reorderJob } = useReorderJob();
+
+  // Assessment status hook
+  const jobIds = useMemo(() => jobs.map(job => job.id), [jobs]);
+  const { getAssessmentStatus } = useJobsWithAssessments(jobIds);
 
   // UI State
   const [viewMode, setViewMode] = useState<'table' | 'cards'>('table');
@@ -60,8 +352,23 @@ export function JobsBoard() {
     tags: [],
   });
 
+  // Drag and Drop State
+  const [activeId, setActiveId] = useState<string | null>(null);
+
   // Debounced search
   const [searchDebounce, setSearchDebounce] = useState<ReturnType<typeof setTimeout> | null>(null);
+
+  // Drag and Drop Sensors
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 8,
+      },
+    }),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
 
   // Form handling with react-hook-form
   const createForm = useForm<CreateJobForm>({
@@ -87,6 +394,65 @@ export function JobsBoard() {
     const allTags = jobs.flatMap(job => job.tags);
     return [...new Set(allTags)].sort();
   }, [jobs]);
+
+  // Drag and Drop Handlers
+  const handleDragStart = (event: DragStartEvent) => {
+    setActiveId(event.active.id as string);
+    console.log('Drag started for job ID:', event.active.id);
+  };
+
+  const handleDragEnd = async (event: DragEndEvent) => {
+    const { active, over } = event;
+    setActiveId(null);
+
+    if (!over || active.id === over.id) {
+      return;
+    }
+
+    const activeId = active.id as number;
+    const overId = over.id as number;
+    
+    const activeJob = jobs.find(job => job.id === activeId);
+    const overJob = jobs.find(job => job.id === overId);
+
+    if (!activeJob || !overJob) {
+      console.error('Could not find jobs for drag operation', { activeId, overId, jobs });
+      return;
+    }
+
+    // Don't do anything if jobs are the same
+    if (activeJob.id === overJob.id) {
+      return;
+    }
+
+    // Calculate the correct new order based on drag direction
+    const oldIndex = jobs.findIndex(job => job.id === activeId);
+    const newIndex = jobs.findIndex(job => job.id === overId);
+    
+    // Convert frontend 0-based index to backend 1-based order
+    // Frontend: positions 0, 1, 2, 3...
+    // Backend:  orders   1, 2, 3, 4...
+    const targetOrder = newIndex + 1;
+
+    console.log('Reordering job:', {
+      activeJob: { id: activeJob.id, title: activeJob.title, order: activeJob.order },
+      overJob: { id: overJob.id, title: overJob.title, order: overJob.order },
+      oldIndex,
+      newIndex,
+      targetOrder,
+      direction: oldIndex < newIndex ? 'down' : 'up',
+      indexConversion: `frontend index ${newIndex} -> backend order ${targetOrder}`
+    });
+
+    try {
+      // Use the converted 1-based order value
+      await reorderJob(activeJob.id, activeJob.order, targetOrder);
+      toast.success(`Moved "${activeJob.title}" to new position`);
+    } catch (error) {
+      console.error('Failed to reorder job:', error);
+      toast.error('Failed to reorder job. Changes reverted.');
+    }
+  };
 
   // Handle search with debouncing
   const handleSearchChange = (value: string) => {
@@ -185,10 +551,25 @@ export function JobsBoard() {
     editForm.reset({
       title: job.title,
       status: job.status,
-      tags: job.tags.join(', '),
+      tags: job.tags ? job.tags.join(', ') : '',
       order: job.order.toString(),
     });
     setShowEditModal(true);
+  };
+
+  // Open view job using navigation
+  const openViewModal = (job: Job) => {
+    navigate(`/jobs/${job.id}`);
+  };
+
+  // Handle assessment click - navigate to assessment detail or show create option
+  const handleAssessmentClick = (jobId: number) => {
+    const assessmentStatus = getAssessmentStatus(jobId);
+    if (assessmentStatus.hasAssessment) {
+      navigate(`/assessment/${jobId}`);
+    } else {
+      navigate(`/assessment/${jobId}/edit`);
+    }
   };
 
   // Format date
@@ -384,218 +765,184 @@ export function JobsBoard() {
 
         {/* Table View */}
         {!loading && jobs.length > 0 && viewMode === 'table' && (
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-            <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
-                  <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Job
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Status
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Tags
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Created
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Order
-                    </th>
-                    <th className="relative px-6 py-3">
-                      <span className="sr-only">Actions</span>
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
-                  {jobs.map((job) => (
-                    <tr key={job.id} className="hover:bg-gray-50 transition-colors">
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div>
-                          <div className="text-sm font-medium text-gray-900">{job.title}</div>
-                          <div className="text-sm text-gray-500">{job.slug}</div>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <span className={getStatusBadge(job.status)}>
-                          {job.status === 'active' && <CheckCircleIcon className="h-3 w-3 mr-1" />}
-                          {job.status === 'archived' && <ArchiveBoxSolidIcon className="h-3 w-3 mr-1" />}
-                          {job.status}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4">
-                        <div className="flex flex-wrap gap-1">
-                          {job.tags.slice(0, 3).map((tag) => (
-                            <span
-                              key={tag}
-                              className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800"
-                            >
-                              {tag}
-                            </span>
-                          ))}
-                          {job.tags.length > 3 && (
-                            <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800">
-                              +{job.tags.length - 3}
-                            </span>
-                          )}
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        <div className="flex items-center">
-                          <CalendarIcon className="h-4 w-4 mr-1" />
-                          {formatDate(job.createdAt)}
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        #{job.order}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                        <div className="flex items-center justify-end space-x-2">
-                          <button
-                            onClick={() => openEditModal(job)}
-                            className="text-blue-600 hover:text-blue-900 p-1 hover:bg-blue-50 rounded transition-colors"
-                            title="Edit job"
-                          >
-                            <PencilIcon className="h-4 w-4" />
-                          </button>
-                          <button
-                            className="text-gray-600 hover:text-gray-900 p-1 hover:bg-gray-50 rounded transition-colors"
-                            title="View details"
-                          >
-                            <EyeIcon className="h-4 w-4" />
-                          </button>
-                          <button
-                            className="text-gray-600 hover:text-gray-900 p-1 hover:bg-gray-50 rounded transition-colors"
-                            title="Archive job"
-                          >
-                            <ArchiveBoxIcon className="h-4 w-4" />
-                          </button>
-                        </div>
-                      </td>
+          <DndContext
+            sensors={sensors}
+            collisionDetection={closestCenter}
+            onDragStart={handleDragStart}
+            onDragEnd={handleDragEnd}
+          >
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+              <div className="overflow-x-auto">
+                <table className="min-w-full divide-y divide-gray-200">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Job
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Status
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Tags
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Created
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Order
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Assessment
+                      </th>
+                      <th className="relative px-6 py-3">
+                        <span className="sr-only">Actions</span>
+                      </th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <SortableContext items={jobs.map(job => job.id)} strategy={verticalListSortingStrategy}>
+                    <tbody className="bg-white divide-y divide-gray-200">
+                      {jobs.map((job) => (
+                        <SortableJobRow
+                          key={job.id}
+                          job={job}
+                          openEditModal={openEditModal}
+                          openViewModal={openViewModal}
+                          updateJob={updateJob}
+                          getStatusBadge={getStatusBadge}
+                          formatDate={formatDate}
+                          hasAssessment={getAssessmentStatus(job.id).hasAssessment}
+                          onAssessmentClick={handleAssessmentClick}
+                        />
+                      ))}
+                    </tbody>
+                  </SortableContext>
+                </table>
+              </div>
             </div>
-          </div>
+            <DragOverlay>
+              {activeId ? (
+                <div className="bg-white border border-gray-300 rounded-lg shadow-xl p-4 opacity-90">
+                  <div className="text-sm font-medium text-gray-900">
+                    {jobs.find(job => job.id.toString() === activeId)?.title}
+                  </div>
+                </div>
+              ) : null}
+            </DragOverlay>
+          </DndContext>
         )}
 
         {/* Cards View */}
         {!loading && jobs.length > 0 && viewMode === 'cards' && (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {jobs.map((job) => (
-              <div
-                key={job.id}
-                className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow"
-              >
-                <div className="flex items-start justify-between mb-4">
-                  <div className="flex-1">
-                    <h3 className="text-lg font-medium text-gray-900 mb-1">{job.title}</h3>
-                    <p className="text-sm text-gray-500">{job.slug}</p>
-                  </div>
-                  <span className={getStatusBadge(job.status)}>
-                    {job.status === 'active' && <CheckCircleIcon className="h-3 w-3 mr-1" />}
-                    {job.status === 'archived' && <ArchiveBoxSolidIcon className="h-3 w-3 mr-1" />}
-                    {job.status}
-                  </span>
-                </div>
-
-                {job.tags.length > 0 && (
-                  <div className="mb-4">
-                    <div className="flex flex-wrap gap-1">
-                      {job.tags.map((tag) => (
-                        <span
-                          key={tag}
-                          className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800"
-                        >
-                          <TagIcon className="h-3 w-3 mr-1" />
-                          {tag}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                <div className="flex items-center justify-between text-sm text-gray-500 mb-4">
-                  <div className="flex items-center">
-                    <CalendarIcon className="h-4 w-4 mr-1" />
-                    {formatDate(job.createdAt)}
-                  </div>
-                  <div>Order #{job.order}</div>
-                </div>
-
-                <div className="flex items-center justify-between">
-                  <div className="flex space-x-2">
-                    <button
-                      onClick={() => openEditModal(job)}
-                      className="inline-flex items-center px-3 py-1.5 border border-gray-300 shadow-sm text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-                    >
-                      <PencilIcon className="h-3 w-3 mr-1" />
-                      Edit
-                    </button>
-                    <button className="inline-flex items-center px-3 py-1.5 border border-gray-300 shadow-sm text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-                      <EyeIcon className="h-3 w-3 mr-1" />
-                      View
-                    </button>
-                  </div>
-                </div>
+          <DndContext
+            sensors={sensors}
+            collisionDetection={closestCenter}
+            onDragStart={handleDragStart}
+            onDragEnd={handleDragEnd}
+          >
+            <SortableContext items={jobs.map(job => job.id)} strategy={verticalListSortingStrategy}>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {jobs.map((job) => (
+                  <SortableJobCard
+                    key={job.id}
+                    job={job}
+                    openEditModal={openEditModal}
+                    updateJob={updateJob}
+                    getStatusBadge={getStatusBadge}
+                    formatDate={formatDate}
+                    hasAssessment={getAssessmentStatus(job.id).hasAssessment}
+                    onAssessmentClick={handleAssessmentClick}
+                  />
+                ))}
               </div>
-            ))}
-          </div>
+            </SortableContext>
+            <DragOverlay>
+              {activeId ? (
+                <div className="bg-white border border-gray-300 rounded-lg shadow-xl p-4 opacity-90">
+                  <div className="text-sm font-medium text-gray-900">
+                    {jobs.find(job => job.id.toString() === activeId)?.title}
+                  </div>
+                </div>
+              ) : null}
+            </DragOverlay>
+          </DndContext>
         )}
 
         {/* Pagination */}
-        {!loading && jobs.length > 0 && pagination.totalPages > 1 && (
+        {!loading && jobs.length > 0 && (
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 px-6 py-4 mt-6">
             <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-2">
+              <div className="flex items-center space-x-4">
                 <span className="text-sm text-gray-700">
-                  Showing {((pagination.page - 1) * pagination.pageSize) + 1} to{' '}
-                  {Math.min(pagination.page * pagination.pageSize, pagination.totalCount)} of{' '}
-                  {pagination.totalCount} jobs
+                  {pagination.totalPages > 1 ? (
+                    <>
+                      Showing {((pagination.page - 1) * pagination.pageSize) + 1} to{' '}
+                      {Math.min(pagination.page * pagination.pageSize, pagination.totalCount)} of{' '}
+                      {pagination.totalCount} jobs
+                    </>
+                  ) : (
+                    `Showing all ${pagination.totalCount} jobs`
+                  )}
                 </span>
+                
+                {/* Show All Toggle */}
+                {pagination.totalCount > 10 && (
+                  <button
+                    onClick={() => {
+                      if (pagination.totalPages > 1) {
+                        // Show all jobs
+                        updatePagination({ pageSize: pagination.totalCount, page: 1 });
+                      } else {
+                        // Reset to default pagination
+                        updatePagination({ pageSize: 10, page: 1 });
+                      }
+                    }}
+                    className="inline-flex items-center px-3 py-1.5 border border-gray-300 shadow-sm text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                  >
+                    {pagination.totalPages > 1 ? 'Show All' : 'Show Pages'}
+                  </button>
+                )}
               </div>
               
-              <div className="flex items-center space-x-2">
-                <button
-                  onClick={() => updatePagination({ page: pagination.page - 1 })}
-                  disabled={pagination.page === 1}
-                  className="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  <ChevronLeftIcon className="h-4 w-4 mr-1" />
-                  Previous
-                </button>
-                
-                <div className="flex space-x-1">
-                  {[...Array(Math.min(5, pagination.totalPages))].map((_, i) => {
-                    const pageNum = i + 1;
-                    return (
-                      <button
-                        key={pageNum}
-                        onClick={() => updatePagination({ page: pageNum })}
-                        className={`px-3 py-2 text-sm font-medium rounded-lg ${
-                          pagination.page === pageNum
-                            ? 'bg-blue-600 text-white'
-                            : 'text-gray-700 bg-white border border-gray-300 hover:bg-gray-50'
-                        }`}
-                      >
-                        {pageNum}
-                      </button>
-                    );
-                  })}
+              {pagination.totalPages > 1 && (
+                <div className="flex items-center space-x-2">
+                  <button
+                    onClick={() => updatePagination({ page: pagination.page - 1 })}
+                    disabled={pagination.page === 1}
+                    className="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    <ChevronLeftIcon className="h-4 w-4 mr-1" />
+                    Previous
+                  </button>
+                  
+                  <div className="flex space-x-1">
+                    {[...Array(Math.min(5, pagination.totalPages))].map((_, i) => {
+                      const pageNum = i + 1;
+                      return (
+                        <button
+                          key={pageNum}
+                          onClick={() => updatePagination({ page: pageNum })}
+                          className={`px-3 py-2 text-sm font-medium rounded-lg ${
+                            pagination.page === pageNum
+                              ? 'bg-blue-600 text-white'
+                              : 'text-gray-700 bg-white border border-gray-300 hover:bg-gray-50'
+                          }`}
+                        >
+                          {pageNum}
+                        </button>
+                      );
+                    })}
+                  </div>
+                  
+                  <button
+                    onClick={() => updatePagination({ page: pagination.page + 1 })}
+                    disabled={pagination.page === pagination.totalPages}
+                    className="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    Next
+                    <ChevronRightIcon className="h-4 w-4 ml-1" />
+                  </button>
                 </div>
-                
-                <button
-                  onClick={() => updatePagination({ page: pagination.page + 1 })}
-                  disabled={pagination.page === pagination.totalPages}
-                  className="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  Next
-                  <ChevronRightIcon className="h-4 w-4 ml-1" />
-                </button>
-              </div>
+              )}
             </div>
           </div>
         )}
@@ -791,6 +1138,19 @@ export function JobsBoard() {
                   >
                     Update Job
                   </button>
+                  {getAssessmentStatus(selectedJob.id).hasAssessment && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setShowEditModal(false);
+                        selectJob(null);
+                        navigate(`/job/${selectedJob.id}`);
+                      }}
+                      className="w-full inline-flex justify-center rounded-lg border border-transparent shadow-sm px-4 py-2 bg-purple-600 text-base font-medium text-white hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 sm:ml-3 sm:w-auto sm:text-sm"
+                    >
+                      Edit Assessment
+                    </button>
+                  )}
                   <button
                     type="button"
                     onClick={() => {

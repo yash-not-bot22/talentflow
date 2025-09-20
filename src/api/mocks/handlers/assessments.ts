@@ -29,14 +29,6 @@ const validateQuestionIds = (assessment: Omit<Assessment, 'jobId' | 'updatedAt'>
 export const assessmentsHandlers = [
   // GET /assessments/:jobId
   http.get('/api/assessments/:jobId', async ({ params }) => {
-    await delay();
-    
-    if (shouldError()) {
-      return new HttpResponse(
-        JSON.stringify({ error: 'Failed to fetch assessment' }),
-        { status: 500, headers: { 'Content-Type': 'application/json' } }
-      );
-    }
 
     try {
       console.log('🔍 GET /assessments/:jobId - Starting handler...');

@@ -67,7 +67,7 @@ const defaultPagination: JobsPagination = {
 
 export const useJobsStore = create<JobsState>()(
   devtools(
-    (set, get) => ({
+    (set) => ({
       // Initial state
       jobs: [],
       selectedJob: null,
@@ -122,10 +122,16 @@ export const useJobsStore = create<JobsState>()(
         jobs.splice(jobIndex, 1);
         
         // Find the new position based on toOrder
+        // We need to find where to visually place the item, which should be after items with lower order
         let insertIndex = 0;
         for (let i = 0; i < jobs.length; i++) {
           if (jobs[i].order < toOrder) {
             insertIndex = i + 1;
+          } else if (jobs[i].order === toOrder) {
+            // If we're moving to the same position as an existing item,
+            // place it before that item (insertIndex = i)
+            insertIndex = i;
+            break;
           } else {
             break;
           }
