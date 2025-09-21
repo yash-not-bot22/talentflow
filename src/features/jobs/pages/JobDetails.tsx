@@ -1,9 +1,12 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { useForm } from 'react-hook-form';
 import { assessmentsApi } from '../../../api/assessmentsApi';
+import { jobsApi } from '../../../api/jobsApi';
 import { useJobDetailStore } from '../../../store/jobDetailStore';
 import { useJobsStore } from '../../../store/jobsStore';
-import type { Assessment } from '../../../db';
+import { useNotifications } from '../../../hooks/useNotifications';
+import type { Assessment, CandidateResponse, Job } from '../../../db';
 import {
   ArrowLeftIcon,
   CalendarIcon,
@@ -30,10 +33,24 @@ export function JobDetails() {
   // Zustand stores
   const { currentJob, setCurrentJob, findJobById } = useJobDetailStore();
   const { jobs } = useJobsStore();
+  const { showSuccess, showError } = useNotifications();
   
   const [assessment, setAssessment] = useState<Assessment | null>(null);
   const [assessmentLoading, setAssessmentLoading] = useState(false);
+  const [submissions, setSubmissions] = useState<CandidateResponse[]>([]);
+  const [submissionsLoading, setSubmissionsLoading] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Edit form
+  const editForm = useForm({
+    defaultValues: {
+      title: '',
+      status: 'active' as 'active' | 'archived',
+      tags: '',
+      order: '',
+    },
+  });
 
   useEffect(() => {
     const loadJobFromState = () => {
@@ -56,6 +73,8 @@ export function JobDetails() {
         setError(null);
         // Load assessment for this job
         loadAssessment(jobIdNum);
+        // Load submissions for this job
+        loadSubmissions(jobIdNum);
       } else {
         setError('Job not found');
       }
@@ -77,6 +96,19 @@ export function JobDetails() {
     }
   };
 
+  const loadSubmissions = async (jobIdNum: number) => {
+    setSubmissionsLoading(true);
+    try {
+      const responses = await assessmentsApi.getResponses(jobIdNum);
+      setSubmissions(responses);
+    } catch (err) {
+      console.log('No submissions found for this job');
+      setSubmissions([]);
+    } finally {
+      setSubmissionsLoading(false);
+    }
+  };
+
   const handleAssessmentAction = (action: 'view' | 'create' | 'edit') => {
     if (!currentJob) return;
     
@@ -85,6 +117,41 @@ export function JobDetails() {
     } else if (action === 'create' || action === 'edit') {
       navigate(`/assessment/${currentJob.id}/edit`);
     }
+  };
+
+  // Handle edit job submission
+  const handleEditJob = async (data: { title: string; status: string; tags: string; order: string }) => {
+    if (!currentJob) return;
+
+    try {
+      const tagsArray = data.tags.split(',').map(tag => tag.trim()).filter(tag => tag.length > 0);
+      
+      const updatedJob = await jobsApi.updateJob(currentJob.id, {
+        title: data.title,
+        status: data.status as 'active' | 'archived',
+        tags: tagsArray,
+        order: parseInt(data.order),
+      });
+
+      setCurrentJob(updatedJob);
+      setShowEditModal(false);
+      showSuccess('Success', 'Job updated successfully');
+    } catch (error) {
+      showError('Error', error instanceof Error ? error.message : 'Failed to update job');
+    }
+  };
+
+  // Open edit modal with job data
+  const openEditModal = () => {
+    if (!currentJob) return;
+    
+    editForm.reset({
+      title: currentJob.title,
+      status: currentJob.status,
+      tags: currentJob.tags ? currentJob.tags.join(', ') : '',
+      order: currentJob.order.toString(),
+    });
+    setShowEditModal(true);
   };
 
   const formatDate = (timestamp: number) => {
@@ -164,7 +231,7 @@ export function JobDetails() {
             
             <div className="flex items-center gap-3">
               <button
-                onClick={() => navigate(`/jobs/${currentJob.id}/edit`)}
+                onClick={openEditModal}
                 className="inline-flex items-center px-4 py-2 bg-white/20 text-white rounded-lg hover:bg-white/30 transition-colors"
               >
                 <PencilIcon className="h-4 w-4 mr-2" />
@@ -332,12 +399,90 @@ export function JobDetails() {
             </div>
           </div>
 
+          {/* Assessment Submissions */}
+          <div className="mt-8 pt-6 border-t border-gray-200">
+            <h2 className="text-lg font-semibold text-gray-900 mb-4">Assessment Submissions</h2>
+            
+            {submissionsLoading ? (
+              <div className="text-center py-4">
+                <LoadingSpinner />
+                <p className="text-sm text-gray-500 mt-2">Loading submissions...</p>
+              </div>
+            ) : submissions.length > 0 ? (
+              <div className="space-y-4">
+                {submissions.map((submission) => (
+                  <div key={submission.id} className="bg-white border border-gray-200 rounded-lg p-4">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h3 className="font-medium text-gray-900">
+                          Candidate #{submission.candidateId}
+                        </h3>
+                        <p className="text-sm text-gray-500 mt-1">
+                          Submitted {new Date(submission.submittedAt).toLocaleDateString('en-US', {
+                            year: 'numeric',
+                            month: 'long',
+                            day: 'numeric',
+                            hour: '2-digit',
+                            minute: '2-digit'
+                          })}
+                        </p>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-sm font-medium text-gray-900">
+                          {Object.keys(submission.responses).length} response(s)
+                        </p>
+                        <p className="text-xs text-gray-500">Job #{submission.jobId}</p>
+                      </div>
+                    </div>
+                    
+                    {/* Response preview */}
+                    <div className="mt-3 pt-3 border-t border-gray-100">
+                      <h4 className="text-sm font-medium text-gray-700 mb-2">Responses:</h4>
+                      <div className="space-y-2">
+                        {Object.entries(submission.responses).slice(0, 3).map(([questionId, response]) => (
+                          <div key={questionId} className="text-sm">
+                            <span className="font-medium text-gray-600">Q{questionId}:</span>
+                            <span className="ml-2 text-gray-800">
+                              {Array.isArray(response) 
+                                ? response.join(', ') 
+                                : String(response).slice(0, 100) + (String(response).length > 100 ? '...' : '')
+                              }
+                            </span>
+                          </div>
+                        ))}
+                        {Object.keys(submission.responses).length > 3 && (
+                          <p className="text-xs text-gray-500">
+                            +{Object.keys(submission.responses).length - 3} more response(s)
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="bg-gray-50 border border-gray-200 rounded-lg p-6 text-center">
+                <DocumentTextIcon className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                <h3 className="font-medium text-gray-700 mb-2">No Submissions Yet</h3>
+                <p className="text-sm text-gray-500">
+                  {assessment 
+                    ? 'Candidates haven\'t submitted any assessment responses for this job yet.'
+                    : 'Create an assessment first to start receiving candidate submissions.'
+                  }
+                </p>
+              </div>
+            )}
+          </div>
+
           {/* Quick Actions */}
           <div className="mt-8 pt-6 border-t border-gray-200">
             <h2 className="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h2>
             
             <div className="flex flex-wrap gap-4">
-              <button className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+              <button 
+                onClick={openEditModal}
+                className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              >
                 <PencilIcon className="h-4 w-4 mr-2" />
                 Edit Job Details
               </button>
@@ -368,6 +513,108 @@ export function JobDetails() {
           </div>
         </div>
       </div>
+
+      {/* Edit Job Modal */}
+      {showEditModal && currentJob && (
+        <div className="fixed inset-0 z-50 overflow-y-auto">
+          <div className="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+            <div className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" onClick={() => setShowEditModal(false)}></div>
+            
+            <span className="hidden sm:inline-block sm:align-middle sm:h-screen">&#8203;</span>
+            
+            <div className="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+              <form onSubmit={editForm.handleSubmit(handleEditJob)}>
+                <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                  <div className="sm:flex sm:items-start">
+                    <div className="mt-3 text-center sm:mt-0 sm:text-left w-full">
+                      <h3 className="text-lg leading-6 font-medium text-gray-900 mb-4">
+                        Edit Job: {currentJob.title}
+                      </h3>
+                      
+                      <div className="space-y-4">
+                        <div>
+                          <label htmlFor="edit-title" className="block text-sm font-medium text-gray-700 mb-1">
+                            Job Title *
+                          </label>
+                          <input
+                            {...editForm.register('title', { required: 'Job title is required' })}
+                            type="text"
+                            id="edit-title"
+                            className="block w-full border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                            placeholder="e.g. Senior React Developer"
+                          />
+                          {editForm.formState.errors.title && (
+                            <p className="mt-1 text-sm text-red-600">{editForm.formState.errors.title.message}</p>
+                          )}
+                        </div>
+
+                        <div>
+                          <label htmlFor="edit-status" className="block text-sm font-medium text-gray-700 mb-1">
+                            Status
+                          </label>
+                          <select
+                            {...editForm.register('status')}
+                            id="edit-status"
+                            className="block w-full border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                          >
+                            <option value="active">Active</option>
+                            <option value="archived">Archived</option>
+                          </select>
+                        </div>
+
+                        <div>
+                          <label htmlFor="edit-tags" className="block text-sm font-medium text-gray-700 mb-1">
+                            Tags
+                          </label>
+                          <input
+                            {...editForm.register('tags')}
+                            type="text"
+                            id="edit-tags"
+                            className="block w-full border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                            placeholder="remote, senior, react, typescript"
+                          />
+                          <p className="mt-1 text-sm text-gray-500">Separate tags with commas</p>
+                        </div>
+
+                        <div>
+                          <label htmlFor="edit-order" className="block text-sm font-medium text-gray-700 mb-1">
+                            Order
+                          </label>
+                          <input
+                            {...editForm.register('order')}
+                            type="number"
+                            min="1"
+                            id="edit-order"
+                            className="block w-full border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                            placeholder="Position in job list"
+                          />
+                          <p className="mt-1 text-sm text-gray-500">Change position in job list. Other jobs will be reordered automatically.</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+                  <button
+                    type="submit"
+                    className="w-full inline-flex justify-center rounded-lg border border-transparent shadow-sm px-4 py-2 bg-blue-600 text-base font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:ml-3 sm:w-auto sm:text-sm"
+                  >
+                    Update Job
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setShowEditModal(false)}
+                    className="mt-3 w-full inline-flex justify-center rounded-lg border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

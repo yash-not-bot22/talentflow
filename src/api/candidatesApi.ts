@@ -49,6 +49,7 @@ export interface UpdateCandidateRequest {
 export interface CandidatesFilters {
   search?: string;
   stage?: Candidate['stage'] | '';
+  jobId?: number;
   page?: number;
   pageSize?: number;
 }
@@ -62,6 +63,7 @@ class CandidatesApi {
     
     if (filters.search) params.append('search', filters.search);
     if (filters.stage) params.append('stage', filters.stage);
+    if (filters.jobId) params.append('jobId', filters.jobId.toString());
     if (filters.page) params.append('page', filters.page.toString());
     if (filters.pageSize) params.append('pageSize', filters.pageSize.toString());
 

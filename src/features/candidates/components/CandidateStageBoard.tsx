@@ -278,55 +278,95 @@ export function CandidateStageBoard({ candidates, onStageChange, onCandidateClic
     const { active, over } = event;
     setActiveId(null);
 
-    if (!over) return;
+    if (!over) {
+      toast.error('Drop zone not found. Please drop the candidate on a valid stage column.');
+      return;
+    }
 
     const candidateId = parseInt(active.id.toString());
     const overStage = over.id as Candidate['stage'];
     
     const candidate = candidates.find(c => c.id === candidateId);
-    if (!candidate || candidate.stage === overStage) return;
+    if (!candidate) {
+      toast.error('Candidate not found.');
+      return;
+    }
+
+    // Validate the target stage
+    const validStages = ['applied', 'screen', 'tech', 'offer', 'hired', 'rejected'];
+    if (!validStages.includes(overStage)) {
+      toast.error(`Invalid target stage: ${overStage}`);
+      return;
+    }
+
+    if (candidate.stage === overStage) {
+      toast('Candidate is already in this stage.', { duration: 2000 });
+      return;
+    }
 
     // Enhanced stage progression validation
     const stageOrder = ['applied', 'screen', 'tech', 'offer', 'hired'];
     const currentStageIndex = stageOrder.indexOf(candidate.stage);
     const targetStageIndex = stageOrder.indexOf(overStage);
     
-    // Prevent specific invalid transitions
+    // Prevent specific invalid transitions with detailed messages
     if (candidate.stage === 'hired' && overStage === 'rejected') {
-      toast.error(`Cannot move from Hired to Rejected. A hired candidate cannot be rejected.`);
+      toast.error('Cannot reject a hired candidate. A hired candidate cannot be moved to rejected status.');
       return;
     }
     
     if (candidate.stage === 'rejected' && overStage === 'hired') {
-      toast.error(`Cannot move from Rejected to Hired. A rejected candidate cannot be hired.`);
+      toast.error('Cannot hire a rejected candidate. Rejected candidates cannot be moved to hired status.');
       return;
     }
     
     if (candidate.stage === 'rejected' && overStage !== 'rejected') {
-      toast.error(`Cannot move from Rejected to other stages. Rejected candidates cannot re-enter the hiring process.`);
+      toast.error('Cannot move a rejected candidate to active stages. Rejected candidates cannot re-enter the hiring process.');
       return;
     }
     
     // Allow moving to 'rejected' from any stage except 'hired'
     if (overStage === 'rejected' && candidate.stage !== 'hired') {
-      // Proceed with the stage change
-    } else if (overStage !== 'rejected' && targetStageIndex < currentStageIndex) {
-      // Prevent moving backwards in normal progression
-      const currentStageTitle = stageDefinitions.find(s => s.id === candidate.stage)?.title;
-      const targetStageTitle = stageDefinitions.find(s => s.id === overStage)?.title;
-      toast.error(`Cannot move backwards from ${currentStageTitle} to ${targetStageTitle}`);
+      // Show confirmation for rejection
+      toast.success('Moving candidate to rejected stage...');
+    } else if (overStage !== 'rejected' && targetStageIndex !== -1 && currentStageIndex !== -1 && targetStageIndex < currentStageIndex) {
+      // Prevent moving backwards in normal progression with specific stage names
+      const currentStageTitle = stageDefinitions.find(s => s.id === candidate.stage)?.title || candidate.stage;
+      const targetStageTitle = stageDefinitions.find(s => s.id === overStage)?.title || overStage;
+      toast.error(`Cannot move backwards from ${currentStageTitle} to ${targetStageTitle}. Candidates can only progress forward in the hiring process.`);
       return;
+    } else if (overStage !== 'rejected' && targetStageIndex !== -1 && currentStageIndex !== -1 && targetStageIndex > currentStageIndex + 1) {
+      // Prevent skipping stages (optional - can be removed if skipping is allowed)
+      const currentStageTitle = stageDefinitions.find(s => s.id === candidate.stage)?.title || candidate.stage;
+      const targetStageTitle = stageDefinitions.find(s => s.id === overStage)?.title || overStage;
+      toast(`⚠️ Skipping stages: moving from ${currentStageTitle} to ${targetStageTitle}. Make sure this progression is intended.`, { duration: 4000 });
     }
 
     try {
       setIsUpdating(true);
       console.log(`🔄 Moving candidate ${candidateId} to stage ${overStage}`);
       await onStageChange(candidateId, overStage);
-      const targetStageTitle = stageDefinitions.find(s => s.id === overStage)?.title;
-      toast.success(`Moved ${candidate.name} to ${targetStageTitle}`);
+      const targetStageTitle = stageDefinitions.find(s => s.id === overStage)?.title || overStage;
+      toast.success(`Successfully moved ${candidate.name} to ${targetStageTitle}`);
     } catch (error) {
       console.error(`❌ Failed to move candidate:`, error);
-      toast.error('Failed to update candidate stage');
+      let errorMessage = 'Unknown error occurred';
+      
+      if (error instanceof Error) {
+        errorMessage = error.message;
+      } else if (typeof error === 'string') {
+        errorMessage = error;
+      }
+      
+      toast.error(`Failed to update candidate stage: ${errorMessage}`);
+      
+      // Log additional debug info
+      console.error('Debug info:', {
+        candidateId,
+        currentStage: candidate.stage,
+        targetStage: overStage,
+        error
+      });
     } finally {
       setIsUpdating(false);
     }

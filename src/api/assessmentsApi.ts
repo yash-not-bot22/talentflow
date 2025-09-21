@@ -88,6 +88,27 @@ class AssessmentsApiClient {
   }
 
   /**
+   * Get candidate responses for a specific job
+   * GET /assessments/:jobId/responses
+   */
+  async getResponses(jobId: number): Promise<CandidateResponse[]> {
+    const response = await fetch(`${this.baseUrl}/${jobId}/responses`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (!response.ok) {
+      const errorData: AssessmentApiError = await response.json();
+      throw new Error(errorData.error || `HTTP ${response.status}: Failed to fetch responses`);
+    }
+
+    const result: { data: CandidateResponse[] } = await response.json();
+    return result.data;
+  }
+
+  /**
    * Helper method to validate assessment structure
    */
   validateAssessment(assessment: Omit<Assessment, 'jobId' | 'updatedAt'>): string[] {

@@ -3,6 +3,20 @@ import { useDatabase } from '../hooks/useDatabase';
 export function DatabaseStatus() {
   const { status, isSeeding, seedDatabase, clearDatabase } = useDatabase();
 
+  // Handle clear database with event emission
+  const handleClearDatabase = async () => {
+    await clearDatabase();
+    // Emit custom event to trigger refresh across the app
+    window.dispatchEvent(new CustomEvent('database-cleared'));
+  };
+
+  // Handle seed database with event emission  
+  const handleSeedDatabase = async () => {
+    await seedDatabase();
+    // Emit custom event to trigger refresh across the app
+    window.dispatchEvent(new CustomEvent('database-seeded'));
+  };
+
   if (status.error) {
     return (
       <div className="bg-red-50 border border-red-200 rounded-md p-4 mb-4">
@@ -32,14 +46,14 @@ export function DatabaseStatus() {
         </div>
         <div className="flex space-x-2">
           <button
-            onClick={seedDatabase}
+            onClick={handleSeedDatabase}
             disabled={isSeeding}
             className="px-3 py-1 bg-blue-600 text-white text-sm rounded hover:bg-blue-700 disabled:opacity-50"
           >
             {isSeeding ? 'Seeding...' : 'Seed Data'}
           </button>
           <button
-            onClick={clearDatabase}
+            onClick={handleClearDatabase}
             disabled={isSeeding}
             className="px-3 py-1 bg-red-600 text-white text-sm rounded hover:bg-red-700 disabled:opacity-50"
           >

@@ -58,9 +58,23 @@ export function useJobs() {
     setPagination(newPagination);
   }, [setPagination]);
 
-  // Auto-fetch when filters or pagination changes
+  // Auto-fetch when filters or pagination changes, and listen for database events
   useEffect(() => {
     fetchJobs();
+
+    // Listen for database events
+    const handleDatabaseChange = () => {
+      console.log('🔄 Database changed, refreshing jobs...');
+      fetchJobs();
+    };
+
+    window.addEventListener('database-cleared', handleDatabaseChange);
+    window.addEventListener('database-seeded', handleDatabaseChange);
+
+    return () => {
+      window.removeEventListener('database-cleared', handleDatabaseChange);
+      window.removeEventListener('database-seeded', handleDatabaseChange);
+    };
   }, [fetchJobs]);
 
   return {
@@ -79,6 +93,9 @@ export function useJobs() {
 // Hook for creating jobs
 export function useCreateJob() {
   const {
+    addJobOptimistically,
+    commitOptimisticUpdate,
+    rollbackOptimisticUpdate,
     setError,
   } = useJobsStore();
 
@@ -88,19 +105,18 @@ export function useCreateJob() {
     try {
       const createdJob = await jobsApi.createJob(jobData);
       
-      // Add the new job to the store (no optimistic update needed for create since it's fast)
-      // The jobs list will be refreshed by the parent component or we could add it directly
-      const currentJobs = useJobsStore.getState().jobs;
-      const updatedJobs = [...currentJobs, createdJob].sort((a, b) => a.order - b.order);
-      useJobsStore.getState().setJobs(updatedJobs);
+      // Add the new job using optimistic update pattern
+      addJobOptimistically(createdJob);
+      commitOptimisticUpdate();
       
       return createdJob;
     } catch (err) {
+      rollbackOptimisticUpdate();
       const errorMessage = err instanceof Error ? err.message : 'Failed to create job';
       setError(errorMessage);
       throw err;
     }
-  }, [setError]);
+  }, [addJobOptimistically, commitOptimisticUpdate, rollbackOptimisticUpdate, setError]);
 
   return { createJob };
 }

@@ -516,4 +516,71 @@ export const assessmentsHandlers = [
       );
     }
   }),
+
+  // GET /assessments/:jobId/responses - Get all candidate responses for a job
+  http.get('/api/assessments/:jobId/responses', async ({ params }) => {
+    try {
+      console.log('🔍 GET /assessments/:jobId/responses - Starting handler...');
+      
+      // Ensure database is open
+      if (!db.isOpen()) {
+        console.log('📂 Database not open, opening...');
+        await db.open();
+      }
+
+      const jobId = parseInt(params.jobId as string);
+      console.log('🔍 GET /assessments/responses with jobId:', jobId);
+
+      // Validate jobId
+      if (isNaN(jobId) || jobId <= 0) {
+        console.log('❌ Invalid jobId:', params.jobId);
+        return new HttpResponse(
+          JSON.stringify({ error: 'Invalid job ID', details: 'Job ID must be a positive integer' }),
+          { status: 400, headers: { 'Content-Type': 'application/json' } }
+        );
+      }
+
+      // Optional random delay
+      await delay();
+
+      // Simulate random error
+      if (shouldError()) {
+        console.log('💥 Simulating random error for responses endpoint');
+        return new HttpResponse(
+          JSON.stringify({ error: 'Random server error', details: 'Simulated error for testing' }),
+          { status: 500, headers: { 'Content-Type': 'application/json' } }
+        );
+      }
+
+      // Check if job exists
+      const job = await db.jobs.get(jobId);
+      if (!job) {
+        console.log('❌ Job not found:', jobId);
+        return new HttpResponse(
+          JSON.stringify({ error: 'Job not found', details: `No job found with ID ${jobId}` }),
+          { status: 404, headers: { 'Content-Type': 'application/json' } }
+        );
+      }
+
+      // Get all candidate responses for this job
+      const responses = await db.candidateResponses
+        .where('jobId')
+        .equals(jobId)
+        .toArray();
+
+      console.log(`✅ Found ${responses.length} responses for job ${jobId}`);
+
+      const response = {
+        data: responses
+      };
+
+      return HttpResponse.json(response);
+    } catch (error) {
+      console.error('❌ Error in GET /assessments/:jobId/responses:', error);
+      return new HttpResponse(
+        JSON.stringify({ error: 'Database error', details: error instanceof Error ? error.message : 'Unknown error' }),
+        { status: 500, headers: { 'Content-Type': 'application/json' } }
+      );
+    }
+  }),
 ];

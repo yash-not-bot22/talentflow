@@ -390,10 +390,12 @@ export function AssessmentBuilder({ initialAssessment, onSave, onCancel }: Asses
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [previewMode, setPreviewMode] = useState(false);
+  const [currentSectionId, setCurrentSectionId] = useState<string | null>(null);
 
   useEffect(() => {
     if (initialAssessment) {
       setAssessment(initialAssessment);
+      setCurrentSectionId(initialAssessment.sections[0]?.id || null);
       setLoading(false);
     } else if (jobId && jobId !== 'new') {
       // Load existing assessment for the job
@@ -409,6 +411,7 @@ export function AssessmentBuilder({ initialAssessment, onSave, onCancel }: Asses
       setLoading(true);
       const assessment = await assessmentsApi.getAssessment(assessmentJobId);
       setAssessment(assessment);
+      setCurrentSectionId(assessment.sections[0]?.id || null);
     } catch (err) {
       console.error('Failed to load assessment:', err);
       // If assessment doesn't exist for this job, create a new one
@@ -420,11 +423,12 @@ export function AssessmentBuilder({ initialAssessment, onSave, onCancel }: Asses
   };
 
   const createNewAssessment = (jobIdForAssessment?: number) => {
+    const sectionId = `section_${Date.now()}`;
     const newAssessment: Assessment = {
       jobId: jobIdForAssessment || 0, // Use provided jobId or default to 0
       sections: [
         {
-          id: `section_${Date.now()}`,
+          id: sectionId,
           name: 'General Questions',
           questions: []
         }
@@ -432,6 +436,7 @@ export function AssessmentBuilder({ initialAssessment, onSave, onCancel }: Asses
       updatedAt: Date.now()
     };
     setAssessment(newAssessment);
+    setCurrentSectionId(sectionId);
     setLoading(false);
   };
 
@@ -486,7 +491,7 @@ export function AssessmentBuilder({ initialAssessment, onSave, onCancel }: Asses
   };
 
   const addQuestion = (questionType: QuestionType = 'short-text') => {
-    if (!assessment) return;
+    if (!assessment || !currentSectionId) return;
 
     const newQuestion: Question = {
       id: `q_${Date.now()}`,
@@ -497,12 +502,50 @@ export function AssessmentBuilder({ initialAssessment, onSave, onCancel }: Asses
     };
 
     const updatedSections = assessment.sections.map(section => 
-      section.id === assessment.sections[0].id 
+      section.id === currentSectionId
         ? { ...section, questions: [...section.questions, newQuestion] }
         : section
     );
 
     setAssessment({ ...assessment, sections: updatedSections });
+  };
+
+  const addSection = () => {
+    if (!assessment) return;
+
+    const newSection = {
+      id: `section_${Date.now()}`,
+      name: `Section ${assessment.sections.length + 1}`,
+      questions: []
+    };
+
+    const updatedSections = [...assessment.sections, newSection];
+    setAssessment({ ...assessment, sections: updatedSections });
+    setCurrentSectionId(newSection.id);
+  };
+
+  const updateSectionName = (sectionId: string, newName: string) => {
+    if (!assessment) return;
+
+    const updatedSections = assessment.sections.map(section => 
+      section.id === sectionId
+        ? { ...section, name: newName }
+        : section
+    );
+
+    setAssessment({ ...assessment, sections: updatedSections });
+  };
+
+  const deleteSection = (sectionId: string) => {
+    if (!assessment || assessment.sections.length <= 1) return;
+
+    const updatedSections = assessment.sections.filter(section => section.id !== sectionId);
+    setAssessment({ ...assessment, sections: updatedSections });
+    
+    // Switch to first section if we deleted the current one
+    if (currentSectionId === sectionId) {
+      setCurrentSectionId(updatedSections[0]?.id || null);
+    }
   };
 
   const updateQuestion = (questionId: string, updatedQuestion: Question) => {
@@ -528,6 +571,9 @@ export function AssessmentBuilder({ initialAssessment, onSave, onCancel }: Asses
 
     setAssessment({ ...assessment, sections: updatedSections });
   };
+
+  // Get current section
+  const currentSection = assessment?.sections.find(section => section.id === currentSectionId);
 
   if (loading) {
     return (
@@ -665,6 +711,62 @@ export function AssessmentBuilder({ initialAssessment, onSave, onCancel }: Asses
         </div>
       ) : (
         <div className="space-y-6">
+          {/* Section Tabs */}
+          <div className="bg-white border border-gray-200 rounded-lg p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-gray-900">Sections</h3>
+              <button
+                onClick={addSection}
+                className="inline-flex items-center px-3 py-2 border border-transparent text-sm font-medium rounded-md text-blue-700 bg-blue-100 hover:bg-blue-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+              >
+                <PlusIcon className="h-4 w-4 mr-1" />
+                Add Section
+              </button>
+            </div>
+            
+            <div className="flex space-x-1 mb-4">
+              {assessment.sections.map(section => (
+                <div key={section.id} className="flex items-center">
+                  <button
+                    onClick={() => setCurrentSectionId(section.id)}
+                    className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
+                      currentSectionId === section.id
+                        ? 'bg-blue-600 text-white'
+                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                    }`}
+                  >
+                    {section.name}
+                  </button>
+                  {assessment.sections.length > 1 && (
+                    <button
+                      onClick={() => deleteSection(section.id)}
+                      className="ml-1 p-1 text-red-500 hover:text-red-700 rounded"
+                      title="Delete section"
+                    >
+                      <XMarkIcon className="h-4 w-4" />
+                    </button>
+                  )}
+                </div>
+              ))}
+            </div>
+            
+            {/* Section Name Editor */}
+            {currentSection && (
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Section Name
+                </label>
+                <input
+                  type="text"
+                  value={currentSection.name}
+                  onChange={(e) => updateSectionName(currentSection.id, e.target.value)}
+                  className="block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                  placeholder="Enter section name..."
+                />
+              </div>
+            )}
+          </div>
+
           {/* Question Type Selector */}
           <div className="bg-white border border-gray-200 rounded-lg p-6">
             <h3 className="text-lg font-semibold text-gray-900 mb-4">Question Types</h3>
@@ -673,7 +775,8 @@ export function AssessmentBuilder({ initialAssessment, onSave, onCancel }: Asses
                 <button
                   key={type.type}
                   onClick={() => addQuestion(type.type)}
-                  className="flex items-center p-3 border border-gray-200 rounded-lg hover:border-blue-300 hover:bg-blue-50 transition-colors text-left"
+                  disabled={!currentSectionId}
+                  className="flex items-center p-3 border border-gray-200 rounded-lg hover:border-blue-300 hover:bg-blue-50 transition-colors text-left disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <span className="text-2xl mr-3">{type.icon}</span>
                   <div>
@@ -688,23 +791,31 @@ export function AssessmentBuilder({ initialAssessment, onSave, onCancel }: Asses
           {/* Questions */}
           <div className="bg-white border border-gray-200 rounded-lg p-6">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold text-gray-900">Questions</h3>
+              <h3 className="text-lg font-semibold text-gray-900">
+                Questions {currentSection && `- ${currentSection.name}`}
+              </h3>
               <button
                 onClick={() => addQuestion()}
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm font-medium"
+                disabled={!currentSectionId}
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Add Question
               </button>
             </div>
             
             <div className="space-y-4">
-              {assessment.sections[0]?.questions.length === 0 ? (
+              {!currentSection ? (
+                <div className="text-center py-8 text-gray-500">
+                  <p>No section selected.</p>
+                  <p className="text-sm">Select a section above to start adding questions.</p>
+                </div>
+              ) : currentSection.questions.length === 0 ? (
                 <div className="text-center py-8 text-gray-500">
                   <p>No questions added yet.</p>
                   <p className="text-sm">Click "Add Question" or select a question type above to get started.</p>
                 </div>
               ) : (
-                assessment.sections[0]?.questions.map(question => (
+                currentSection.questions.map(question => (
                   <QuestionEditor
                     key={question.id}
                     question={question}

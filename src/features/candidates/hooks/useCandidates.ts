@@ -57,9 +57,23 @@ export function useCandidates() {
     fetchCandidates();
   }, [fetchCandidates]);
 
-  // Fetch on mount and when filters/pagination change
+  // Fetch on mount and when filters/pagination change, and listen for database events
   useEffect(() => {
     fetchCandidates();
+
+    // Listen for database events
+    const handleDatabaseChange = () => {
+      console.log('🔄 Database changed, refreshing candidates...');
+      fetchCandidates();
+    };
+
+    window.addEventListener('database-cleared', handleDatabaseChange);
+    window.addEventListener('database-seeded', handleDatabaseChange);
+
+    return () => {
+      window.removeEventListener('database-cleared', handleDatabaseChange);
+      window.removeEventListener('database-seeded', handleDatabaseChange);
+    };
   }, [fetchCandidates]);
 
   return {

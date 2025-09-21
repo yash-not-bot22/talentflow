@@ -39,10 +39,11 @@ export const candidatesHandlers = [
       const url = new URL(request.url);
       const search = url.searchParams.get('search') || '';
       const stage = url.searchParams.get('stage') || '';
+      const jobId = url.searchParams.get('jobId');
       const page = parseInt(url.searchParams.get('page') || '1');
       const pageSize = parseInt(url.searchParams.get('pageSize') || '10');
 
-      console.log('🔍 GET /candidates with filters:', { search, stage, page, pageSize });
+      console.log('🔍 GET /candidates with filters:', { search, stage, jobId, page, pageSize });
 
       console.log('🔍 GET /candidates - Executing database query...');
       let candidates = await db.candidates.toArray();
@@ -63,6 +64,12 @@ export const candidatesHandlers = [
       // Apply stage filter
       if (stage) {
         candidates = candidates.filter(candidate => candidate.stage === stage);
+      }
+      
+      // Apply jobId filter
+      if (jobId) {
+        const jobIdNum = parseInt(jobId);
+        candidates = candidates.filter(candidate => candidate.jobId === jobIdNum);
       }
 
       // Apply pagination
@@ -254,14 +261,7 @@ export const candidatesHandlers = [
 
   // GET /candidates/:id/timeline
   http.get('/api/candidates/:id/timeline', async ({ params }) => {
-    await delay();
     
-    if (shouldError()) {
-      return new HttpResponse(
-        JSON.stringify({ error: 'Failed to fetch candidate timeline' }),
-        { status: 500, headers: { 'Content-Type': 'application/json' } }
-      );
-    }
 
     try {
       const candidateId = parseInt(params.id as string);

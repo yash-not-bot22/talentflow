@@ -429,24 +429,33 @@ export function JobsBoard() {
     const oldIndex = jobs.findIndex(job => job.id === activeId);
     const newIndex = jobs.findIndex(job => job.id === overId);
     
-    // Convert frontend 0-based index to backend 1-based order
-    // Frontend: positions 0, 1, 2, 3...
-    // Backend:  orders   1, 2, 3, 4...
-    const targetOrder = newIndex + 1;
+    // Backend order: Use the target job's actual order for correct backend logic
+    let backendTargetOrder;
+    
+    if (oldIndex < newIndex) {
+      // Dragging down: backend should place item after the target job
+      // This means the item should get the order that comes after the target
+      backendTargetOrder = overJob.order + 1;
+    } else {
+      // Dragging up: backend should place item at the target job's position
+      backendTargetOrder = overJob.order;
+    }
 
     console.log('Reordering job:', {
       activeJob: { id: activeJob.id, title: activeJob.title, order: activeJob.order },
       overJob: { id: overJob.id, title: overJob.title, order: overJob.order },
       oldIndex,
       newIndex,
-      targetOrder,
+      backendTargetOrder,
       direction: oldIndex < newIndex ? 'down' : 'up',
-      indexConversion: `frontend index ${newIndex} -> backend order ${targetOrder}`
+      logic: oldIndex < newIndex 
+        ? `dragging down: place after target order ${overJob.order} -> ${backendTargetOrder}`
+        : `dragging up: place at target order ${overJob.order} -> ${backendTargetOrder}`
     });
 
     try {
-      // Use the converted 1-based order value
-      await reorderJob(activeJob.id, activeJob.order, targetOrder);
+      // Use the backend target order (based on actual job orders, not array indices)
+      await reorderJob(activeJob.id, activeJob.order, backendTargetOrder);
       toast.success(`Moved "${activeJob.title}" to new position`);
     } catch (error) {
       console.error('Failed to reorder job:', error);

@@ -72,6 +72,14 @@ export class TalentFlowDB extends Dexie {
       assessments: 'jobId', // 1:1 with job
       candidateResponses: '++id, [candidateId+jobId]', // Unique per candidate-job
     });
+    
+    // Version 2: Add jobId index to candidateResponses
+    this.version(2).stores({
+      jobs: '++id, &slug, status, order', // &slug for unique
+      candidates: '++id, jobId, stage, email, createdAt, [jobId+stage]', // Added email and createdAt indexes
+      assessments: 'jobId', // 1:1 with job
+      candidateResponses: '++id, jobId, candidateId, [candidateId+jobId]', // Added jobId index
+    });
   }
 }
 

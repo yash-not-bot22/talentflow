@@ -114,14 +114,7 @@ export const jobsHandlers = [
 
   // GET /jobs/:id
   http.get('/api/jobs/:id', async ({ params }) => {
-    await randomDelay();
     
-    if (shouldFail()) {
-      return HttpResponse.json(
-        { error: 'Failed to fetch job' },
-        { status: 500 }
-      );
-    }
 
     try {
       console.log('🔍 GET /jobs/:id - Starting handler...');

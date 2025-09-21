@@ -159,11 +159,15 @@ function KanbanColumn({ stage, isActive, isCompleted, onCandidateClick }: Kanban
     <div
       ref={setNodeRef}
       className={`
-        w-full bg-white rounded-lg border-2 transition-all duration-300 h-80
+        w-full bg-white rounded-lg border-2 transition-all duration-300 min-h-96 flex flex-col
         ${isOver ? 'border-blue-400 bg-blue-50' : 'border-gray-200'}
         ${isActive ? 'ring-2 ring-blue-500 ring-opacity-50 border-blue-400' : ''}
         ${isCompleted ? 'bg-green-50 border-green-300' : ''}
       `}
+      style={{
+        // Ensure the entire column area is droppable
+        position: 'relative',
+      }}
     >
       {/* Column Header */}
       <div className={`p-4 border-b border-gray-200 ${isActive ? 'bg-blue-50' : ''}`}>
@@ -200,21 +204,43 @@ function KanbanColumn({ stage, isActive, isCompleted, onCandidateClick }: Kanban
         </div>
       </div>
 
-      {/* Candidates List */}
-      <div className="p-4">
-        <div className="space-y-3 min-h-32">
+      {/* Candidates List - Make the entire area droppable */}
+      <div className="p-4 flex-1 relative">
+        {/* Enhanced drop zone overlay */}
+        {isOver && (
+          <div className="absolute inset-2 border-2 border-dashed border-blue-400 bg-blue-50 bg-opacity-75 rounded-lg flex items-center justify-center z-10 pointer-events-none">
+            <div className="text-center">
+              <IconSolid className="h-12 w-12 mx-auto mb-2 text-blue-500" />
+              <p className="text-lg font-medium text-blue-700">Drop candidate here</p>
+              <p className="text-sm text-blue-600">Move to {stage.title}</p>
+            </div>
+          </div>
+        )}
+        
+        <div className="space-y-3 min-h-48">
           {stage.candidates.map((candidate) => (
             <div key={candidate.id} onClick={() => onCandidateClick(candidate)}>
               <CandidateCard candidate={candidate} />
             </div>
           ))}
           
-          {/* Drop Zone Indicator */}
+          {/* Drop Zone Indicator - Enhanced */}
           {stage.candidates.length === 0 && (
-            <div className="h-32 border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center text-gray-400">
+            <div className={`
+              h-40 border-2 border-dashed rounded-lg flex items-center justify-center transition-all duration-200
+              ${isOver 
+                ? 'border-blue-400 bg-blue-50 text-blue-600' 
+                : 'border-gray-300 text-gray-400 hover:border-blue-400 hover:text-blue-500'
+              }
+            `}>
               <div className="text-center">
-                <IconOutline className="h-8 w-8 mx-auto mb-2 opacity-50" />
-                <p className="text-sm">Drop candidates here</p>
+                <IconOutline className={`h-10 w-10 mx-auto mb-2 opacity-50 ${isOver ? 'opacity-100' : ''}`} />
+                <p className="text-sm font-medium">
+                  {isOver ? 'Release to drop here' : 'Drag candidates here'}
+                </p>
+                <p className="text-xs mt-1 opacity-75">
+                  {isOver ? `Moving to ${stage.title}` : `to move to ${stage.title}`}
+                </p>
               </div>
             </div>
           )}
@@ -324,52 +350,91 @@ export function CandidateKanbanBoard({
     const { active, over } = event;
     setActiveId(null);
 
-    if (!over) return;
+    if (!over) {
+      toast.error('Drop zone not found. Please drop the candidate on a valid stage column.');
+      return;
+    }
 
     const candidateId = parseInt(active.id.toString());
     const overStageId = over.id as string;
     
     console.log('🔄 Drag end:', { candidateId, overStageId, currentStage: candidate.stage });
+
+    // Validate the target stage
+    const validStages = ['applied', 'screen', 'tech', 'offer', 'hired', 'rejected'];
+    if (!validStages.includes(overStageId)) {
+      toast.error(`Invalid target stage: ${overStageId}`);
+      return;
+    }
     
-    if (overStageId === candidate.stage) return; // No change needed
+    if (overStageId === candidate.stage) {
+      toast('Candidate is already in this stage.', { duration: 2000 });
+      return; // No change needed
+    }
 
     // Enhanced stage progression validation
     const stageOrder = ['applied', 'screen', 'tech', 'offer', 'hired'];
     const currentStageIndex = stageOrder.indexOf(candidate.stage);
     const targetStageIndex = stageOrder.indexOf(overStageId);
     
-    // Prevent specific invalid transitions
+    // Prevent specific invalid transitions with more detailed messages
     if (candidate.stage === 'hired' && overStageId === 'rejected') {
-      toast.error(`Cannot move from Hired to Rejected. A hired candidate cannot be rejected.`);
+      toast.error('Cannot reject a hired candidate. A hired candidate cannot be moved to rejected status.');
       return;
     }
     
     if (candidate.stage === 'rejected' && overStageId === 'hired') {
-      toast.error(`Cannot move from Rejected to Hired. A rejected candidate cannot be hired.`);
+      toast.error('Cannot hire a rejected candidate. Rejected candidates cannot be moved to hired status.');
       return;
     }
     
     if (candidate.stage === 'rejected' && overStageId !== 'rejected') {
-      toast.error(`Cannot move from Rejected to other stages. Rejected candidates cannot re-enter the hiring process.`);
+      toast.error('Cannot move a rejected candidate to active stages. Rejected candidates cannot re-enter the hiring process.');
       return;
     }
     
     // Allow moving to 'rejected' from any stage except 'hired'
     if (overStageId === 'rejected' && candidate.stage !== 'hired') {
-      // Proceed with the stage change
-    } else if (overStageId !== 'rejected' && targetStageIndex < currentStageIndex) {
-      // Prevent moving backwards in normal progression
-      toast.error(`Cannot move backwards from ${stages.find(s => s.id === candidate.stage)?.title} to ${stages.find(s => s.id === overStageId)?.title}`);
+      // Show confirmation for rejection
+      toast.success('Moving candidate to rejected stage...');
+    } else if (overStageId !== 'rejected' && targetStageIndex !== -1 && currentStageIndex !== -1 && targetStageIndex < currentStageIndex) {
+      // Prevent moving backwards in normal progression with specific stage names
+      const currentStageName = stages.find(s => s.id === candidate.stage)?.title || candidate.stage;
+      const targetStageName = stages.find(s => s.id === overStageId)?.title || overStageId;
+      toast.error(`Cannot move backwards from ${currentStageName} to ${targetStageName}. Candidates can only progress forward in the hiring process.`);
       return;
+    } else if (overStageId !== 'rejected' && targetStageIndex !== -1 && currentStageIndex !== -1 && targetStageIndex > currentStageIndex + 1) {
+      // Prevent skipping stages (optional - can be removed if skipping is allowed)
+      const currentStageName = stages.find(s => s.id === candidate.stage)?.title || candidate.stage;
+      const targetStageName = stages.find(s => s.id === overStageId)?.title || overStageId;
+      toast(`⚠️ Skipping stages: moving from ${currentStageName} to ${targetStageName}. Make sure this progression is intended.`, { duration: 4000 });
     }
 
     setIsUpdating(true);
     try {
       await onStageChange(candidateId, overStageId as Candidate['stage']);
-      toast.success(`Moved candidate to ${stages.find(s => s.id === overStageId)?.title}`);
+      const targetStageName = stages.find(s => s.id === overStageId)?.title || overStageId;
+      toast.success(`Successfully moved candidate to ${targetStageName}`);
     } catch (error) {
       console.error('Failed to update candidate stage:', error);
-      toast.error('Failed to update candidate stage');
+      let errorMessage = 'Unknown error occurred';
+      
+      if (error instanceof Error) {
+        errorMessage = error.message;
+      } else if (typeof error === 'string') {
+        errorMessage = error;
+      }
+      
+      // Show specific error message to user
+      toast.error(`Failed to update candidate stage: ${errorMessage}`);
+      
+      // Log additional debug info
+      console.error('Debug info:', {
+        candidateId,
+        currentStage: candidate.stage,
+        targetStage: overStageId,
+        error
+      });
     } finally {
       setIsUpdating(false);
     }
