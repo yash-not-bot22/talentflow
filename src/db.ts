@@ -16,7 +16,7 @@ export interface Candidate {
   id: number; // Auto-increment
   name: string; // e.g., "John Doe"
   email: string; // e.g., "john.doe@example.com"
-  jobId: number; // Foreign key to jobs.id (random 1-25)
+  jobId: number; // Foreign key to jobs.id
   stage: 'applied' | 'screen' | 'tech' | 'offer' | 'hired' | 'rejected';
   history: { stage: Candidate['stage']; timestamp: number }[]; // Timeline of stage changes
   notes: { text: string; timestamp: number }[]; // Notes with @mentions

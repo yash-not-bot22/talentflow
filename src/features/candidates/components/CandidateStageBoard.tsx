@@ -15,7 +15,7 @@ import {
   useSortable,
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import type { Candidate } from '../../../db';
+import type { Candidate, Job } from '../../../db';
 import toast from 'react-hot-toast';
 import {
   ClockIcon,
@@ -23,6 +23,7 @@ import {
   DocumentCheckIcon,
   CheckIcon,
   XCircleIcon,
+  BriefcaseIcon,
 } from '@heroicons/react/24/outline';
 
 interface StageDefinition {
@@ -37,6 +38,7 @@ interface StageDefinition {
 
 interface StageBoardProps {
   candidates: Candidate[];
+  jobs?: Job[]; // Optional array of jobs for displaying job titles
   onStageChange: (candidateId: number, newStage: Candidate['stage']) => Promise<void>;
   onCandidateClick?: (candidate: Candidate) => void;
   onClose?: () => void;
@@ -45,10 +47,11 @@ interface StageBoardProps {
 
 interface CandidateCardProps {
   candidate: Candidate;
+  jobTitle?: string; // Optional job title for display
   onClick?: (candidate: Candidate) => void;
 }
 
-function StageCandidateCard({ candidate, onClick }: CandidateCardProps) {
+function StageCandidateCard({ candidate, jobTitle, onClick }: CandidateCardProps) {
   const {
     attributes,
     listeners,
@@ -103,6 +106,12 @@ function StageCandidateCard({ candidate, onClick }: CandidateCardProps) {
             {candidate.name}
           </h4>
           <p className="text-xs text-gray-500 truncate">{candidate.email}</p>
+          {jobTitle && (
+            <div className="flex items-center mt-1">
+              <BriefcaseIcon className="h-3 w-3 text-gray-400 mr-1" />
+              <p className="text-xs text-gray-400 truncate">{jobTitle}</p>
+            </div>
+          )}
         </div>
       </div>
 
@@ -127,10 +136,13 @@ function StageCandidateCard({ candidate, onClick }: CandidateCardProps) {
 interface StageColumnProps {
   stage: StageDefinition;
   candidates: Candidate[];
+  jobs: Job[];
+  draggedCandidate: Candidate | null;
+  isValidTransition: (fromStage: Candidate['stage'], toStage: Candidate['stage']) => boolean;
   onCandidateClick: (candidate: Candidate) => void;
 }
 
-function StageColumn({ stage, candidates, onCandidateClick }: StageColumnProps) {
+function StageColumn({ stage, candidates, jobs, draggedCandidate, isValidTransition, onCandidateClick }: StageColumnProps) {
   const {
     setNodeRef,
     isOver,
@@ -138,13 +150,26 @@ function StageColumn({ stage, candidates, onCandidateClick }: StageColumnProps) 
     id: stage.id,
   });
 
+  // Helper function to get job title for a candidate
+  const getJobTitle = (candidateJobId: number): string | undefined => {
+    const job = jobs.find(j => j.id === candidateJobId);
+    return job?.title;
+  };
+
+  // Determine if this is a valid drop target
+  const isValidDropTarget = draggedCandidate ? isValidTransition(draggedCandidate.stage, stage.id) : true;
+  const isDragging = draggedCandidate !== null;
+
   const StageIcon = stage.icon;
 
   return (
     <div
       ref={setNodeRef}
       className={`flex-1 min-w-80 bg-white rounded-xl border-2 transition-all duration-300 ${
-        isOver ? `${stage.borderColor} bg-opacity-10 ${stage.bgColor}` : 'border-gray-200'
+        isOver && isValidDropTarget ? `${stage.borderColor} bg-opacity-10 ${stage.bgColor}` : 
+        isOver && !isValidDropTarget ? 'border-red-400 bg-red-50' :
+        isDragging && !isValidDropTarget ? 'border-gray-300 bg-gray-100 opacity-50' :
+        'border-gray-200'
       }`}
     >
       {/* Column Header */}
@@ -167,35 +192,70 @@ function StageColumn({ stage, candidates, onCandidateClick }: StageColumnProps) 
         </div>
       </div>
 
-      {/* Candidates List */}
-      <div className="p-4 min-h-96 max-h-96 overflow-y-auto">
+      {/* Candidates List - Entire area is droppable */}
+      <div className={`p-4 min-h-96 max-h-96 overflow-y-auto relative ${
+        isOver && isValidDropTarget ? 'bg-opacity-5 ' + stage.bgColor : ''
+      }`}>
         <div className="space-y-3">
           {candidates.map((candidate) => (
             <StageCandidateCard
               key={candidate.id}
               candidate={candidate}
+              jobTitle={getJobTitle(candidate.jobId)}
               onClick={onCandidateClick}
             />
           ))}
           
-          {/* Drop Zone Indicator */}
-          {candidates.length === 0 && (
-            <div className="h-32 border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center text-gray-400">
-              <div className="text-center">
-                <StageIcon className="h-8 w-8 mx-auto mb-2 opacity-50" />
-                <p className="text-sm">Drop candidates here</p>
-              </div>
+          {/* Always visible drop zone at bottom */}
+          <div className={`mt-4 p-3 border-2 border-dashed rounded-lg flex items-center justify-center text-gray-400 transition-all duration-200 ${
+            isOver && isValidDropTarget ? `${stage.borderColor} bg-opacity-20 ${stage.bgColor} text-gray-600 border-solid` : 
+            isOver && !isValidDropTarget ? 'border-red-400 bg-red-50 text-red-600' :
+            isDragging && !isValidDropTarget ? 'border-gray-300 opacity-50' :
+            'border-gray-300'
+          } ${candidates.length === 0 ? 'h-32' : 'h-16'}`}>
+            <div className="text-center">
+              <StageIcon className={`h-6 w-6 mx-auto mb-1 transition-all duration-200 ${
+                isOver && isValidDropTarget ? 'opacity-80 scale-110' : 
+                isOver && !isValidDropTarget ? 'opacity-60 text-red-500' :
+                'opacity-50'
+              }`} />
+              <p className="text-xs">{
+                isOver && !isValidDropTarget ? 'Invalid transition' :
+                isOver && isValidDropTarget ? `Drop to move to ${stage.title}` : 
+                candidates.length === 0 ? 'Drop candidates here' : 'Drop here to add'
+              }</p>
             </div>
-          )}
+          </div>
         </div>
+        
+        {/* Overlay for entire droppable area when dragging */}
+        {isOver && (
+          <div className={`absolute inset-0 border-2 border-dashed ${
+            isValidDropTarget ? stage.borderColor : 'border-red-400'
+          } ${
+            isValidDropTarget ? `bg-opacity-5 ${stage.bgColor}` : 'bg-red-50'
+          } rounded-lg pointer-events-none flex items-center justify-center`}>
+            <div className="text-center">
+              <StageIcon className={`h-12 w-12 mx-auto mb-2 ${
+                isValidDropTarget ? stage.color.split(' ')[0] : 'text-red-500'
+              } opacity-70`} />
+              <p className={`text-sm font-medium ${
+                isValidDropTarget ? stage.color.split(' ')[0] : 'text-red-600'
+              }`}>
+                {isValidDropTarget ? `Drop to move to ${stage.title}` : 'Invalid transition'}
+              </p>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
 }
 
-export function CandidateStageBoard({ candidates, onStageChange, onCandidateClick = () => {}, onClose, isInline = false }: StageBoardProps) {
+export function CandidateStageBoard({ candidates, jobs = [], onStageChange, onCandidateClick = () => {}, onClose, isInline = false }: StageBoardProps) {
   const [activeId, setActiveId] = useState<string | null>(null);
   const [isUpdating, setIsUpdating] = useState(false);
+  const [draggedCandidate, setDraggedCandidate] = useState<Candidate | null>(null);
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -270,16 +330,50 @@ export function CandidateStageBoard({ candidates, onStageChange, onCandidateClic
     candidates: candidates.filter(candidate => candidate.stage === stage.id),
   }));
 
+  // Helper function to validate stage transitions
+  const isValidTransition = (fromStage: Candidate['stage'], toStage: Candidate['stage']): boolean => {
+    if (fromStage === toStage) return false; // Same stage
+    
+    // Rejected candidates cannot move anywhere except stay rejected
+    if (fromStage === 'rejected' && toStage !== 'rejected') return false;
+    
+    // Hired candidates cannot be rejected
+    if (fromStage === 'hired' && toStage === 'rejected') return false;
+    
+    // Hired candidates cannot move back to earlier stages
+    if (fromStage === 'hired' && toStage !== 'hired') return false;
+    
+    // Rejected candidates cannot be hired
+    if (fromStage === 'rejected' && toStage === 'hired') return false;
+    
+    // Allow moving to rejected from any stage except hired
+    if (toStage === 'rejected' && fromStage !== 'hired') return true;
+    
+    // Check normal progression (allow forward movement)
+    const stageOrder = ['applied', 'screen', 'tech', 'offer', 'hired'];
+    const fromIndex = stageOrder.indexOf(fromStage);
+    const toIndex = stageOrder.indexOf(toStage);
+    
+    // Prevent moving backwards in normal progression
+    if (fromIndex !== -1 && toIndex !== -1 && toIndex < fromIndex) return false;
+    
+    return true;
+  };
+
   const handleDragStart = (event: DragStartEvent) => {
+    const candidateId = parseInt(event.active.id.toString());
+    const candidate = candidates.find(c => c.id === candidateId);
     setActiveId(event.active.id.toString());
+    setDraggedCandidate(candidate || null);
   };
 
   const handleDragEnd = async (event: DragEndEvent) => {
     const { active, over } = event;
     setActiveId(null);
+    setDraggedCandidate(null);
 
     if (!over) {
-      toast.error('Drop zone not found. Please drop the candidate on a valid stage column.');
+      toast.error('❌ Drop zone not found. Please drop the candidate on a valid stage column.');
       return;
     }
 
@@ -304,42 +398,52 @@ export function CandidateStageBoard({ candidates, onStageChange, onCandidateClic
       return;
     }
 
-    // Enhanced stage progression validation
+    // Enhanced stage progression validation with more specific error messages
     const stageOrder = ['applied', 'screen', 'tech', 'offer', 'hired'];
     const currentStageIndex = stageOrder.indexOf(candidate.stage);
     const targetStageIndex = stageOrder.indexOf(overStage);
     
-    // Prevent specific invalid transitions with detailed messages
+    // Get stage titles for better error messages
+    const currentStageTitle = stageDefinitions.find(s => s.id === candidate.stage)?.title || candidate.stage;
+    const targetStageTitle = stageDefinitions.find(s => s.id === overStage)?.title || overStage;
+    
+    // Comprehensive validation rules with specific error messages
     if (candidate.stage === 'hired' && overStage === 'rejected') {
-      toast.error('Cannot reject a hired candidate. A hired candidate cannot be moved to rejected status.');
+      toast.error(`❌ Invalid transition: Cannot reject a hired candidate. ${candidate.name} is already hired and cannot be moved to rejected status.`);
       return;
     }
     
     if (candidate.stage === 'rejected' && overStage === 'hired') {
-      toast.error('Cannot hire a rejected candidate. Rejected candidates cannot be moved to hired status.');
+      toast.error(`❌ Invalid transition: Cannot hire a rejected candidate. ${candidate.name} was rejected and cannot be moved to hired status.`);
       return;
     }
     
     if (candidate.stage === 'rejected' && overStage !== 'rejected') {
-      toast.error('Cannot move a rejected candidate to active stages. Rejected candidates cannot re-enter the hiring process.');
+      toast.error(`❌ Invalid transition: Cannot move rejected candidates back to active stages. ${candidate.name} cannot re-enter the hiring process.`);
+      return;
+    }
+    
+    if (candidate.stage === 'hired' && overStage !== 'hired' && overStage !== 'rejected') {
+      toast.error(`❌ Invalid transition: Cannot move hired candidates back to earlier stages. ${candidate.name} is already hired.`);
       return;
     }
     
     // Allow moving to 'rejected' from any stage except 'hired'
     if (overStage === 'rejected' && candidate.stage !== 'hired') {
-      // Show confirmation for rejection
-      toast.success('Moving candidate to rejected stage...');
+      toast.success(`Moving ${candidate.name} to rejected stage...`);
     } else if (overStage !== 'rejected' && targetStageIndex !== -1 && currentStageIndex !== -1 && targetStageIndex < currentStageIndex) {
-      // Prevent moving backwards in normal progression with specific stage names
-      const currentStageTitle = stageDefinitions.find(s => s.id === candidate.stage)?.title || candidate.stage;
-      const targetStageTitle = stageDefinitions.find(s => s.id === overStage)?.title || overStage;
-      toast.error(`Cannot move backwards from ${currentStageTitle} to ${targetStageTitle}. Candidates can only progress forward in the hiring process.`);
+      // Prevent moving backwards in normal progression
+      toast.error(`❌ Invalid transition: Cannot move backwards from ${currentStageTitle} to ${targetStageTitle}. ${candidate.name} can only progress forward in the hiring process.`);
       return;
     } else if (overStage !== 'rejected' && targetStageIndex !== -1 && currentStageIndex !== -1 && targetStageIndex > currentStageIndex + 1) {
-      // Prevent skipping stages (optional - can be removed if skipping is allowed)
-      const currentStageTitle = stageDefinitions.find(s => s.id === candidate.stage)?.title || candidate.stage;
-      const targetStageTitle = stageDefinitions.find(s => s.id === overStage)?.title || overStage;
-      toast(`⚠️ Skipping stages: moving from ${currentStageTitle} to ${targetStageTitle}. Make sure this progression is intended.`, { duration: 4000 });
+      // Warn about skipping stages but allow it
+      toast(`⚠️ Stage skipping: Moving ${candidate.name} from ${currentStageTitle} to ${targetStageTitle}. Make sure this progression is intended.`, { 
+        duration: 4000,
+        icon: '⚠️'
+      });
+    } else {
+      // Valid forward progression
+      toast.success(`✅ Moving ${candidate.name} from ${currentStageTitle} to ${targetStageTitle}...`);
     }
 
     try {
@@ -392,6 +496,9 @@ export function CandidateStageBoard({ candidates, onStageChange, onCandidateClic
                   key={stage.id}
                   stage={stage}
                   candidates={stage.candidates}
+                  jobs={jobs}
+                  draggedCandidate={draggedCandidate}
+                  isValidTransition={isValidTransition}
                   onCandidateClick={onCandidateClick}
                 />
               ))}
@@ -456,6 +563,9 @@ export function CandidateStageBoard({ candidates, onStageChange, onCandidateClic
                   key={stage.id}
                   stage={stage}
                   candidates={stage.candidates}
+                  jobs={jobs}
+                  draggedCandidate={draggedCandidate}
+                  isValidTransition={isValidTransition}
                   onCandidateClick={onCandidateClick}
                 />
               ))}

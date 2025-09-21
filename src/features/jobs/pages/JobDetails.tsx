@@ -2,11 +2,12 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { assessmentsApi } from '../../../api/assessmentsApi';
+import { candidatesApi } from '../../../api/candidatesApi';
 import { jobsApi } from '../../../api/jobsApi';
 import { useJobDetailStore } from '../../../store/jobDetailStore';
 import { useJobsStore } from '../../../store/jobsStore';
 import { useNotifications } from '../../../hooks/useNotifications';
-import type { Assessment, CandidateResponse, Job } from '../../../db';
+import type { Assessment, Candidate, CandidateResponse, Job } from '../../../db';
 import {
   ArrowLeftIcon,
   CalendarIcon,
@@ -17,6 +18,7 @@ import {
   CheckCircleIcon,
   ArchiveBoxIcon as ArchiveBoxSolidIcon,
   DocumentTextIcon,
+  UserGroupIcon,
 } from '@heroicons/react/24/outline';
 
 // Simple loading spinner component
@@ -39,6 +41,8 @@ export function JobDetails() {
   const [assessmentLoading, setAssessmentLoading] = useState(false);
   const [submissions, setSubmissions] = useState<CandidateResponse[]>([]);
   const [submissionsLoading, setSubmissionsLoading] = useState(false);
+  const [candidates, setCandidates] = useState<Candidate[]>([]);
+  const [candidatesLoading, setCandidatesLoading] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -53,7 +57,7 @@ export function JobDetails() {
   });
 
   useEffect(() => {
-    const loadJobFromState = () => {
+    const loadJobData = async () => {
       if (!jobId) {
         setError('Job ID is required');
         return;
@@ -65,7 +69,7 @@ export function JobDetails() {
         return;
       }
 
-      // Find job in the jobs state
+      // First try to find job in the jobs state
       const foundJob = findJobById(jobIdNum, jobs);
       
       if (foundJob) {
@@ -75,12 +79,29 @@ export function JobDetails() {
         loadAssessment(jobIdNum);
         // Load submissions for this job
         loadSubmissions(jobIdNum);
+        // Load candidates for this job
+        loadCandidates(jobIdNum);
       } else {
-        setError('Job not found');
+        // If not found in state, try fetching from API (handles page refresh)
+        try {
+          console.log('Job not found in state, fetching from API...');
+          const jobFromApi = await jobsApi.getJob(jobIdNum);
+          setCurrentJob(jobFromApi);
+          setError(null);
+          // Load assessment for this job
+          loadAssessment(jobIdNum);
+          // Load submissions for this job
+          loadSubmissions(jobIdNum);
+          // Load candidates for this job
+          loadCandidates(jobIdNum);
+        } catch (apiError) {
+          console.error('Failed to fetch job from API:', apiError);
+          setError('Job not found');
+        }
       }
     };
 
-    loadJobFromState();
+    loadJobData();
   }, [jobId, jobs, findJobById, setCurrentJob]);
 
   const loadAssessment = async (jobIdNum: number) => {
@@ -106,6 +127,19 @@ export function JobDetails() {
       setSubmissions([]);
     } finally {
       setSubmissionsLoading(false);
+    }
+  };
+
+  const loadCandidates = async (jobIdNum: number) => {
+    setCandidatesLoading(true);
+    try {
+      const jobCandidates = await candidatesApi.getCandidatesByJobId(jobIdNum);
+      setCandidates(jobCandidates);
+    } catch (err) {
+      console.log('No candidates found for this job');
+      setCandidates([]);
+    } finally {
+      setCandidatesLoading(false);
     }
   };
 
@@ -397,6 +431,67 @@ export function JobDetails() {
                 <p className="text-sm text-gray-900 font-mono">#{currentJob.id}</p>
               </div>
             </div>
+          </div>
+
+          {/* Candidates in this Job */}
+          <div className="mt-8 pt-6 border-t border-gray-200">
+            <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+              <UserGroupIcon className="h-5 w-5 mr-2" />
+              Candidates in this Job
+            </h2>
+            
+            {candidatesLoading ? (
+              <div className="text-center py-4">
+                <LoadingSpinner />
+                <p className="text-sm text-gray-500 mt-2">Loading candidates...</p>
+              </div>
+            ) : candidates.length > 0 ? (
+              <div className="space-y-3">
+                {candidates.map((candidate) => (
+                  <div
+                    key={candidate.id}
+                    className="flex items-center justify-between p-4 bg-gray-50 rounded-lg border border-gray-200 hover:bg-gray-100 transition-colors cursor-pointer"
+                    onClick={() => {
+                      console.log('🔗 Navigating to candidate:', candidate.id, candidate.name);
+                      navigate(`/candidates/${candidate.id}`);
+                    }}
+                  >
+                    <div className="flex items-center space-x-4">
+                      <div className="flex-shrink-0">
+                        <div className="h-10 w-10 bg-blue-500 rounded-full flex items-center justify-center">
+                          <span className="text-white font-medium text-sm">
+                            {candidate.name.split(' ').map(n => n[0]).join('').slice(0, 2)}
+                          </span>
+                        </div>
+                      </div>
+                      <div>
+                        <h3 className="text-sm font-medium text-gray-900">{candidate.name}</h3>
+                        <p className="text-sm text-gray-500">{candidate.email}</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center space-x-3">
+                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
+                        ${candidate.stage === 'applied' ? 'bg-blue-100 text-blue-800' :
+                          candidate.stage === 'screen' ? 'bg-yellow-100 text-yellow-800' :
+                          candidate.stage === 'tech' ? 'bg-purple-100 text-purple-800' :
+                          candidate.stage === 'offer' ? 'bg-orange-100 text-orange-800' :
+                          candidate.stage === 'hired' ? 'bg-green-100 text-green-800' :
+                          'bg-red-100 text-red-800'}`}>
+                        {candidate.stage}
+                      </span>
+                      <span className="text-xs text-gray-400">
+                        {new Date(candidate.createdAt).toLocaleDateString()}
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-8 text-gray-500">
+                <UserGroupIcon className="h-12 w-12 mx-auto text-gray-300 mb-4" />
+                <p className="text-sm">No candidates have applied for this job yet.</p>
+              </div>
+            )}
           </div>
 
           {/* Assessment Submissions */}

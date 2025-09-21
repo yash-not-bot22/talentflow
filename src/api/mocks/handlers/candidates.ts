@@ -147,6 +147,55 @@ export const candidatesHandlers = [
     }
   }),
 
+  // GET /jobs/:jobId/candidates - Get candidates for a specific job
+  http.get('/api/jobs/:jobId/candidates', async ({ params }) => {
+    try {
+      console.log('🔍 GET /jobs/:jobId/candidates - Starting handler...');
+      
+      const jobId = parseInt(params.jobId as string);
+      if (isNaN(jobId)) {
+        return new HttpResponse(
+          JSON.stringify({ error: 'Invalid job ID' }),
+          { status: 400, headers: { 'Content-Type': 'application/json' } }
+        );
+      }
+
+      console.log('🔍 GET /jobs/:jobId/candidates for jobId:', jobId);
+
+      // Ensure database is open
+      if (!db.isOpen()) {
+        console.log('📂 Database not open, opening...');
+        await db.open();
+      }
+
+      // First verify the job exists
+      const job = await db.jobs.get(jobId);
+      if (!job) {
+        return new HttpResponse(
+          JSON.stringify({ error: 'Job not found' }),
+          { status: 404, headers: { 'Content-Type': 'application/json' } }
+        );
+      }
+
+      // Get all candidates for this job
+      const candidates = await db.candidates.where('jobId').equals(jobId).toArray();
+      
+      console.log('✅ Found', candidates.length, 'candidates for job', jobId);
+      
+      return HttpResponse.json({
+        data: candidates,
+        jobId,
+        jobTitle: job.title
+      });
+    } catch (error) {
+      console.error('❌ Error in GET /jobs/:jobId/candidates:', error);
+      return new HttpResponse(
+        JSON.stringify({ error: 'Database error' }),
+        { status: 500, headers: { 'Content-Type': 'application/json' } }
+      );
+    }
+  }),
+
   // POST /candidates
   http.post('/api/candidates', async ({ request }) => {
     await delay();

@@ -429,13 +429,13 @@ export function JobsBoard() {
     const oldIndex = jobs.findIndex(job => job.id === activeId);
     const newIndex = jobs.findIndex(job => job.id === overId);
     
-    // Backend order: Use the target job's actual order for correct backend logic
+    // Backend order: Use the target job's actual order for correct positioning
     let backendTargetOrder;
     
     if (oldIndex < newIndex) {
-      // Dragging down: backend should place item after the target job
-      // This means the item should get the order that comes after the target
-      backendTargetOrder = overJob.order + 1;
+      // Dragging down: backend should place item at the target job's position
+      // The target job and others will shift up automatically
+      backendTargetOrder = overJob.order;
     } else {
       // Dragging up: backend should place item at the target job's position
       backendTargetOrder = overJob.order;
@@ -449,7 +449,7 @@ export function JobsBoard() {
       backendTargetOrder,
       direction: oldIndex < newIndex ? 'down' : 'up',
       logic: oldIndex < newIndex 
-        ? `dragging down: place after target order ${overJob.order} -> ${backendTargetOrder}`
+        ? `dragging down: place at target order ${overJob.order} -> ${backendTargetOrder}`
         : `dragging up: place at target order ${overJob.order} -> ${backendTargetOrder}`
     });
 

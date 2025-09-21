@@ -118,29 +118,7 @@ export const useJobsStore = create<JobsState>()(
         
         const jobToMove = jobs[jobIndex];
         
-        // Remove the job from its current position
-        jobs.splice(jobIndex, 1);
-        
-        // Find the new position based on toOrder
-        // We need to find where to visually place the item, which should be after items with lower order
-        let insertIndex = 0;
-        for (let i = 0; i < jobs.length; i++) {
-          if (jobs[i].order < toOrder) {
-            insertIndex = i + 1;
-          } else if (jobs[i].order === toOrder) {
-            // If we're moving to the same position as an existing item,
-            // place it before that item (insertIndex = i)
-            insertIndex = i;
-            break;
-          } else {
-            break;
-          }
-        }
-        
-        // Insert the job at the new position
-        jobs.splice(insertIndex, 0, { ...jobToMove, order: toOrder });
-        
-        // Update the order of other jobs
+        // First, update the orders of other jobs to match backend behavior
         if (fromOrder < toOrder) {
           // Moving down: decrease order of jobs that were between fromOrder and toOrder
           for (let i = 0; i < jobs.length; i++) {
@@ -156,6 +134,12 @@ export const useJobsStore = create<JobsState>()(
             }
           }
         }
+        
+        // Update the moved job's order
+        jobs[jobIndex] = { ...jobToMove, order: toOrder };
+        
+        // Now sort the jobs by their updated order to get correct visual positioning
+        jobs.sort((a, b) => a.order - b.order);
         
         return {
           optimisticJobs: jobs,

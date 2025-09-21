@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { candidatesApi } from '../../../api/candidatesApi';
+import { jobsApi } from '../../../api/jobsApi';
 import type { CandidateTimelineEntry } from '../../../api/candidatesApi';
-import type { Candidate } from '../../../db';
+import type { Candidate, Job } from '../../../db';
 import { useCandidateStages, useCandidateOperations } from '../hooks/useCandidates';
 import { CandidateKanbanBoard } from '../components/CandidateKanbanBoard';
 import { NotesWithMentions as EnhancedNotesWithMentions } from '../components/NotesWithMentions';
@@ -99,6 +100,7 @@ export function CandidateProfile() {
   const { updateCandidate } = useCandidateOperations();
   
   const [candidate, setCandidate] = useState<Candidate | null>(null);
+  const [job, setJob] = useState<Job | null>(null);
   const [timeline, setTimeline] = useState<CandidateTimelineEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -122,18 +124,10 @@ export function CandidateProfile() {
         setError(null);
         console.log('📡 Starting API calls...');
         
-        // Fetch candidate details and timeline
-        console.log('📡 Calling candidatesApi.getCandidates()...');
-        const candidatesResponse = await candidatesApi.getCandidates({});
-        console.log('✅ Candidates API response received:', {
-          totalCandidates: candidatesResponse.data?.length,
-          pagination: candidatesResponse.pagination,
-          firstFewIds: candidatesResponse.data?.slice(0, 5).map(c => c.id)
-        });
-        
-        const foundCandidate = candidatesResponse.data.find(c => c.id.toString() === candidateId);
-        console.log('🎯 Looking for candidate with ID:', candidateId, '(type:', typeof candidateId, ')');
-        console.log('🎯 Found candidate:', foundCandidate ? { id: foundCandidate.id, name: foundCandidate.name } : 'NOT FOUND');
+        // Fetch candidate details directly by ID
+        console.log('📡 Calling candidatesApi.getCandidate()...');
+        const foundCandidate = await candidatesApi.getCandidate(parseInt(candidateId));
+        console.log('✅ Candidate API response received:', foundCandidate ? { id: foundCandidate.id, name: foundCandidate.name } : 'NOT FOUND');
         
         if (!foundCandidate) {
           console.log('❌ Candidate not found in response data');
@@ -141,6 +135,18 @@ export function CandidateProfile() {
         } else {
           console.log('✅ Setting candidate data');
           setCandidate(foundCandidate);
+          
+          // Fetch job information
+          try {
+            console.log('📡 Calling jobsApi.getJob for jobId:', foundCandidate.jobId);
+            const jobResponse = await jobsApi.getJob(foundCandidate.jobId);
+            console.log('✅ Job API response:', jobResponse);
+            setJob(jobResponse);
+          } catch (jobError) {
+            console.warn('⚠️ Job error:', jobError);
+            setJob(null);
+          }
+          
           console.log('📅 Fetching timeline for candidate:', candidateId);
           
           // Fetch timeline
@@ -156,7 +162,11 @@ export function CandidateProfile() {
         }
       } catch (err) {
         console.error('Failed to fetch candidate:', err);
-        setError('Failed to load candidate details');
+        if (err instanceof Error) {
+          setError(`Failed to load candidate details: ${err.message}`);
+        } else {
+          setError('Failed to load candidate details');
+        }
       } finally {
         setLoading(false);
       }
@@ -292,7 +302,16 @@ export function CandidateProfile() {
                       </div>
                       <div className="flex items-center">
                         <BriefcaseIcon className="h-4 w-4 mr-1.5" />
-                        Job ID #{candidate.jobId}
+                        {job ? (
+                          <button
+                            onClick={() => navigate(`/jobs/${candidate.jobId}`)}
+                            className="text-blue-600 hover:text-blue-800 hover:underline transition-colors"
+                          >
+                            {job.title} (#{candidate.jobId})
+                          </button>
+                        ) : (
+                          <span>Job ID #{candidate.jobId}</span>
+                        )}
                       </div>
                     </div>
                   </div>

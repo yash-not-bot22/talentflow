@@ -1,6 +1,7 @@
 import { useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useCandidates, useCandidateStages, useCandidateOperations } from '../hooks/useCandidates';
+import { useJobs } from '../../jobs/hooks/useJobs';
 import type { Candidate } from '../../../db';
 import {
   MagnifyingGlassIcon,
@@ -215,6 +216,7 @@ export function CandidatesPage() {
   const { candidates, loading, error, filters, pagination, updateFilters, updatePagination, refreshCandidates } = useCandidates();
   const { getStageInfo, getStageOptions } = useCandidateStages();
   const { updateCandidate } = useCandidateOperations();
+  const { jobs } = useJobs();
   
   const [searchTerm, setSearchTerm] = useState(filters.search || '');
   const [stageFilter, setStageFilter] = useState(filters.stage || '');
@@ -532,6 +534,7 @@ export function CandidatesPage() {
                 /* Stage Board View */
                 <CandidateStageBoard
                   candidates={candidates}
+                  jobs={jobs}
                   onStageChange={handleStageChangeFromBoard}
                   onCandidateClick={handleViewCandidate}
                   isInline={true}
