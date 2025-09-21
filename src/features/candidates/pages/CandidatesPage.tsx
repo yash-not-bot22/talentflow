@@ -320,7 +320,7 @@ export function CandidatesPage() {
                 <div className="flex items-center bg-gray-100 rounded-lg p-1">
                   <button
                     onClick={() => setViewMode('list')}
-                    className={`px-3 py-2 rounded-md transition-colors flex items-center space-x-2 ${
+                    className={`px-3 py-2 rounded-md transition-colors flex items-center ${
                       viewMode === 'list' 
                         ? 'bg-white text-gray-900 shadow-sm' 
                         : 'text-gray-500 hover:text-gray-700'
@@ -328,11 +328,10 @@ export function CandidatesPage() {
                     title="List view"
                   >
                     <ListBulletIcon className="h-4 w-4" />
-                    <span className="text-sm font-medium">List</span>
                   </button>
                   <button
                     onClick={() => setViewMode('cards')}
-                    className={`px-3 py-2 rounded-md transition-colors flex items-center space-x-2 ${
+                    className={`px-3 py-2 rounded-md transition-colors flex items-center ${
                       viewMode === 'cards' 
                         ? 'bg-white text-gray-900 shadow-sm' 
                         : 'text-gray-500 hover:text-gray-700'
@@ -340,7 +339,6 @@ export function CandidatesPage() {
                     title="Card view"
                   >
                     <Squares2X2Icon className="h-4 w-4" />
-                    <span className="text-sm font-medium">Cards</span>
                   </button>
                   <button
                     onClick={() => setViewMode('stages')}
@@ -349,10 +347,10 @@ export function CandidatesPage() {
                         ? 'bg-white text-gray-900 shadow-sm' 
                         : 'text-gray-500 hover:text-gray-700'
                     }`}
-                    title="Stage board view"
+                    title="Candidate Stage Board"
                   >
                     <TableCellsIcon className="h-4 w-4" />
-                    <span className="text-sm font-medium">Stages</span>
+                    <span className="text-sm font-medium">Candidate Stage Board</span>
                   </button>
                 </div>
 

@@ -12,6 +12,7 @@ import { CandidateProfile } from './features/candidates/pages/CandidateProfile';
 import { DebugCandidates } from './components/DebugCandidates';
 import { AssessmentBuilder } from './features/assessments/components/AssessmentBuilder';
 import { AssessmentDetail } from './features/assessments/pages/AssessmentDetail';
+import { CandidateResponseDetail } from './features/assessments/pages/CandidateResponseDetail';
 
 // Navigation component with active state
 function Navigation() {
@@ -118,6 +119,7 @@ function App() {
               <Route path="/candidates/:id" element={<CandidateProfile />} />
               <Route path="/assessment/:jobId" element={<AssessmentDetail />} />
               <Route path="/assessment/:jobId/edit" element={<AssessmentBuilder />} />
+              <Route path="/assessment/:jobId/response/:responseId" element={<CandidateResponseDetail />} />
               <Route path="/debug" element={<DebugCandidates />} />
             </Routes>
           </div>

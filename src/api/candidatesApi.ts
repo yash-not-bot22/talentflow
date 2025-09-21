@@ -120,6 +120,21 @@ class CandidatesApi {
     return response.json();
   }
 
+  async getCandidate(candidateId: number): Promise<Candidate> {
+    const url = `${this.baseUrl}/candidates/${candidateId}`;
+    console.log('🌐 API Call: GET', url);
+
+    const response = await fetch(url);
+
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({ error: 'Unknown error' }));
+      throw new Error(error.error || `HTTP ${response.status}`);
+    }
+
+    const result = await response.json();
+    return result.data;
+  }
+
   async getCandidateTimeline(candidateId: number): Promise<CandidateTimelineResponse> {
     const url = `${this.baseUrl}/candidates/${candidateId}/timeline`;
     console.log('🌐 API Call: GET', url);

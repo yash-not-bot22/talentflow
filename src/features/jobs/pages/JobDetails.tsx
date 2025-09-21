@@ -409,52 +409,47 @@ export function JobDetails() {
                 <p className="text-sm text-gray-500 mt-2">Loading submissions...</p>
               </div>
             ) : submissions.length > 0 ? (
-              <div className="space-y-4">
+              <div className="space-y-3">
                 {submissions.map((submission) => (
-                  <div key={submission.id} className="bg-white border border-gray-200 rounded-lg p-4">
+                  <div 
+                    key={submission.id} 
+                    onClick={() => navigate(`/assessment/${jobId}/response/${submission.id}`)}
+                    className="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md hover:border-gray-300 transition-all cursor-pointer group"
+                  >
                     <div className="flex items-center justify-between">
-                      <div>
-                        <h3 className="font-medium text-gray-900">
-                          Candidate #{submission.candidateId}
-                        </h3>
-                        <p className="text-sm text-gray-500 mt-1">
-                          Submitted {new Date(submission.submittedAt).toLocaleDateString('en-US', {
-                            year: 'numeric',
-                            month: 'long',
-                            day: 'numeric',
-                            hour: '2-digit',
-                            minute: '2-digit'
-                          })}
-                        </p>
-                      </div>
-                      <div className="text-right">
-                        <p className="text-sm font-medium text-gray-900">
-                          {Object.keys(submission.responses).length} response(s)
-                        </p>
-                        <p className="text-xs text-gray-500">Job #{submission.jobId}</p>
-                      </div>
-                    </div>
-                    
-                    {/* Response preview */}
-                    <div className="mt-3 pt-3 border-t border-gray-100">
-                      <h4 className="text-sm font-medium text-gray-700 mb-2">Responses:</h4>
-                      <div className="space-y-2">
-                        {Object.entries(submission.responses).slice(0, 3).map(([questionId, response]) => (
-                          <div key={questionId} className="text-sm">
-                            <span className="font-medium text-gray-600">Q{questionId}:</span>
-                            <span className="ml-2 text-gray-800">
-                              {Array.isArray(response) 
-                                ? response.join(', ') 
-                                : String(response).slice(0, 100) + (String(response).length > 100 ? '...' : '')
-                              }
-                            </span>
-                          </div>
-                        ))}
-                        {Object.keys(submission.responses).length > 3 && (
-                          <p className="text-xs text-gray-500">
-                            +{Object.keys(submission.responses).length - 3} more response(s)
+                      <div className="flex items-center space-x-3">
+                        <div className="h-10 w-10 bg-gradient-to-br from-blue-400 to-purple-500 rounded-full flex items-center justify-center">
+                          <span className="text-white text-sm font-semibold">
+                            #{submission.candidateId}
+                          </span>
+                        </div>
+                        <div>
+                          <h3 className="font-medium text-gray-900 group-hover:text-blue-600 transition-colors">
+                            Candidate #{submission.candidateId}
+                          </h3>
+                          <p className="text-sm text-gray-500">
+                            Submitted {new Date(submission.submittedAt).toLocaleDateString('en-US', {
+                              year: 'numeric',
+                              month: 'long',
+                              day: 'numeric',
+                              hour: '2-digit',
+                              minute: '2-digit'
+                            })}
                           </p>
-                        )}
+                        </div>
+                      </div>
+                      <div className="flex items-center space-x-3">
+                        <div className="text-right">
+                          <p className="text-sm font-medium text-gray-900">
+                            {Object.keys(submission.responses).length} response{Object.keys(submission.responses).length !== 1 ? 's' : ''}
+                          </p>
+                          <p className="text-xs text-gray-500">Response ID: #{submission.id}</p>
+                        </div>
+                        <div className="flex-shrink-0">
+                          <svg className="w-5 h-5 text-gray-400 group-hover:text-blue-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                          </svg>
+                        </div>
                       </div>
                     </div>
                   </div>

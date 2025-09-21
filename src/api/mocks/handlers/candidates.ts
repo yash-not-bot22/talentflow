@@ -99,6 +99,54 @@ export const candidatesHandlers = [
     }
   }),
 
+  // GET /candidates/:id
+  http.get('/api/candidates/:id', async ({ params }) => {
+    await delay();
+    
+    if (shouldError()) {
+      return new HttpResponse(
+        JSON.stringify({ error: 'Failed to fetch candidate' }),
+        { status: 500, headers: { 'Content-Type': 'application/json' } }
+      );
+    }
+
+    try {
+      const candidateId = parseInt(params.id as string);
+      console.log('👤 GET /candidates/' + candidateId);
+
+      if (isNaN(candidateId)) {
+        return new HttpResponse(
+          JSON.stringify({ error: 'Invalid candidate ID' }),
+          { status: 400, headers: { 'Content-Type': 'application/json' } }
+        );
+      }
+
+      const candidate = await db.candidates.get(candidateId);
+
+      if (!candidate) {
+        return new HttpResponse(
+          JSON.stringify({ error: 'Candidate not found' }),
+          { status: 404, headers: { 'Content-Type': 'application/json' } }
+        );
+      }
+
+      console.log(`✅ Found candidate: ${candidate.name}`);
+
+      const response = {
+        data: candidate,
+        message: 'Candidate retrieved successfully'
+      };
+
+      return HttpResponse.json(response);
+    } catch (error) {
+      console.error('❌ Error in GET /candidates/:id:', error);
+      return new HttpResponse(
+        JSON.stringify({ error: 'Database error' }),
+        { status: 500, headers: { 'Content-Type': 'application/json' } }
+      );
+    }
+  }),
+
   // POST /candidates
   http.post('/api/candidates', async ({ request }) => {
     await delay();
