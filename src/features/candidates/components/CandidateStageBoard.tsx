@@ -10,6 +10,7 @@ import {
   useDroppable,
   useDraggable,
 } from '@dnd-kit/core';
+import { snapCenterToCursor } from '@dnd-kit/modifiers'; // Added for cursor alignment fix
 import type { DragStartEvent, DragEndEvent } from '@dnd-kit/core';
 import type { Candidate, Job } from '../../../db';
 import toast from 'react-hot-toast';
@@ -22,6 +23,7 @@ import {
   BriefcaseIcon,
 } from '@heroicons/react/24/outline';
 
+
 interface StageDefinition {
   id: Candidate['stage'];
   title: string;
@@ -32,6 +34,7 @@ interface StageDefinition {
   icon: React.ComponentType<any>;
 }
 
+
 interface StageBoardProps {
   candidates: Candidate[];
   jobs?: Job[]; // Optional array of jobs for displaying job titles
@@ -41,13 +44,16 @@ interface StageBoardProps {
   isInline?: boolean;
 }
 
+
 interface CandidateCardProps {
   candidate: Candidate;
   jobTitle?: string; // Optional job title for display
   onClick?: (candidate: Candidate) => void;
+  isDragOverlay?: boolean; // Added to distinguish overlay rendering
 }
 
-function StageCandidateCard({ candidate, jobTitle, onClick }: CandidateCardProps) {
+
+function StageCandidateCard({ candidate, jobTitle, onClick, isDragOverlay = false }: CandidateCardProps) {
   const {
     attributes,
     listeners,
@@ -55,13 +61,16 @@ function StageCandidateCard({ candidate, jobTitle, onClick }: CandidateCardProps
     isDragging,
   } = useDraggable({
     id: candidate.id.toString(),
+    disabled: isDragOverlay, // Disable dragging on overlay copy
   });
 
+  // Fixed cursor alignment: Clean style without conflicting transforms
   const style = {
-    opacity: isDragging ? 0 : 1,
+    opacity: isDragging ? 0.4 : 1, // Fade original when dragging
     cursor: isDragging ? 'grabbing' : 'grab',
     touchAction: 'none',
     userSelect: 'none' as const,
+    // Remove any transforms that could cause cursor misalignment
   };
 
   const formatDate = (timestamp: number) => {
@@ -77,15 +86,19 @@ function StageCandidateCard({ candidate, jobTitle, onClick }: CandidateCardProps
 
   return (
     <div
-      ref={setNodeRef}
-      style={style}
-      {...attributes}
-      {...listeners}
+      ref={isDragOverlay ? undefined : setNodeRef}
+      style={isDragOverlay ? undefined : style}
+      {...(isDragOverlay ? {} : attributes)}
+      {...(isDragOverlay ? {} : listeners)}
       onClick={(e) => {
-        e.stopPropagation();
-        onClick?.(candidate);
+        if (!isDragOverlay) {
+          e.stopPropagation();
+          onClick?.(candidate);
+        }
       }}
-      className="bg-white dark:bg-slate-800 rounded-2xl border border-gray-200 dark:border-slate-700 p-3 cursor-grab hover:shadow-xl hover:border-blue-300 dark:hover:border-blue-600 transition-all duration-300 active:cursor-grabbing hover:scale-105 hover:-translate-y-1 hover:rotate-1 relative group overflow-hidden select-none"
+      className={`bg-white dark:bg-slate-800 rounded-2xl border border-gray-200 dark:border-slate-700 p-3 cursor-grab hover:shadow-xl hover:border-blue-300 dark:hover:border-blue-600 transition-all duration-300 active:cursor-grabbing hover:scale-105 hover:-translate-y-1 hover:rotate-1 relative group overflow-hidden select-none ${
+        isDragOverlay ? 'shadow-2xl' : ''
+      }`}
     >
       {/* Hover gradient overlay */}
       <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 via-purple-500/10 to-pink-500/10 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
@@ -132,6 +145,7 @@ function StageCandidateCard({ candidate, jobTitle, onClick }: CandidateCardProps
   );
 }
 
+
 interface StageColumnProps {
   stage: StageDefinition;
   candidates: Candidate[];
@@ -140,6 +154,7 @@ interface StageColumnProps {
   isValidTransition: (fromStage: Candidate['stage'], toStage: Candidate['stage']) => boolean;
   onCandidateClick: (candidate: Candidate) => void;
 }
+
 
 function StageColumn({ stage, candidates, jobs, draggedCandidate, isValidTransition, onCandidateClick }: StageColumnProps) {
   const {
@@ -273,6 +288,7 @@ function StageColumn({ stage, candidates, jobs, draggedCandidate, isValidTransit
     </div>
   );
 }
+
 
 export function CandidateStageBoard({ candidates, jobs = [], onStageChange, onCandidateClick = () => {}, onClose, isInline = false }: StageBoardProps) {
   const [activeId, setActiveId] = useState<string | null>(null);
@@ -500,6 +516,12 @@ export function CandidateStageBoard({ candidates, jobs = [], onStageChange, onCa
 
   const activeCandidate = activeId ? candidates.find(c => c.id.toString() === activeId) : null;
 
+  // Helper function to get job title for active candidate
+  const getJobTitle = (candidateJobId: number): string | undefined => {
+    const job = jobs.find(j => j.id === candidateJobId);
+    return job?.title;
+  };
+
   // Inline rendering (no modal wrapper)
   if (isInline) {
     return (
@@ -541,18 +563,20 @@ export function CandidateStageBoard({ candidates, jobs = [], onStageChange, onCa
               ))}
             </div>
 
+            {/* FIXED: DragOverlay with proper cursor alignment */}
             <DragOverlay
+              modifiers={[snapCenterToCursor]} // This fixes cursor alignment
               dropAnimation={{
-                duration: 500,
+                duration: 200,
                 easing: 'cubic-bezier(0.18, 0.67, 0.6, 1.22)',
               }}
             >
               {activeCandidate ? (
-                <div className="rotate-3 scale-105 shadow-2xl">
-                  <StageCandidateCard
-                    candidate={activeCandidate}
-                  />
-                </div>
+                <StageCandidateCard
+                  candidate={activeCandidate}
+                  jobTitle={getJobTitle(activeCandidate.jobId)}
+                  isDragOverlay={true}
+                />
               ) : null}
             </DragOverlay>
           </DndContext>
@@ -630,18 +654,20 @@ export function CandidateStageBoard({ candidates, jobs = [], onStageChange, onCa
               ))}
             </div>
 
+            {/* FIXED: DragOverlay with proper cursor alignment */}
             <DragOverlay
+              modifiers={[snapCenterToCursor]} // This fixes cursor alignment
               dropAnimation={{
-                duration: 500,
+                duration: 200,
                 easing: 'cubic-bezier(0.18, 0.67, 0.6, 1.22)',
               }}
             >
               {activeCandidate ? (
-                <div className="rotate-3 scale-105 shadow-2xl">
-                  <StageCandidateCard
-                    candidate={activeCandidate}
-                  />
-                </div>
+                <StageCandidateCard
+                  candidate={activeCandidate}
+                  jobTitle={getJobTitle(activeCandidate.jobId)}
+                  isDragOverlay={true}
+                />
               ) : null}
             </DragOverlay>
           </DndContext>

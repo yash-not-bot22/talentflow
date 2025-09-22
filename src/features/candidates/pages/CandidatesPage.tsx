@@ -4,14 +4,12 @@ import { useCandidates, useCandidateStages, useCandidateOperations } from '../ho
 import { useJobs } from '../../jobs/hooks/useJobs';
 import type { Candidate } from '../../../db';
 import {
-  PlusIcon,
   UserIcon,
   EnvelopeIcon,
   CalendarIcon,
   Squares2X2Icon,
   ListBulletIcon,
   XMarkIcon,
-  BriefcaseIcon,
   ClockIcon,
   TableCellsIcon,
 } from '@heroicons/react/24/outline';
@@ -165,7 +163,7 @@ const CandidateCardView: React.FC<CandidateCardProps> = ({ candidate, getStageIn
           <span>{candidate.history.length} changes</span>
         </div>
         <div className="flex items-center">
-          <BriefcaseIcon className="h-4 w-4 mr-1" />
+          <ClockIcon className="h-4 w-4 mr-1" />
           <span>{candidate.notes.length} notes</span>
         </div>
       </div>
@@ -344,16 +342,6 @@ export function CandidatesPage() {
                     <span className="text-sm font-medium">Candidate Stage Board</span>
                   </button>
                 </div>
-
-
-                <button className="inline-flex items-center px-4 py-2 border border-gray-300 dark:border-slate-600 shadow-sm text-sm font-medium rounded-lg text-gray-700 dark:text-gray-300 bg-white dark:bg-slate-700 hover:bg-gray-50 dark:hover:bg-slate-600 transition-colors">
-                  <BriefcaseIcon className="h-4 w-4 mr-2" />
-                  Import
-                </button>
-                <button className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-lg text-white bg-blue-600 hover:bg-blue-700 transition-colors">
-                  <PlusIcon className="h-4 w-4 mr-2" />
-                  Add Candidate
-                </button>
               </div>
             </div>
 
@@ -433,12 +421,6 @@ export function CandidatesPage() {
                   : 'Get started by adding your first candidate to the system'
                 }
               </p>
-              {!stageFilter && (
-                <button className="inline-flex items-center px-6 py-3 border border-transparent text-sm font-medium rounded-lg text-white bg-blue-600 hover:bg-blue-700 transition-colors shadow-sm">
-                  <PlusIcon className="h-4 w-4 mr-2" />
-                  Add Your First Candidate
-                </button>
-              )}
             </div>
           ) : (
             <div className="p-4">

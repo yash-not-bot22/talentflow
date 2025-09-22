@@ -14,13 +14,14 @@ import { assessmentsApi, type SubmissionData } from '../../../api/assessmentsApi
 import { jobsApi } from '../../../api/jobsApi';
 import { LoadingSpinner } from '../../../components/LoadingSpinner';
 import { useNotifications } from '../../../hooks/useNotifications';
+import { Notification } from '../../../components/Notification';
 import { CandidateSearchModal } from '../components/CandidateSearchModal';
 import type { Candidate } from '../../../db';
 
 export function AssessmentDetail() {
   const { jobId } = useParams<{ jobId: string }>();
   const navigate = useNavigate();
-  const { addNotification } = useNotifications();
+  const { addNotification, notifications, removeNotification } = useNotifications();
   
   const [assessment, setAssessment] = useState<Assessment | null>(null);
   const [job, setJob] = useState<Job | null>(null);
@@ -106,6 +107,14 @@ export function AssessmentDetail() {
 
     // Check if candidate is selected
     if (!selectedCandidate) {
+      console.log('🚨 No candidate selected, showing candidate modal');
+      // Scroll to top so user can see the notification
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      addNotification({
+        type: 'warning',
+        title: 'No Candidate Selected',
+        message: 'Please select a candidate before submitting the assessment.'
+      });
       setShowCandidateModal(true);
       return;
     }
@@ -115,35 +124,56 @@ export function AssessmentDetail() {
     const requiredQuestions = allQuestions.filter(q => q.required);
     const missingAnswers: string[] = [];
 
+    console.log('🔍 Validating assessment submission:');
+    console.log(`- Total questions: ${allQuestions.length}`);
+    console.log(`- Required questions: ${requiredQuestions.length}`);
+    console.log('- Current responses:', candidateResponses);
+
     for (const question of requiredQuestions) {
       const answer = candidateResponses[question.id];
+      console.log(`- Question ${question.id} (${question.text.slice(0, 50)}...): ${JSON.stringify(answer)}`);
+      
       if (answer === null || answer === undefined || answer === '' || 
           (Array.isArray(answer) && answer.length === 0)) {
         missingAnswers.push(question.id);
+        console.log(`  ❌ Missing answer for question ${question.id}`);
+      } else {
+        console.log(`  ✅ Answer provided for question ${question.id}`);
       }
     }
 
+    console.log(`- Missing answers: ${missingAnswers.length}`, missingAnswers);
+
     // If there are missing required answers, scroll to first missing field and show error
     if (missingAnswers.length > 0) {
-      // Find the first missing question element and scroll to it
-      const firstMissingElement = document.getElementById(`question-${missingAnswers[0]}`);
-      if (firstMissingElement) {
-        firstMissingElement.scrollIntoView({ 
-          behavior: 'smooth', 
-          block: 'center' 
-        });
-        // Add a visual highlight to the missing field
-        firstMissingElement.classList.add('ring-2', 'ring-red-500', 'ring-opacity-50');
-        setTimeout(() => {
-          firstMissingElement.classList.remove('ring-2', 'ring-red-500', 'ring-opacity-50');
-        }, 3000);
-      }
+      console.log('🚨 Showing validation error notification');
       
+      // Scroll to top first so user can see the notification
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      
+      // Show notification
       addNotification({
         type: 'error',
         title: 'Required Fields Missing',
         message: `Please fill in all required fields before submitting. ${missingAnswers.length} field(s) are missing.`
       });
+      
+      // Then scroll to the first missing field after a brief delay
+      setTimeout(() => {
+        const firstMissingElement = document.getElementById(`question-${missingAnswers[0]}`);
+        if (firstMissingElement) {
+          firstMissingElement.scrollIntoView({ 
+            behavior: 'smooth', 
+            block: 'center' 
+          });
+          // Add a visual highlight to the missing field
+          firstMissingElement.classList.add('ring-2', 'ring-red-500', 'ring-opacity-50');
+          setTimeout(() => {
+            firstMissingElement.classList.remove('ring-2', 'ring-red-500', 'ring-opacity-50');
+          }, 3000);
+        }
+      }, 1000); // Wait 1 second for user to see the notification
+      
       return;
     }
 
@@ -587,6 +617,17 @@ export function AssessmentDetail() {
         onSelectCandidate={handleCandidateSelect}
         jobId={parseInt(jobId || '0')}
       />
+
+      {/* Notifications */}
+      {notifications.map((notification) => (
+        <Notification
+          key={notification.id}
+          type={notification.type}
+          title={notification.title}
+          message={notification.message}
+          onClose={() => removeNotification(notification.id)}
+        />
+      ))}
       </div>
     </div>
   );

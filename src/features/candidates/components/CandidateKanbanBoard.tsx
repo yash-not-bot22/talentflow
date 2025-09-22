@@ -70,8 +70,10 @@ function CandidateCard({ candidate, isActive = false, isDragging = false }: Cand
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
-    opacity: isDragging ? 0.5 : 1,
-  };
+    opacity: isDragging ? 0.3 : 1,
+    cursor: isDragging ? 'grabbing' : 'grab',
+    pointerEvents: isDragging ? 'none' : 'auto',
+  } as React.CSSProperties;
 
   const formatDate = (timestamp: number) => {
     return new Date(timestamp).toLocaleDateString('en-US', {
@@ -91,10 +93,10 @@ function CandidateCard({ candidate, isActive = false, isDragging = false }: Cand
       {...attributes}
       {...listeners}
       className={`
-        bg-white dark:bg-slate-800 rounded-lg border dark:border-slate-600 shadow-sm p-3 cursor-grab hover:shadow-md transition-all duration-200
+        bg-white dark:bg-slate-800 rounded-lg border dark:border-slate-600 shadow-sm p-3 transition-all duration-200
         ${isActive ? 'ring-2 ring-blue-500 shadow-lg' : ''}
         ${isOver ? 'ring-2 ring-green-400' : ''}
-        ${isDragging ? 'rotate-2 scale-105' : ''}
+        ${isDragging ? 'rotate-2 scale-105 cursor-grabbing' : 'cursor-grab hover:shadow-md'}
       `}
     >
       {/* Candidate Header */}
@@ -440,13 +442,6 @@ export function CandidateKanbanBoard({
     }
   };
 
-  const activeCandidateCard = activeId ? (
-    <CandidateCard 
-      candidate={candidate} 
-      isDragging 
-    />
-  ) : null;
-
   return (
     <div className="w-full">
       {/* Progress Bar */}
@@ -514,8 +509,27 @@ export function CandidateKanbanBoard({
           </div>
         </div>
 
-        <DragOverlay>
-          {activeCandidateCard}
+        <DragOverlay
+          style={{
+            cursor: 'grabbing',
+          }}
+          dropAnimation={{
+            duration: 200,
+            easing: 'cubic-bezier(0.18, 0.67, 0.6, 1.22)',
+          }}
+        >
+          {activeId ? (
+            <div
+              style={{
+                cursor: 'grabbing',
+                transform: 'rotate(3deg)',
+                pointerEvents: 'none',
+              }}
+              className="shadow-2xl scale-105"
+            >
+              <CandidateCard candidate={candidate} isDragging />
+            </div>
+          ) : null}
         </DragOverlay>
       </DndContext>
 

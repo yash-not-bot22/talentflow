@@ -101,14 +101,7 @@ export const candidatesHandlers = [
 
   // GET /candidates/:id
   http.get('/api/candidates/:id', async ({ params }) => {
-    await delay();
     
-    if (shouldError()) {
-      return new HttpResponse(
-        JSON.stringify({ error: 'Failed to fetch candidate' }),
-        { status: 500, headers: { 'Content-Type': 'application/json' } }
-      );
-    }
 
     try {
       const candidateId = parseInt(params.id as string);

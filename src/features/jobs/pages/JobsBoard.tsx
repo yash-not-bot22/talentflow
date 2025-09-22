@@ -35,9 +35,11 @@ import {
   CalendarIcon,
   ChevronLeftIcon,
   ChevronRightIcon,
-  Bars3Icon,
+  
   DocumentTextIcon,
   CheckIcon,
+  ChevronUpIcon,
+  ChevronDownIcon,
 } from '@heroicons/react/24/outline';
 import type { Job } from '../../../db';
 import { Button, StatusPill, GradientBadge } from '../../../components/ui';
@@ -106,7 +108,10 @@ function SortableJobRow({ job, openEditModal, openViewModal, updateJob, formatDa
             className="cursor-grab active:cursor-grabbing"
             title="Drag to reorder"
           >
-            <Bars3Icon className="h-5 w-5" />
+            <div className="flex flex-col space-y-0.5">
+              <ChevronUpIcon className="h-3 w-3" />
+              <ChevronDownIcon className="h-3 w-3" />
+            </div>
           </Button>
           <div>
             <div className="text-sm font-medium text-gray-900 dark:text-slate-100">{job.title}</div>
@@ -238,7 +243,10 @@ function SortableJobCard({ job, openEditModal, openViewModal, updateJob, formatD
             className="cursor-grab active:cursor-grabbing mt-1"
             title="Drag to reorder"
           >
-            <Bars3Icon className="h-4 w-4" />
+            <div className="flex flex-col space-y-0.5">
+              <ChevronUpIcon className="h-3 w-3" />
+              <ChevronDownIcon className="h-3 w-3" />
+            </div>
           </Button>
           <div className="flex-1">
             <h3 className="text-lg font-medium text-gray-900 dark:text-slate-100 mb-1">{job.title}</h3>

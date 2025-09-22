@@ -26,6 +26,8 @@ import {
   DocumentCheckIcon,
   CheckIcon,
   XCircleIcon,
+  ChevronUpIcon,
+  ChevronDownIcon,
 } from '@heroicons/react/24/outline';
 import {
   CheckCircleIcon as CheckCircleSolidIcon,
@@ -86,20 +88,30 @@ function CandidateCard({ candidate, isActive = false, isDragging = false, onClic
     <div
       ref={setNodeRef}
       style={style}
-      {...attributes}
-      {...listeners}
       onClick={(e) => {
         e.stopPropagation();
         onClick?.(candidate);
       }}
       className={`
-        bg-white rounded-lg border shadow-sm p-3 cursor-grab hover:shadow-md transition-all duration-200
+        bg-white rounded-lg border shadow-sm p-3 hover:shadow-md transition-all duration-200
         ${isActive ? 'ring-2 ring-blue-500 shadow-lg' : ''}
         ${isDragging ? 'rotate-1 scale-105' : ''}
       `}
     >
-      {/* Candidate Header */}
+      {/* Candidate Header with Drag Handle */}
       <div className="flex items-center space-x-3 mb-2">
+        <button
+          {...attributes}
+          {...listeners}
+          className="cursor-grab active:cursor-grabbing p-1 rounded hover:bg-gray-100 transition-colors"
+          title="Drag to move candidate"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <div className="flex flex-col space-y-0.5">
+            <ChevronUpIcon className="h-3 w-3 text-gray-400" />
+            <ChevronDownIcon className="h-3 w-3 text-gray-400" />
+          </div>
+        </button>
         <div className="flex-shrink-0">
           <div className="h-8 w-8 bg-gradient-to-br from-blue-400 to-purple-500 rounded-full flex items-center justify-center">
             <span className="text-white text-xs font-semibold">
@@ -300,29 +312,39 @@ export function MultiCandidateKanbanBoard({
     candidates: candidates.filter(candidate => candidate.stage === stageDef.id),
   }));
 
+  // Drag and Drop Handlers
   const handleDragStart = (event: DragStartEvent) => {
-    setActiveId(event.active.id.toString());
+    setActiveId(event.active.id as string);
+    console.log('Drag started for candidate ID:', event.active.id);
   };
 
   const handleDragEnd = async (event: DragEndEvent) => {
     const { active, over } = event;
     setActiveId(null);
 
-    if (!over) return;
+    if (!over || active.id === over.id) {
+      return;
+    }
 
     const candidateId = parseInt(active.id.toString());
     const overStage = over.id as Candidate['stage'];
     
     const candidate = candidates.find(c => c.id === candidateId);
-    if (!candidate || candidate.stage === overStage) return;
+    if (!candidate || candidate.stage === overStage) {
+      return;
+    }
+
+    console.log('Moving candidate:', {
+      candidate: { id: candidate.id, name: candidate.name, currentStage: candidate.stage },
+      newStage: overStage
+    });
 
     try {
       setIsUpdating(true);
-      console.log(`🔄 Moving candidate ${candidateId} to stage ${overStage}`);
       await onStageChange(candidateId, overStage);
-      console.log(`✅ Successfully moved candidate to ${overStage}`);
+      console.log('Successfully moved candidate to:', overStage);
     } catch (error) {
-      console.error(`❌ Failed to move candidate:`, error);
+      console.error('Failed to move candidate:', error);
     } finally {
       setIsUpdating(false);
     }
