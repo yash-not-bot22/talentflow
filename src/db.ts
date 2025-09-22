@@ -29,7 +29,7 @@ export interface Candidate {
 
 export type QuestionType = 'single-choice' | 'multi-choice' | 'short-text' | 'long-text' | 'numeric' | 'file-upload';
 
-export interface Question {
+export interface BaseQuestion {
   id: string; // UUID (crypto.randomUUID())
   type: QuestionType;
   text: string; // e.g., "What is React?"
@@ -39,8 +39,11 @@ export interface Question {
   min?: number; // For numeric
   max?: number; // For numeric
   conditional?: boolean; // If true, this question can have sub-questions
-  subQuestions?: Question[]; // Sub-questions that appear when this question is answered
   dependsOn?: { questionId: string; value: string | number | string[] }; // Conditional logic
+}
+
+export interface Question extends BaseQuestion {
+  subQuestions?: BaseQuestion[]; // Sub-questions that appear when this question is answered
 }
 
 export interface Section {

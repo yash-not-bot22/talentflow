@@ -172,6 +172,7 @@ function generateSampleAssessment(jobId: number): Assessment {
           text: 'What is your primary programming language?',
           options: ['JavaScript', 'Python', 'Java', 'TypeScript', 'Go', 'Rust'],
           required: true,
+          conditional: false,
         },
         {
           id: crypto.randomUUID(),
@@ -179,6 +180,7 @@ function generateSampleAssessment(jobId: number): Assessment {
           text: 'Which frameworks have you worked with? (Select all that apply)',
           options: ['React', 'Vue', 'Angular', 'Node.js', 'Express', 'Django', 'Flask'],
           required: true,
+          conditional: false,
         },
         {
           id: crypto.randomUUID(),
@@ -187,6 +189,7 @@ function generateSampleAssessment(jobId: number): Assessment {
           min: 0,
           max: 50,
           required: true,
+          conditional: false,
         },
         {
           id: crypto.randomUUID(),
@@ -194,6 +197,7 @@ function generateSampleAssessment(jobId: number): Assessment {
           text: 'What is your favorite development tool?',
           maxLength: 100,
           required: false,
+          conditional: false,
         },
       ],
     },
@@ -204,28 +208,35 @@ function generateSampleAssessment(jobId: number): Assessment {
         {
           id: crypto.randomUUID(),
           type: 'long-text',
-          text: 'Describe a challenging technical problem you solved recently and your approach.',
+          text: 'Describe a challenging project you worked on and how you overcame the difficulties.',
           maxLength: 1000,
           required: true,
+          conditional: false,
         },
         {
           id: crypto.randomUUID(),
           type: 'single-choice',
-          text: 'When debugging, what is your first step?',
-          options: [
-            'Read error messages carefully',
-            'Add console.log statements',
-            'Use a debugger',
-            'Search Stack Overflow',
-            'Ask a colleague'
-          ],
+          text: 'How do you prefer to work?',
+          options: ['Independently', 'In a small team', 'In a large team', 'Flexible approach'],
           required: true,
+          conditional: true,
+          subQuestions: [
+            {
+              id: crypto.randomUUID(),
+              type: 'short-text',
+              text: 'Can you elaborate on why this work style suits you best?',
+              maxLength: 200,
+              required: false,
+              conditional: false,
+            }
+          ],
         },
         {
           id: crypto.randomUUID(),
           type: 'file-upload',
-          text: 'Upload your portfolio or code samples (optional)',
+          text: 'Please upload your resume or portfolio (optional)',
           required: false,
+          conditional: false,
         },
       ],
     },
@@ -239,6 +250,7 @@ function generateSampleAssessment(jobId: number): Assessment {
           text: 'Do you prefer working in a team or independently?',
           options: ['Team', 'Independently', 'Both equally'],
           required: true,
+          conditional: false,
         },
         {
           id: crypto.randomUUID(),
@@ -246,6 +258,7 @@ function generateSampleAssessment(jobId: number): Assessment {
           text: 'What motivates you in your work?',
           maxLength: 500,
           required: true,
+          conditional: false,
         },
         {
           id: crypto.randomUUID(),
@@ -253,6 +266,7 @@ function generateSampleAssessment(jobId: number): Assessment {
           text: 'Are you interested in remote work?',
           options: ['Yes', 'No', 'Hybrid preferred'],
           required: true,
+          conditional: false,
         },
       ],
     },
