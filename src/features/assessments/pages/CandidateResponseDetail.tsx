@@ -75,39 +75,39 @@ export function CandidateResponseDetail() {
     const answer = response?.responses[questionId];
     
     if (answer === null || answer === undefined || answer === '') {
-      return <span className="text-gray-400 italic">No answer provided</span>;
+      return <span className="text-gray-400 dark:text-gray-500 italic">No answer provided</span>;
     }
 
     switch (questionType) {
       case 'single-choice':
-        return <span className="text-gray-900 font-medium">{String(answer)}</span>;
+        return <span className="text-gray-900 dark:text-white font-medium">{String(answer)}</span>;
       
       case 'multi-choice':
         if (Array.isArray(answer)) {
           return (
             <div className="flex flex-wrap gap-2">
               {answer.map((choice, index) => (
-                <span key={index} className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                <span key={index} className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 dark:bg-blue-900/50 text-blue-800 dark:text-blue-200">
                   {choice}
                 </span>
               ))}
             </div>
           );
         }
-        return <span className="text-gray-900">{String(answer)}</span>;
+        return <span className="text-gray-900 dark:text-white">{String(answer)}</span>;
       
       case 'short-text':
       case 'long-text':
-        return <div className="text-gray-900 whitespace-pre-wrap">{String(answer)}</div>;
+        return <div className="text-gray-900 dark:text-white whitespace-pre-wrap">{String(answer)}</div>;
       
       case 'numeric':
-        return <span className="text-gray-900 font-mono">{String(answer)}</span>;
+        return <span className="text-gray-900 dark:text-white font-mono">{String(answer)}</span>;
       
       case 'file-upload':
-        return <span className="text-blue-600 underline">{String(answer)}</span>;
+        return <span className="text-blue-600 dark:text-blue-400 underline">{String(answer)}</span>;
       
       default:
-        return <span className="text-gray-900">{String(answer)}</span>;
+        return <span className="text-gray-900 dark:text-white">{String(answer)}</span>;
     }
   };
 
@@ -127,16 +127,16 @@ export function CandidateResponseDetail() {
         <div className="mb-6">
           <button
             onClick={() => navigate(`/jobs/${jobId}`)}
-            className="inline-flex items-center text-blue-600 hover:text-blue-700 font-medium"
+            className="inline-flex items-center text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 font-medium"
           >
             <ArrowLeftIcon className="h-4 w-4 mr-2" />
             Back to Job Details
           </button>
         </div>
         
-        <div className="bg-red-50 border border-red-200 rounded-md p-4">
-          <h3 className="text-red-800 font-medium">Error</h3>
-          <p className="text-red-700 text-sm mt-1">{error || 'Failed to load response details'}</p>
+        <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-md p-4">
+          <h3 className="text-red-800 dark:text-red-400 font-medium">Error</h3>
+          <p className="text-red-700 dark:text-red-300 text-sm mt-1">{error || 'Failed to load response details'}</p>
         </div>
       </div>
     );
@@ -148,7 +148,7 @@ export function CandidateResponseDetail() {
       <div className="mb-6">
         <button
           onClick={() => navigate(`/jobs/${jobId}`)}
-          className="inline-flex items-center text-blue-600 hover:text-blue-700 font-medium"
+          className="inline-flex items-center text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 font-medium"
         >
           <ArrowLeftIcon className="h-4 w-4 mr-2" />
           Back to Job Details
@@ -156,7 +156,7 @@ export function CandidateResponseDetail() {
       </div>
 
       {/* Response Header */}
-      <div className="bg-white shadow-lg rounded-lg overflow-hidden mb-6">
+      <div className="bg-white dark:bg-slate-800 shadow-lg rounded-lg overflow-hidden mb-6">
         <div className="bg-gradient-to-r from-blue-600 to-purple-600 px-6 py-8">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
@@ -182,21 +182,21 @@ export function CandidateResponseDetail() {
         </div>
 
         {/* Response Stats */}
-        <div className="bg-gray-50 px-6 py-4 border-b">
+        <div className="bg-gray-50 dark:bg-slate-700 px-6 py-4 border-b dark:border-slate-600">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="text-center">
-              <div className="text-2xl font-bold text-gray-900">{Object.keys(response.responses).length}</div>
-              <div className="text-sm text-gray-500">Questions Answered</div>
+              <div className="text-2xl font-bold text-gray-900 dark:text-white">{Object.keys(response.responses).length}</div>
+              <div className="text-sm text-gray-500 dark:text-gray-400">Questions Answered</div>
             </div>
             <div className="text-center">
-              <div className="text-2xl font-bold text-gray-900">{assessment.sections.length}</div>
-              <div className="text-sm text-gray-500">Sections Completed</div>
+              <div className="text-2xl font-bold text-gray-900 dark:text-white">{assessment.sections.length}</div>
+              <div className="text-sm text-gray-500 dark:text-gray-400">Sections Completed</div>
             </div>
             <div className="text-center">
-              <div className="text-2xl font-bold text-blue-600">
+              <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">
                 {Math.round((Object.keys(response.responses).length / assessment.sections.reduce((total, section) => total + section.questions.length, 0)) * 100)}%
               </div>
-              <div className="text-sm text-gray-500">Completion Rate</div>
+              <div className="text-sm text-gray-500 dark:text-gray-400">Completion Rate</div>
             </div>
           </div>
         </div>
@@ -205,10 +205,10 @@ export function CandidateResponseDetail() {
       {/* Assessment Responses */}
       <div className="space-y-6">
         {assessment.sections.map((section, sectionIndex) => (
-          <div key={section.id} className="bg-white shadow-sm rounded-lg overflow-hidden">
-            <div className="bg-gray-50 px-6 py-4 border-b">
-              <h2 className="text-lg font-semibold text-gray-900">{section.name}</h2>
-              <p className="text-sm text-gray-500 mt-1">
+          <div key={section.id} className="bg-white dark:bg-slate-800 shadow-sm rounded-lg overflow-hidden">
+            <div className="bg-gray-50 dark:bg-slate-700 px-6 py-4 border-b dark:border-slate-600">
+              <h2 className="text-lg font-semibold text-gray-900 dark:text-white">{section.name}</h2>
+              <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
                 Section {sectionIndex + 1} • {section.questions.length} question{section.questions.length !== 1 ? 's' : ''}
               </p>
             </div>
@@ -216,31 +216,31 @@ export function CandidateResponseDetail() {
             <div className="p-6">
               <div className="space-y-6">
                 {section.questions.map((question, questionIndex) => (
-                  <div key={question.id} className="border-b border-gray-100 pb-6 last:border-b-0 last:pb-0">
+                  <div key={question.id} className="border-b border-gray-100 dark:border-slate-600 pb-6 last:border-b-0 last:pb-0">
                     <div className="flex items-start justify-between mb-3">
                       <div className="flex-1">
                         <div className="flex items-center space-x-2 mb-2">
-                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 dark:bg-slate-600 text-gray-800 dark:text-gray-200">
                             Q{questionIndex + 1}
                           </span>
-                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 dark:bg-blue-900/50 text-blue-800 dark:text-blue-200">
                             {question.type}
                           </span>
                           {question.required && (
-                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 dark:bg-red-900/50 text-red-800 dark:text-red-200">
                               Required
                             </span>
                           )}
                         </div>
-                        <h3 className="text-base font-medium text-gray-900 mb-3">{question.text}</h3>
+                        <h3 className="text-base font-medium text-gray-900 dark:text-white mb-3">{question.text}</h3>
                         
                         {/* Show options for choice questions */}
                         {(question.type === 'single-choice' || question.type === 'multi-choice') && question.options && (
                           <div className="mb-3">
-                            <p className="text-sm text-gray-600 mb-2">Available options:</p>
+                            <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">Available options:</p>
                             <div className="flex flex-wrap gap-2">
                               {question.options.map((option, optionIndex) => (
-                                <span key={optionIndex} className="inline-flex items-center px-2 py-1 rounded border text-xs text-gray-600 bg-gray-50">
+                                <span key={optionIndex} className="inline-flex items-center px-2 py-1 rounded border text-xs text-gray-600 dark:text-gray-300 bg-gray-50 dark:bg-slate-600 border-gray-200 dark:border-slate-500">
                                   {option}
                                 </span>
                               ))}
@@ -250,8 +250,8 @@ export function CandidateResponseDetail() {
                       </div>
                     </div>
                     
-                    <div className="bg-gray-50 rounded-lg p-4">
-                      <div className="text-sm font-medium text-gray-700 mb-2">Candidate's Response:</div>
+                    <div className="bg-gray-50 dark:bg-slate-700/50 rounded-lg p-4">
+                      <div className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Candidate's Response:</div>
                       <div className="text-sm">
                         {renderQuestionResponse(question.id, question.type)}
                       </div>

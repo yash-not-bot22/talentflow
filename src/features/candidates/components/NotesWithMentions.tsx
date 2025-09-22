@@ -53,14 +53,14 @@ function MentionSuggestions({ query, onSelect, position, isVisible }: MentionSug
 
   return (
     <div
-      className="absolute z-50 bg-white border border-gray-200 rounded-lg shadow-lg py-2 max-h-48 overflow-y-auto"
+      className="absolute z-50 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-600 rounded-lg shadow-lg py-2 max-h-48 overflow-y-auto"
       style={{ top: position.top, left: position.left, minWidth: '200px' }}
     >
       {filteredUsers.map((user) => (
         <button
           key={user.id}
           onClick={() => onSelect(user)}
-          className="w-full px-4 py-2 text-left hover:bg-gray-50 focus:bg-gray-50 focus:outline-none"
+          className="w-full px-4 py-2 text-left hover:bg-gray-50 dark:hover:bg-slate-700 focus:bg-gray-50 dark:focus:bg-slate-700 focus:outline-none text-gray-900 dark:text-white"
         >
           <div className="flex items-center space-x-3">
             <div className="flex-shrink-0">
@@ -71,7 +71,7 @@ function MentionSuggestions({ query, onSelect, position, isVisible }: MentionSug
               </div>
             </div>
             <div className="min-w-0 flex-1">
-              <p className="text-sm font-medium text-gray-900">{user.name}</p>
+              <p className="text-sm font-medium text-gray-900 dark:text-white">{user.name}</p>
               <p className="text-xs text-gray-500">{user.email}</p>
             </div>
           </div>
@@ -92,7 +92,7 @@ function renderNoteWithMentions(text: string) {
       return (
         <span
           key={index}
-          className="inline-flex items-center px-2 py-1 rounded-md bg-blue-100 text-blue-800 text-sm font-medium mr-1"
+          className="inline-flex items-center px-2 py-1 rounded-md bg-blue-100 dark:bg-blue-900/50 text-blue-800 dark:text-blue-400 text-sm font-medium mr-1"
         >
           <AtSymbolIcon className="h-3 w-3 mr-1" />
           {part}
@@ -235,7 +235,7 @@ export function NotesWithMentions({ notes, onAddNote }: NotesWithMentionsProps) 
             id="note"
             name="note"
             rows={4}
-            className="block w-full resize-none border-0 py-3 px-4 text-gray-900 placeholder-gray-500 focus:ring-0 focus:outline-none"
+            className="block w-full resize-none border-0 py-3 px-4 text-gray-900 dark:text-white bg-white dark:bg-slate-800 placeholder-gray-500 dark:placeholder-gray-400 focus:ring-0 focus:outline-none"
             placeholder="Add a note... Use @username to mention team members"
             value={newNote}
             onChange={handleInputChange}
@@ -251,13 +251,13 @@ export function NotesWithMentions({ notes, onAddNote }: NotesWithMentionsProps) 
           />
 
           {/* Toolbar */}
-          <div className="flex items-center justify-between py-2 px-4 bg-gray-50">
-            <div className="flex items-center space-x-2 text-sm text-gray-500">
+          <div className="flex items-center justify-between py-2 px-4 bg-gray-50 dark:bg-slate-700">
+            <div className="flex items-center space-x-2 text-sm text-gray-500 dark:text-gray-400">
               <AtSymbolIcon className="h-4 w-4" />
               <span>Use @ to mention team members</span>
             </div>
             <div className="flex items-center space-x-2">
-              <kbd className="px-2 py-1 text-xs font-semibold text-gray-800 bg-gray-100 border border-gray-200 rounded">
+              <kbd className="px-2 py-1 text-xs font-semibold text-gray-800 dark:text-gray-300 bg-gray-100 dark:bg-slate-600 border border-gray-200 dark:border-slate-500 rounded">
                 Cmd+Enter
               </kbd>
               <button
@@ -277,15 +277,15 @@ export function NotesWithMentions({ notes, onAddNote }: NotesWithMentionsProps) 
       <div className="space-y-4">
         {notes.length === 0 ? (
           <div className="text-center py-8">
-            <ChatBubbleLeftIcon className="mx-auto h-12 w-12 text-gray-400" />
-            <h3 className="mt-2 text-sm font-medium text-gray-900">No notes yet</h3>
-            <p className="mt-1 text-sm text-gray-500">
+            <ChatBubbleLeftIcon className="mx-auto h-12 w-12 text-gray-400 dark:text-gray-500" />
+            <h3 className="mt-2 text-sm font-medium text-gray-900 dark:text-white">No notes yet</h3>
+            <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
               Start the conversation by adding a note above.
             </p>
           </div>
         ) : (
           notes.map((note, index) => (
-            <div key={index} className="bg-gray-50 rounded-lg p-4 border border-gray-100">
+            <div key={index} className="bg-gray-50 dark:bg-slate-700 rounded-lg p-4 border border-gray-100 dark:border-slate-600">
               <div className="flex items-start space-x-3">
                 <div className="flex-shrink-0">
                   <div className="h-8 w-8 bg-gradient-to-r from-green-400 to-blue-500 rounded-full flex items-center justify-center">
@@ -293,10 +293,10 @@ export function NotesWithMentions({ notes, onAddNote }: NotesWithMentionsProps) 
                   </div>
                 </div>
                 <div className="min-w-0 flex-1">
-                  <div className="text-sm text-gray-900 leading-relaxed">
+                  <div className="text-sm text-gray-900 dark:text-white leading-relaxed">
                     {renderNoteWithMentions(note.text)}
                   </div>
-                  <div className="mt-2 flex items-center text-xs text-gray-500">
+                  <div className="mt-2 flex items-center text-xs text-gray-500 dark:text-gray-400">
                     <CalendarIcon className="h-3 w-3 mr-1" />
                     {formatDate(note.timestamp)}
                   </div>
@@ -309,11 +309,11 @@ export function NotesWithMentions({ notes, onAddNote }: NotesWithMentionsProps) 
 
       {/* Quick Mention Examples */}
       {notes.length === 0 && (
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-          <h4 className="text-sm font-medium text-blue-900 mb-2">💡 Pro Tips:</h4>
-          <ul className="text-sm text-blue-800 space-y-1">
-            <li>• Type <code className="bg-blue-100 px-1 rounded">@</code> to mention team members</li>
-            <li>• Use <kbd className="bg-blue-100 px-1 rounded text-xs">Cmd+Enter</kbd> to quickly add notes</li>
+        <div className="bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
+          <h4 className="text-sm font-medium text-blue-900 dark:text-blue-300 mb-2">💡 Pro Tips:</h4>
+          <ul className="text-sm text-blue-800 dark:text-blue-400 space-y-1">
+            <li>• Type <code className="bg-blue-100 dark:bg-blue-800 px-1 rounded">@</code> to mention team members</li>
+            <li>• Use <kbd className="bg-blue-100 dark:bg-blue-800 px-1 rounded text-xs">Cmd+Enter</kbd> to quickly add notes</li>
             <li>• Mentions will notify the mentioned user</li>
           </ul>
         </div>

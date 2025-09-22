@@ -62,14 +62,14 @@ export function CandidateSearchModal({ isOpen, onClose, onSelectCandidate, jobId
 
   const getStageColor = (stage: Candidate['stage']) => {
     const colors = {
-      applied: 'bg-blue-100 text-blue-700',
-      screen: 'bg-yellow-100 text-yellow-700',
-      tech: 'bg-purple-100 text-purple-700',
-      offer: 'bg-green-100 text-green-700',
-      hired: 'bg-emerald-100 text-emerald-700',
-      rejected: 'bg-red-100 text-red-700',
+      applied: 'bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300',
+      screen: 'bg-yellow-100 dark:bg-yellow-900/50 text-yellow-700 dark:text-yellow-300',
+      tech: 'bg-purple-100 dark:bg-purple-900/50 text-purple-700 dark:text-purple-300',
+      offer: 'bg-green-100 dark:bg-green-900/50 text-green-700 dark:text-green-300',
+      hired: 'bg-emerald-100 dark:bg-emerald-900/50 text-emerald-700 dark:text-emerald-300',
+      rejected: 'bg-red-100 dark:bg-red-900/50 text-red-700 dark:text-red-300',
     };
-    return colors[stage] || 'bg-gray-100 text-gray-700';
+    return colors[stage] || 'bg-gray-100 dark:bg-slate-600 text-gray-700 dark:text-gray-300';
   };
 
   const getStageName = (stage: Candidate['stage']) => {
@@ -89,30 +89,30 @@ export function CandidateSearchModal({ isOpen, onClose, onSelectCandidate, jobId
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto">
       <div className="flex min-h-screen items-center justify-center p-4">
-        <div className="fixed inset-0 bg-black bg-opacity-25" onClick={onClose} />
+        <div className="fixed inset-0 bg-black bg-opacity-25 dark:bg-black dark:bg-opacity-50" onClick={onClose} />
         
-        <div className="relative bg-white rounded-lg shadow-lg max-w-2xl w-full max-h-[80vh] overflow-hidden">
+        <div className="relative bg-white dark:bg-slate-800 rounded-lg shadow-lg max-w-2xl w-full max-h-[80vh] overflow-hidden">
           {/* Header */}
-          <div className="flex items-center justify-between p-6 border-b border-gray-200">
-            <h3 className="text-lg font-medium text-gray-900">Select Candidate</h3>
+          <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-slate-600">
+            <h3 className="text-lg font-medium text-gray-900 dark:text-white">Select Candidate</h3>
             <button
               onClick={onClose}
-              className="text-gray-400 hover:text-gray-500"
+              className="text-gray-400 hover:text-gray-500 dark:text-gray-500 dark:hover:text-gray-300"
             >
               <XMarkIcon className="h-6 w-6" />
             </button>
           </div>
 
           {/* Search */}
-          <div className="p-4 border-b border-gray-200">
+          <div className="p-4 border-b border-gray-200 dark:border-slate-600">
             <div className="relative">
-              <MagnifyingGlassIcon className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+              <MagnifyingGlassIcon className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400 dark:text-gray-500" />
               <input
                 type="text"
                 placeholder="Search candidates by name or email..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               />
             </div>
           </div>
@@ -121,16 +121,16 @@ export function CandidateSearchModal({ isOpen, onClose, onSelectCandidate, jobId
           <div className="overflow-y-auto max-h-96">
             {loading ? (
               <div className="flex items-center justify-center p-8">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-                <span className="ml-2 text-gray-600">Loading candidates...</span>
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 dark:border-blue-400"></div>
+                <span className="ml-2 text-gray-600 dark:text-gray-400">Loading candidates...</span>
               </div>
             ) : filteredCandidates.length === 0 ? (
               <div className="text-center p-8">
-                <UserIcon className="h-12 w-12 text-gray-300 mx-auto mb-4" />
-                <h3 className="text-sm font-medium text-gray-900 mb-2">
+                <UserIcon className="h-12 w-12 text-gray-300 dark:text-gray-600 mx-auto mb-4" />
+                <h3 className="text-sm font-medium text-gray-900 dark:text-white mb-2">
                   {searchQuery ? 'No matching candidates' : 'No candidates found'}
                 </h3>
-                <p className="text-sm text-gray-500">
+                <p className="text-sm text-gray-500 dark:text-gray-400">
                   {searchQuery 
                     ? 'Try adjusting your search terms.' 
                     : 'There are no candidates for this job yet.'
@@ -138,34 +138,34 @@ export function CandidateSearchModal({ isOpen, onClose, onSelectCandidate, jobId
                 </p>
               </div>
             ) : (
-              <div className="divide-y divide-gray-200">
+              <div className="divide-y divide-gray-200 dark:divide-slate-600">
                 {filteredCandidates.map((candidate) => (
                   <button
                     key={candidate.id}
                     onClick={() => handleSelectCandidate(candidate)}
-                    className="w-full p-4 text-left hover:bg-gray-50 focus:bg-gray-50 focus:outline-none transition-colors"
+                    className="w-full p-4 text-left hover:bg-gray-50 dark:hover:bg-slate-700 focus:bg-gray-50 dark:focus:bg-slate-700 focus:outline-none transition-colors"
                   >
                     <div className="flex items-center space-x-4">
                       <div className="flex-shrink-0">
-                        <div className="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center">
-                          <span className="text-sm font-medium text-blue-700">
+                        <div className="h-10 w-10 rounded-full bg-blue-100 dark:bg-blue-900/50 flex items-center justify-center">
+                          <span className="text-sm font-medium text-blue-700 dark:text-blue-300">
                             {getInitials(candidate.name)}
                           </span>
                         </div>
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center justify-between">
-                          <p className="text-sm font-medium text-gray-900 truncate">
+                          <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
                             {candidate.name}
                           </p>
                           <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStageColor(candidate.stage)}`}>
                             {getStageName(candidate.stage)}
                           </span>
                         </div>
-                        <p className="text-sm text-gray-500 truncate">
+                        <p className="text-sm text-gray-500 dark:text-gray-400 truncate">
                           {candidate.email}
                         </p>
-                        <p className="text-xs text-gray-400 mt-1">
+                        <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">
                           Applied {new Date(candidate.createdAt).toLocaleDateString()}
                         </p>
                       </div>
@@ -177,8 +177,8 @@ export function CandidateSearchModal({ isOpen, onClose, onSelectCandidate, jobId
           </div>
 
           {/* Footer */}
-          <div className="p-4 border-t border-gray-200 bg-gray-50">
-            <p className="text-sm text-gray-600 text-center">
+          <div className="p-4 border-t border-gray-200 dark:border-slate-600 bg-gray-50 dark:bg-slate-700">
+            <p className="text-sm text-gray-600 dark:text-gray-400 text-center">
               Select a candidate to simulate taking this assessment
             </p>
           </div>

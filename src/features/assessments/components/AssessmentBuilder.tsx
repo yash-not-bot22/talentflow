@@ -66,7 +66,7 @@ function PreviewQuestion({ question, index }: PreviewQuestionProps) {
                   onChange={(e) => handleChange(e.target.value)}
                   className="mr-3 text-blue-600 focus:ring-blue-500"
                 />
-                <span className="text-gray-700">{option}</span>
+                <span className="text-gray-700 dark:text-gray-300">{option}</span>
               </label>
             ))}
           </div>
@@ -91,7 +91,7 @@ function PreviewQuestion({ question, index }: PreviewQuestionProps) {
                   }}
                   className="mr-3 text-blue-600 focus:ring-blue-500 rounded"
                 />
-                <span className="text-gray-700">{option}</span>
+                <span className="text-gray-700 dark:text-gray-300">{option}</span>
               </label>
             ))}
           </div>
@@ -159,7 +159,7 @@ function PreviewQuestion({ question, index }: PreviewQuestionProps) {
   return (
     <div className="border-l-4 border-blue-200 pl-6 py-4">
       <div className="mb-4">
-        <h4 className="font-medium text-gray-900 text-lg">
+        <h4 className="font-medium text-gray-900 dark:text-white text-lg">
           {index + 1}. {question.text || 'Untitled Question'}
           {question.required && <span className="text-red-500 ml-1">*</span>}
         </h4>
@@ -218,36 +218,36 @@ function QuestionEditor({ question, onUpdate, onDelete }: QuestionEditorProps) {
   const needsOptions = question.type === 'single-choice' || question.type === 'multi-choice';
 
   return (
-    <div className="bg-white border border-gray-200 rounded-lg">
+    <div className="bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-600 rounded-lg">
       {/* Question Header */}
       <div 
-        className="p-4 border-b border-gray-100 cursor-pointer hover:bg-gray-50"
+        className="p-4 border-b border-gray-100 dark:border-slate-600 cursor-pointer hover:bg-gray-50 dark:hover:bg-slate-700"
         onClick={() => setIsExpanded(!isExpanded)}
       >
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-3">
             <div className="flex items-center space-x-2">
-              <Bars3Icon className="h-4 w-4 text-gray-400" />
+              <Bars3Icon className="h-4 w-4 text-gray-400 dark:text-gray-500" />
               <span className="text-lg">{typeInfo?.icon}</span>
-              <span className="font-medium text-gray-900">
+              <span className="font-medium text-gray-900 dark:text-white">
                 {question.text || 'Untitled Question'}
               </span>
             </div>
             {question.required && (
-              <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-700">
+              <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-100 dark:bg-red-900/50 text-red-700 dark:text-red-300">
                 Required
               </span>
             )}
           </div>
           
           <div className="flex items-center space-x-2">
-            <span className="text-sm text-gray-500">{typeInfo?.label}</span>
+            <span className="text-sm text-gray-500 dark:text-gray-400">{typeInfo?.label}</span>
             <button
               onClick={(e) => {
                 e.stopPropagation();
                 onDelete();
               }}
-              className="p-1 text-gray-400 hover:text-red-600 rounded"
+              className="p-1 text-gray-400 hover:text-red-600 dark:text-gray-500 dark:hover:text-red-400 rounded"
             >
               <TrashIcon className="h-4 w-4" />
             </button>
@@ -260,14 +260,14 @@ function QuestionEditor({ question, onUpdate, onDelete }: QuestionEditorProps) {
         <div className="p-4 space-y-4">
           {/* Question Text */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               Question Text *
             </label>
             <input
               type="text"
               value={question.text}
               onChange={(e) => updateQuestion({ text: e.target.value })}
-              className="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className="w-full border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-900 dark:text-white rounded-md px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               placeholder="Enter your question..."
             />
           </div>
@@ -281,7 +281,7 @@ function QuestionEditor({ question, onUpdate, onDelete }: QuestionEditorProps) {
                 onChange={(e) => updateQuestion({ required: e.target.checked })}
                 className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
               />
-              <span className="ml-2 text-sm text-gray-700">Required question</span>
+              <span className="ml-2 text-sm text-gray-700 dark:text-gray-300">Required question</span>
             </label>
           </div>
 
@@ -289,12 +289,12 @@ function QuestionEditor({ question, onUpdate, onDelete }: QuestionEditorProps) {
           {needsOptions && (
             <div>
               <div className="flex items-center justify-between mb-3">
-                <label className="block text-sm font-medium text-gray-700">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                   Answer Options
                 </label>
                 <button
                   onClick={addOption}
-                  className="inline-flex items-center px-3 py-1 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
+                  className="inline-flex items-center px-3 py-1 border border-gray-300 dark:border-slate-600 shadow-sm text-sm font-medium rounded-md text-gray-700 dark:text-gray-300 bg-white dark:bg-slate-700 hover:bg-gray-50 dark:hover:bg-slate-600"
                 >
                   <PlusIcon className="h-4 w-4 mr-1" />
                   Add Option
@@ -304,17 +304,17 @@ function QuestionEditor({ question, onUpdate, onDelete }: QuestionEditorProps) {
               <div className="space-y-2">
                 {(question.options || []).map((option: string, index: number) => (
                   <div key={index} className="flex items-center space-x-2">
-                    <span className="text-sm text-gray-500 w-6">{index + 1}.</span>
+                    <span className="text-sm text-gray-500 dark:text-gray-400 w-6">{index + 1}.</span>
                     <input
                       type="text"
                       value={option}
                       onChange={(e) => updateOption(index, e.target.value)}
-                      className="flex-1 border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+                      className="flex-1 border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-900 dark:text-white rounded-md px-3 py-2 text-sm focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
                       placeholder="Option text..."
                     />
                     <button
                       onClick={() => removeOption(index)}
-                      className="p-1 text-gray-400 hover:text-red-600 rounded"
+                      className="p-1 text-gray-400 hover:text-red-600 dark:text-gray-500 dark:hover:text-red-400 rounded"
                     >
                       <XMarkIcon className="h-4 w-4" />
                     </button>
@@ -323,7 +323,7 @@ function QuestionEditor({ question, onUpdate, onDelete }: QuestionEditorProps) {
               </div>
 
               {(question.options?.length || 0) < 2 && (
-                <p className="text-sm text-amber-600 bg-amber-50 border border-amber-200 rounded-md p-2 mt-2">
+                <p className="text-sm text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-md p-2 mt-2">
                   ⚠️ Choice questions need at least 2 options
                 </p>
               )}
@@ -334,26 +334,26 @@ function QuestionEditor({ question, onUpdate, onDelete }: QuestionEditorProps) {
           {question.type === 'numeric' && (
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Minimum Value (Optional)
                 </label>
                 <input
                   type="number"
                   value={question.min || ''}
                   onChange={(e) => updateQuestion({ min: e.target.value ? Number(e.target.value) : undefined })}
-                  className="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-900 dark:text-white rounded-md px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   placeholder="No minimum"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Maximum Value (Optional)
                 </label>
                 <input
                   type="number"
                   value={question.max || ''}
                   onChange={(e) => updateQuestion({ max: e.target.value ? Number(e.target.value) : undefined })}
-                  className="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-900 dark:text-white rounded-md px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   placeholder="No maximum"
                 />
               </div>
@@ -364,14 +364,14 @@ function QuestionEditor({ question, onUpdate, onDelete }: QuestionEditorProps) {
           {(question.type === 'short-text' || question.type === 'long-text') && (
             <div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Maximum Characters (Optional)
                 </label>
                 <input
                   type="number"
                   value={question.maxLength || ''}
                   onChange={(e) => updateQuestion({ maxLength: e.target.value ? Number(e.target.value) : undefined })}
-                  className="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-900 dark:text-white rounded-md px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   placeholder="No maximum"
                 />
               </div>
@@ -602,20 +602,20 @@ export function AssessmentBuilder({ initialAssessment, onSave, onCancel }: Asses
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="bg-white border border-gray-200 rounded-lg p-6">
+      <div className="bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-600 rounded-lg p-6">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center space-x-4">
             <button
               onClick={handleCancel}
-              className="p-2 text-gray-400 hover:text-gray-600 rounded-lg hover:bg-gray-100"
+              className="p-2 text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-slate-700"
             >
               <ArrowLeftIcon className="h-5 w-5" />
             </button>
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">
+              <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
                 {jobId === 'new' ? 'Create New Assessment' : `Edit Assessment for Job #${assessment.jobId}`}
               </h1>
-              <p className="text-gray-600 mt-1">
+              <p className="text-gray-600 dark:text-gray-400 mt-1">
                 Design questions and sections for candidate evaluation
               </p>
             </div>
@@ -626,8 +626,8 @@ export function AssessmentBuilder({ initialAssessment, onSave, onCancel }: Asses
               onClick={() => setPreviewMode(!previewMode)}
               className={`inline-flex items-center px-4 py-2 border shadow-sm text-sm font-medium rounded-lg transition-colors ${
                 previewMode 
-                  ? 'border-blue-300 text-blue-700 bg-blue-50 hover:bg-blue-100'
-                  : 'border-gray-300 text-gray-700 bg-white hover:bg-gray-50'
+                  ? 'border-blue-300 text-blue-700 bg-blue-50 hover:bg-blue-100 dark:border-blue-600 dark:text-blue-300 dark:bg-blue-900/20 dark:hover:bg-blue-900/30'
+                  : 'border-gray-300 text-gray-700 bg-white hover:bg-gray-50 dark:border-slate-600 dark:text-gray-300 dark:bg-slate-700 dark:hover:bg-slate-600'
               }`}
             >
               <EyeIcon className="h-4 w-4 mr-2" />
@@ -636,7 +636,7 @@ export function AssessmentBuilder({ initialAssessment, onSave, onCancel }: Asses
             
             <button
               onClick={handleCancel}
-              className="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50"
+              className="inline-flex items-center px-4 py-2 border border-gray-300 dark:border-slate-600 shadow-sm text-sm font-medium rounded-lg text-gray-700 dark:text-gray-300 bg-white dark:bg-slate-700 hover:bg-gray-50 dark:hover:bg-slate-600"
             >
               Cancel
             </button>
@@ -644,7 +644,7 @@ export function AssessmentBuilder({ initialAssessment, onSave, onCancel }: Asses
             <button
               onClick={handleSave}
               disabled={saving}
-              className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-lg text-white bg-blue-600 hover:bg-blue-700 disabled:opacity-50"
+              className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-lg text-white bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 disabled:opacity-50"
             >
               {saving && <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent mr-2" />}
               <CheckIcon className="h-4 w-4 mr-2" />
@@ -654,7 +654,7 @@ export function AssessmentBuilder({ initialAssessment, onSave, onCancel }: Asses
         </div>
         
         {/* Assessment Stats */}
-        <div className="flex items-center space-x-6 text-sm text-gray-600">
+        <div className="flex items-center space-x-6 text-sm text-gray-600 dark:text-gray-400">
           <div className="flex items-center">
             <span className="font-medium">{assessment.sections.length}</span>
             <span className="ml-1">sections</span>
@@ -672,15 +672,15 @@ export function AssessmentBuilder({ initialAssessment, onSave, onCancel }: Asses
 
       {/* Main Content */}
       {previewMode ? (
-        <div className="bg-white border border-gray-200 rounded-lg p-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-6">Assessment Preview</h3>
+        <div className="bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-600 rounded-lg p-6">
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-6">Assessment Preview</h3>
           <div className="space-y-8">
             {assessment.sections.map(section => (
-              <div key={section.id} className="border border-gray-200 rounded-lg p-6">
-                <h4 className="text-xl font-semibold text-gray-900 mb-6">{section.name}</h4>
+              <div key={section.id} className="border border-gray-200 dark:border-slate-600 rounded-lg p-6">
+                <h4 className="text-xl font-semibold text-gray-900 dark:text-white mb-6">{section.name}</h4>
                 <div className="space-y-6">
                   {section.questions.length === 0 ? (
-                    <div className="text-center py-12 text-gray-500">
+                    <div className="text-center py-12 text-gray-500 dark:text-gray-400">
                       <div className="text-4xl mb-4">📝</div>
                       <p className="text-lg font-medium">No questions in this section yet</p>
                       <p className="text-sm">Add questions using the builder to see the preview</p>
@@ -699,7 +699,7 @@ export function AssessmentBuilder({ initialAssessment, onSave, onCancel }: Asses
             ))}
             
             {/* Submit Button for Preview */}
-            <div className="flex justify-end pt-6 border-t border-gray-200">
+            <div className="flex justify-end pt-6 border-t border-gray-200 dark:border-slate-600">
               <button
                 disabled
                 className="px-6 py-3 bg-blue-600 text-white rounded-lg font-medium opacity-50 cursor-not-allowed"
@@ -712,12 +712,12 @@ export function AssessmentBuilder({ initialAssessment, onSave, onCancel }: Asses
       ) : (
         <div className="space-y-6">
           {/* Section Tabs */}
-          <div className="bg-white border border-gray-200 rounded-lg p-6">
+          <div className="bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-600 rounded-lg p-6">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold text-gray-900">Sections</h3>
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Sections</h3>
               <button
                 onClick={addSection}
-                className="inline-flex items-center px-3 py-2 border border-transparent text-sm font-medium rounded-md text-blue-700 bg-blue-100 hover:bg-blue-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                className="inline-flex items-center px-3 py-2 border border-transparent text-sm font-medium rounded-md text-blue-700 dark:text-blue-300 bg-blue-100 dark:bg-blue-900/50 hover:bg-blue-200 dark:hover:bg-blue-900/70 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
               >
                 <PlusIcon className="h-4 w-4 mr-1" />
                 Add Section
@@ -732,7 +732,7 @@ export function AssessmentBuilder({ initialAssessment, onSave, onCancel }: Asses
                     className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
                       currentSectionId === section.id
                         ? 'bg-blue-600 text-white'
-                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                        : 'bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-slate-600'
                     }`}
                   >
                     {section.name}
@@ -740,7 +740,7 @@ export function AssessmentBuilder({ initialAssessment, onSave, onCancel }: Asses
                   {assessment.sections.length > 1 && (
                     <button
                       onClick={() => deleteSection(section.id)}
-                      className="ml-1 p-1 text-red-500 hover:text-red-700 rounded"
+                      className="ml-1 p-1 text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 rounded"
                       title="Delete section"
                     >
                       <XMarkIcon className="h-4 w-4" />
@@ -753,14 +753,14 @@ export function AssessmentBuilder({ initialAssessment, onSave, onCancel }: Asses
             {/* Section Name Editor */}
             {currentSection && (
               <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                   Section Name
                 </label>
                 <input
                   type="text"
                   value={currentSection.name}
                   onChange={(e) => updateSectionName(currentSection.id, e.target.value)}
-                  className="block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                  className="block w-full border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-900 dark:text-white rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                   placeholder="Enter section name..."
                 />
               </div>
@@ -768,20 +768,20 @@ export function AssessmentBuilder({ initialAssessment, onSave, onCancel }: Asses
           </div>
 
           {/* Question Type Selector */}
-          <div className="bg-white border border-gray-200 rounded-lg p-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">Question Types</h3>
+          <div className="bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-600 rounded-lg p-6">
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Question Types</h3>
             <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
               {questionTypes.map(type => (
                 <button
                   key={type.type}
                   onClick={() => addQuestion(type.type)}
                   disabled={!currentSectionId}
-                  className="flex items-center p-3 border border-gray-200 rounded-lg hover:border-blue-300 hover:bg-blue-50 transition-colors text-left disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="flex items-center p-3 border border-gray-200 dark:border-slate-600 rounded-lg hover:border-blue-300 dark:hover:border-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors text-left disabled:opacity-50 disabled:cursor-not-allowed bg-white dark:bg-slate-700"
                 >
                   <span className="text-2xl mr-3">{type.icon}</span>
                   <div>
-                    <p className="font-medium text-gray-900">{type.label}</p>
-                    <p className="text-xs text-gray-500">{type.description}</p>
+                    <p className="font-medium text-gray-900 dark:text-white">{type.label}</p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">{type.description}</p>
                   </div>
                 </button>
               ))}
@@ -789,15 +789,15 @@ export function AssessmentBuilder({ initialAssessment, onSave, onCancel }: Asses
           </div>
 
           {/* Questions */}
-          <div className="bg-white border border-gray-200 rounded-lg p-6">
+          <div className="bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-600 rounded-lg p-6">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold text-gray-900">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
                 Questions {currentSection && `- ${currentSection.name}`}
               </h3>
               <button
                 onClick={() => addQuestion()}
                 disabled={!currentSectionId}
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                className="px-4 py-2 bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 text-white rounded-lg text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Add Question
               </button>
@@ -805,12 +805,12 @@ export function AssessmentBuilder({ initialAssessment, onSave, onCancel }: Asses
             
             <div className="space-y-4">
               {!currentSection ? (
-                <div className="text-center py-8 text-gray-500">
+                <div className="text-center py-8 text-gray-500 dark:text-gray-400">
                   <p>No section selected.</p>
                   <p className="text-sm">Select a section above to start adding questions.</p>
                 </div>
               ) : currentSection.questions.length === 0 ? (
-                <div className="text-center py-8 text-gray-500">
+                <div className="text-center py-8 text-gray-500 dark:text-gray-400">
                   <p>No questions added yet.</p>
                   <p className="text-sm">Click "Add Question" or select a question type above to get started.</p>
                 </div>

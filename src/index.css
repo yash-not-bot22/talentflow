@@ -1,3 +1,126 @@
 @tailwind base;
 @tailwind components;  
 @tailwind utilities;
+
+@layer base {
+  :root {
+    /* Light theme colors */
+    --color-primary: 37 99 235; /* #2563eb */
+    --color-primary-hover: 29 78 216; /* #1d4ed8 */
+    --color-secondary: 16 185 129; /* #10b981 */
+    --color-secondary-hover: 5 150 105; /* #059669 */
+    
+    --color-surface: 255 255 255; /* #ffffff */
+    --color-surface-secondary: 248 250 252; /* #f8fafc */
+    --color-surface-tertiary: 241 245 249; /* #f1f5f9 */
+    --color-surface-border: 226 232 240; /* #e2e8f0 */
+    
+    --color-text-primary: 15 23 42; /* #0f172a */
+    --color-text-secondary: 51 65 85; /* #334155 */
+    --color-text-muted: 100 116 139; /* #64748b */
+    
+    --color-accent-error: 244 63 94; /* #f43f5e */
+    --color-accent-warning: 245 158 11; /* #f59e0b */
+    --color-accent-success: 16 185 129; /* #10b981 */
+  }
+
+  .dark {
+    /* Dark theme colors */
+    --color-primary: 59 130 246; /* #3b82f6 */
+    --color-primary-hover: 37 99 235; /* #2563eb */
+    --color-secondary: 52 211 153; /* #34d399 */
+    --color-secondary-hover: 16 185 129; /* #10b981 */
+    
+    --color-surface: 15 23 42; /* #0f172a */
+    --color-surface-secondary: 30 41 59; /* #1e293b */
+    --color-surface-tertiary: 51 65 85; /* #334155 */
+    --color-surface-border: 71 85 105; /* #475569 */
+    
+    --color-text-primary: 248 250 252; /* #f8fafc */
+    --color-text-secondary: 226 232 240; /* #e2e8f0 */
+    --color-text-muted: 148 163 184; /* #94a3b8 */
+    
+    --color-accent-error: 248 113 113; /* #f87171 */
+    --color-accent-warning: 251 191 36; /* #fbbf24 */
+    --color-accent-success: 74 222 128; /* #4ade80 */
+  }
+
+  * {
+    @apply border-slate-200 dark:border-slate-700;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-surface-light dark:bg-surface-dark text-text-light-primary dark:text-text-dark-primary transition-colors duration-300;
+  }
+
+  /* Custom scrollbar */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    @apply bg-slate-100 dark:bg-slate-800;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    @apply bg-slate-300 dark:bg-slate-600 rounded-full hover:bg-slate-400 dark:hover:bg-slate-500;
+  }
+
+  /* Focus styles */
+  *:focus {
+    @apply outline-none ring-2 ring-primary ring-opacity-50 ring-offset-2 ring-offset-white dark:ring-offset-slate-900;
+  }
+}
+
+@layer components {
+  /* Gradient text utilities */
+  .gradient-text {
+    @apply bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent;
+  }
+
+  /* Card styles */
+  .card {
+    @apply bg-white dark:bg-slate-800 rounded-xl shadow-soft border border-slate-200 dark:border-slate-700 transition-all duration-200;
+  }
+
+  .card-hover {
+    @apply hover:shadow-lift hover:-translate-y-1;
+  }
+
+  /* Button styles */
+  .btn-primary {
+    @apply bg-primary hover:bg-primary-hover text-white font-medium px-4 py-2 rounded-lg transition-all duration-200 shadow-sm hover:shadow-md focus:ring-2 focus:ring-primary focus:ring-opacity-50 disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  .btn-secondary {
+    @apply bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 border border-slate-300 dark:border-slate-600 font-medium px-4 py-2 rounded-lg transition-all duration-200 shadow-sm hover:shadow-md;
+  }
+
+  /* Status pill */
+  .status-pill {
+    @apply inline-flex items-center px-3 py-1 rounded-full text-sm font-medium transition-all duration-200;
+  }
+
+  .status-pill-active {
+    @apply bg-emerald-100 dark:bg-emerald-900/30 text-emerald-800 dark:text-emerald-300;
+  }
+
+  .status-pill-inactive {
+    @apply bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400;
+  }
+
+  /* Input styles */
+  .input-field {
+    @apply block w-full rounded-lg border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:border-primary focus:ring-primary sm:text-sm transition-colors duration-200;
+  }
+
+  /* Sticky header */
+  .sticky-header {
+    @apply sticky top-0 z-40 bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm border-b border-slate-200 dark:border-slate-700 shadow-sm;
+  }
+}

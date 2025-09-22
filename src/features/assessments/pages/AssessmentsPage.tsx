@@ -43,23 +43,23 @@ function AssessmentCard({ jobWithAssessment, onEdit, onDelete, onDuplicate, onPr
   };
 
   return (
-    <div className="bg-white rounded-xl border border-gray-200 p-6 hover:shadow-md transition-shadow">
+    <div className="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-600 p-6 hover:shadow-md dark:hover:shadow-slate-900/20 transition-shadow">
       <div className="flex items-start justify-between mb-4">
         <div className="flex-1">
           <div className="flex items-center space-x-2 mb-2">
-            <h3 className="text-lg font-semibold text-gray-900">
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
               {job.title}
             </h3>
             <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
               hasAssessment
-                ? 'bg-green-100 text-green-700'
-                : 'bg-gray-100 text-gray-600'
+                ? 'bg-green-100 dark:bg-green-900/50 text-green-700 dark:text-green-300'
+                : 'bg-gray-100 dark:bg-slate-600 text-gray-600 dark:text-gray-400'
             }`}>
               {hasAssessment ? 'Has Assessment' : 'No Assessment'}
             </span>
           </div>
           
-          <div className="space-y-1 text-sm text-gray-600">
+          <div className="space-y-1 text-sm text-gray-600 dark:text-gray-400">
             {hasAssessment && assessment ? (
               <>
                 <div className="flex items-center space-x-4">
@@ -72,7 +72,7 @@ function AssessmentCard({ jobWithAssessment, onEdit, onDelete, onDuplicate, onPr
                 </div>
               </>
             ) : (
-              <div className="text-gray-500 italic">
+              <div className="text-gray-500 dark:text-gray-400 italic">
                 No assessment created yet
               </div>
             )}
@@ -83,7 +83,7 @@ function AssessmentCard({ jobWithAssessment, onEdit, onDelete, onDuplicate, onPr
           {hasAssessment && assessment && onPreview && (
             <button
               onClick={() => onPreview(assessment)}
-              className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+              className="p-2 text-gray-400 hover:text-blue-600 dark:text-gray-500 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors"
               title="Preview assessment"
             >
               <EyeIcon className="h-5 w-5" />
@@ -91,7 +91,7 @@ function AssessmentCard({ jobWithAssessment, onEdit, onDelete, onDuplicate, onPr
           )}
           <button
             onClick={() => onEdit(job.id)}
-            className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+            className="p-2 text-gray-400 hover:text-blue-600 dark:text-gray-500 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors"
             title={hasAssessment ? "Edit assessment" : "Create assessment"}
           >
             <PencilIcon className="h-5 w-5" />
@@ -100,14 +100,14 @@ function AssessmentCard({ jobWithAssessment, onEdit, onDelete, onDuplicate, onPr
             <>
               <button
                 onClick={() => onDuplicate(jobWithAssessment)}
-                className="p-2 text-gray-400 hover:text-green-600 hover:bg-green-50 rounded-lg transition-colors"
+                className="p-2 text-gray-400 hover:text-green-600 dark:text-gray-500 dark:hover:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/20 rounded-lg transition-colors"
                 title="Duplicate assessment"
               >
                 <DocumentDuplicateIcon className="h-5 w-5" />
               </button>
               <button
                 onClick={() => onDelete(job.id)}
-                className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                className="p-2 text-gray-400 hover:text-red-600 dark:text-gray-500 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
                 title="Delete assessment"
               >
                 <TrashIcon className="h-5 w-5" />
@@ -122,10 +122,10 @@ function AssessmentCard({ jobWithAssessment, onEdit, onDelete, onDuplicate, onPr
         <div className="space-y-2">
           {assessment.sections.map((section, index) => (
             <div key={section.id} className="text-sm">
-              <span className="font-medium text-gray-700">
+              <span className="font-medium text-gray-700 dark:text-gray-300">
                 {index + 1}. {section.name}
               </span>
-              <span className="text-gray-500 ml-2">
+              <span className="text-gray-500 dark:text-gray-400 ml-2">
                 ({section.questions.length} questions)
               </span>
             </div>
@@ -237,12 +237,12 @@ export function AssessmentsPage() {
   if (error) {
     return (
       <div className="text-center py-12">
-        <div className="bg-red-50 border border-red-200 rounded-lg p-6 max-w-md mx-auto">
-          <h3 className="text-lg font-semibold text-red-800 mb-2">Error Loading Assessments</h3>
-          <p className="text-red-600 mb-4">{error}</p>
+        <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-6 max-w-md mx-auto">
+          <h3 className="text-lg font-semibold text-red-800 dark:text-red-400 mb-2">Error Loading Assessments</h3>
+          <p className="text-red-600 dark:text-red-300 mb-4">{error}</p>
           <button
             onClick={loadJobsAndAssessments}
-            className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors"
+            className="bg-red-600 hover:bg-red-700 dark:bg-red-500 dark:hover:bg-red-600 text-white px-4 py-2 rounded-lg transition-colors"
           >
             Try Again
           </button>
@@ -256,15 +256,15 @@ export function AssessmentsPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Assessments</h1>
-          <p className="text-gray-600 mt-1">
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Assessments</h1>
+          <p className="text-gray-600 dark:text-gray-400 mt-1">
             Create and manage job-specific assessments for candidates
           </p>
         </div>
         
         <button
           onClick={handleCreateNew}
-          className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-lg text-white bg-blue-600 hover:bg-blue-700 transition-colors"
+          className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-lg text-white bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 transition-colors"
         >
           <PlusIcon className="h-4 w-4 mr-2" />
           Create Assessment
@@ -274,15 +274,15 @@ export function AssessmentsPage() {
       {/* Assessments Grid */}
       {jobsWithAssessments.length === 0 ? (
         <div className="text-center py-12">
-          <div className="bg-gray-50 rounded-xl p-8 max-w-md mx-auto">
-            <DocumentDuplicateIcon className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">No Assessments Yet</h3>
-            <p className="text-gray-600 mb-6">
+          <div className="bg-gray-50 dark:bg-slate-700 rounded-xl p-8 max-w-md mx-auto">
+            <DocumentDuplicateIcon className="h-12 w-12 text-gray-400 dark:text-gray-500 mx-auto mb-4" />
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">No Assessments Yet</h3>
+            <p className="text-gray-600 dark:text-gray-400 mb-6">
               Create your first assessment to start evaluating candidates
             </p>
             <button
               onClick={handleCreateNew}
-              className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-lg text-white bg-blue-600 hover:bg-blue-700 transition-colors"
+              className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-lg text-white bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 transition-colors"
             >
               <PlusIcon className="h-4 w-4 mr-2" />
               Create Assessment

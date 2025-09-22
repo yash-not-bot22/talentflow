@@ -108,7 +108,7 @@ function CandidateCard({ candidate, isActive = false, isDragging = false, onClic
           </div>
         </div>
         <div className="min-w-0 flex-1">
-          <h4 className="text-sm font-semibold text-gray-900 truncate">
+          <h4 className="text-sm font-semibold text-gray-900 dark:text-white truncate">
             {candidate.name}
           </h4>
           <p className="text-xs text-gray-500 truncate">{candidate.email}</p>
@@ -168,7 +168,7 @@ function KanbanColumn({ stage, onCandidateClick }: KanbanColumnProps) {
               <IconOutline className="h-5 w-5 text-white" />
             </div>
             <div>
-              <h3 className="text-base font-semibold text-gray-900">
+              <h3 className="text-base font-semibold text-gray-900 dark:text-white">
                 {stage.title}
               </h3>
               <p className="text-sm text-gray-500">{stage.description}</p>
@@ -331,10 +331,10 @@ export function MultiCandidateKanbanBoard({
   const activeCandidate = activeId ? candidates.find(c => c.id.toString() === activeId) : null;
 
   return (
-    <div className="w-full bg-gray-50 rounded-xl p-6">
+    <div className="w-full bg-gray-50 dark:bg-slate-900 rounded-xl p-6">
       <div className="mb-6">
-        <h2 className="text-xl font-semibold text-gray-900 mb-2">Candidate Pipeline</h2>
-        <p className="text-gray-600">Drag candidates between stages to update their status</p>
+        <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">Candidate Pipeline</h2>
+        <p className="text-gray-600 dark:text-gray-300">Drag candidates between stages to update their status</p>
       </div>
       
       <DndContext 
@@ -370,9 +370,9 @@ export function MultiCandidateKanbanBoard({
 
       {isUpdating && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 flex items-center space-x-3">
+          <div className="bg-white dark:bg-slate-800 rounded-lg p-6 flex items-center space-x-3">
             <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
-            <span className="text-gray-900">Updating candidate stage...</span>
+            <span className="text-gray-900 dark:text-white">Updating candidate stage...</span>
           </div>
         </div>
       )}

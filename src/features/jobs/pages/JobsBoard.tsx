@@ -32,7 +32,6 @@ import {
   XMarkIcon,
   PencilIcon,
   ArchiveBoxIcon,
-  EyeIcon,
   CalendarIcon,
   TagIcon,
   ChevronLeftIcon,
@@ -41,11 +40,8 @@ import {
   DocumentTextIcon,
   CheckIcon,
 } from '@heroicons/react/24/outline';
-import {
-  CheckCircleIcon,
-  ArchiveBoxIcon as ArchiveBoxSolidIcon,
-} from '@heroicons/react/24/solid';
 import type { Job } from '../../../db';
+import { Button, StatusPill, GradientBadge } from '../../../components/ui';
 
 // Types for form validation
 interface CreateJobForm {
@@ -67,13 +63,12 @@ interface SortableJobRowProps {
   openEditModal: (job: Job) => void;
   openViewModal: (job: Job) => void;
   updateJob: (jobId: number, updates: any) => Promise<Job>;
-  getStatusBadge: (status: Job['status']) => string;
   formatDate: (timestamp: number) => string;
   hasAssessment: boolean;
   onAssessmentClick: (jobId: number) => void;
 }
 
-function SortableJobRow({ job, openEditModal, openViewModal, updateJob, getStatusBadge, formatDate, hasAssessment, onAssessmentClick }: SortableJobRowProps) {
+function SortableJobRow({ job, openEditModal, openViewModal, updateJob, formatDate, hasAssessment, onAssessmentClick }: SortableJobRowProps) {
   const {
     attributes,
     listeners,
@@ -95,46 +90,46 @@ function SortableJobRow({ job, openEditModal, openViewModal, updateJob, getStatu
       ref={setNodeRef} 
       style={style}
       onClick={() => openViewModal(job)}
-      className={`hover:bg-gray-50 transition-colors cursor-pointer ${isDragging ? 'z-50' : ''}`}
+      className={`hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors cursor-pointer ${isDragging ? 'z-50' : ''}`}
     >
       <td className="px-6 py-4 whitespace-nowrap">
         <div className="flex items-center space-x-3">
-          <button
+          <Button
             {...attributes}
             {...listeners}
             onClick={(e) => e.stopPropagation()}
-            className="text-gray-400 hover:text-gray-600 cursor-grab active:cursor-grabbing p-1 hover:bg-gray-100 rounded transition-colors"
+            variant="ghost"
+            size="sm"
+            className="cursor-grab active:cursor-grabbing"
             title="Drag to reorder"
           >
             <Bars3Icon className="h-5 w-5" />
-          </button>
+          </Button>
           <div>
-            <div className="text-sm font-medium text-gray-900">{job.title}</div>
+            <div className="text-sm font-medium text-gray-900 dark:text-slate-100">{job.title}</div>
             <div className="text-sm text-gray-500">{job.slug}</div>
           </div>
         </div>
       </td>
       <td className="px-6 py-4 whitespace-nowrap">
-        <span className={getStatusBadge(job.status)}>
-          {job.status === 'active' && <CheckCircleIcon className="h-3 w-3 mr-1" />}
-          {job.status === 'archived' && <ArchiveBoxSolidIcon className="h-3 w-3 mr-1" />}
-          {job.status}
-        </span>
+        <StatusPill status={job.status as 'active' | 'archived'} size="sm" />
       </td>
       <td className="px-6 py-4">
         <div className="flex flex-wrap gap-1">
           {job.tags && job.tags.slice(0, 3).map((tag) => (
-            <span
+            <GradientBadge
               key={tag}
-              className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800"
+              variant="accent"
+              size="sm"
+              outline
             >
               {tag}
-            </span>
+            </GradientBadge>
           ))}
           {job.tags && job.tags.length > 3 && (
-            <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800">
+            <GradientBadge variant="neutral" size="sm" outline>
               +{job.tags.length - 3}
-            </span>
+            </GradientBadge>
           )}
         </div>
       </td>
@@ -148,46 +143,42 @@ function SortableJobRow({ job, openEditModal, openViewModal, updateJob, getStatu
         #{job.order}
       </td>
       <td className="px-6 py-4 whitespace-nowrap">
-        <button
+        <Button
           onClick={() => onAssessmentClick(job.id)}
-          className={`inline-flex items-center px-3 py-1.5 border shadow-sm text-xs font-medium rounded focus:outline-none focus:ring-2 focus:ring-offset-2 transition-all ${
-            hasAssessment
-              ? 'border-blue-300 text-blue-700 bg-blue-50 hover:bg-blue-100 focus:ring-blue-500'
-              : 'border-gray-300 text-gray-500 bg-gray-50 hover:bg-gray-100 focus:ring-gray-500 opacity-60'
-          }`}
+          variant={hasAssessment ? "primary" : "outline"}
+          size="sm"
+          className={!hasAssessment ? "opacity-60" : ""}
           title={hasAssessment ? 'View Assessment' : 'Create Assessment'}
         >
-          <DocumentTextIcon className="h-3 w-3 mr-1" />
+          <DocumentTextIcon className="h-3 w-3" />
           {hasAssessment ? 'View' : 'Create'}
-        </button>
+        </Button>
       </td>
       <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
         <div className="flex items-center justify-end space-x-2">
-          <button
+          <Button
             onClick={(e) => {
               e.stopPropagation();
               openEditModal(job);
             }}
-            className="text-blue-600 hover:text-blue-900 p-1 hover:bg-blue-50 rounded transition-colors"
+            variant="ghost"
+            size="sm"
             title="Edit job"
           >
             <PencilIcon className="h-4 w-4" />
-          </button>
-          <button
+          </Button>
+          <Button
             onClick={async (e) => {
               e.stopPropagation();
               const newStatus = job.status === 'active' ? 'archived' : 'active';
               await updateJob(job.id, { status: newStatus });
             }}
-            className={`p-1 rounded transition-colors ${
-              job.status === 'active' 
-                ? 'text-green-600 hover:text-green-900 hover:bg-green-50' 
-                : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
-            }`}
+            variant="ghost"
+            size="sm"
             title={job.status === 'active' ? 'Archive job' : 'Activate job'}
           >
             {job.status === 'active' ? <ArchiveBoxIcon className="h-4 w-4" /> : <CheckIcon className="h-4 w-4" />}
-          </button>
+          </Button>
         </div>
       </td>
     </tr>
@@ -199,13 +190,12 @@ interface SortableJobCardProps {
   job: Job;
   openEditModal: (job: Job) => void;
   updateJob: (jobId: number, updates: any) => Promise<Job>;
-  getStatusBadge: (status: Job['status']) => string;
   formatDate: (timestamp: number) => string;
   hasAssessment: boolean;
   onAssessmentClick: (jobId: number) => void;
 }
 
-function SortableJobCard({ job, openEditModal, updateJob, getStatusBadge, formatDate, hasAssessment, onAssessmentClick }: SortableJobCardProps) {
+function SortableJobCard({ job, openEditModal, updateJob, formatDate, hasAssessment, onAssessmentClick }: SortableJobCardProps) {
   const {
     attributes,
     listeners,
@@ -226,41 +216,41 @@ function SortableJobCard({ job, openEditModal, updateJob, getStatusBadge, format
     <div
       ref={setNodeRef}
       style={style}
-      className={`bg-white rounded-lg shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow ${isDragging ? 'z-50 shadow-lg' : ''}`}
+      className={`bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-gray-200 dark:border-slate-700 p-6 hover:shadow-md dark:hover:shadow-lg transition-shadow ${isDragging ? 'z-50 shadow-lg' : ''}`}
     >
       <div className="flex items-start justify-between mb-4">
         <div className="flex items-start space-x-3 flex-1">
-          <button
+          <Button
             {...attributes}
             {...listeners}
-            className="text-gray-400 hover:text-gray-600 cursor-grab active:cursor-grabbing p-1 hover:bg-gray-100 rounded transition-colors mt-1"
+            variant="ghost"
+            size="sm"
+            className="cursor-grab active:cursor-grabbing mt-1"
             title="Drag to reorder"
           >
             <Bars3Icon className="h-4 w-4" />
-          </button>
+          </Button>
           <div className="flex-1">
-            <h3 className="text-lg font-medium text-gray-900 mb-1">{job.title}</h3>
+            <h3 className="text-lg font-medium text-gray-900 dark:text-slate-100 mb-1">{job.title}</h3>
             <p className="text-sm text-gray-500">{job.slug}</p>
           </div>
         </div>
-        <span className={getStatusBadge(job.status)}>
-          {job.status === 'active' && <CheckCircleIcon className="h-3 w-3 mr-1" />}
-          {job.status === 'archived' && <ArchiveBoxSolidIcon className="h-3 w-3 mr-1" />}
-          {job.status}
-        </span>
+        <StatusPill status={job.status as 'active' | 'archived'} size="sm" />
       </div>
 
       {job.tags && job.tags.length > 0 && (
         <div className="mb-4">
           <div className="flex flex-wrap gap-1">
             {job.tags.map((tag) => (
-              <span
+              <GradientBadge
                 key={tag}
-                className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800"
+                variant="accent"
+                size="sm"
+                outline
               >
                 <TagIcon className="h-3 w-3 mr-1" />
                 {tag}
-              </span>
+              </GradientBadge>
             ))}
           </div>
         </div>
@@ -276,46 +266,42 @@ function SortableJobCard({ job, openEditModal, updateJob, getStatusBadge, format
 
       <div className="flex items-center justify-between">
         <div className="flex space-x-2">
-          <button
+          <Button
             onClick={(e) => {
               e.stopPropagation();
               openEditModal(job);
             }}
-            className="inline-flex items-center px-3 py-1.5 border border-gray-300 shadow-sm text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+            variant="outline"
+            size="sm"
           >
-            <PencilIcon className="h-3 w-3 mr-1" />
+            <PencilIcon className="h-3 w-3" />
             Edit
-          </button>
-          <button
+          </Button>
+          <Button
             onClick={async (e) => {
               e.stopPropagation();
               const newStatus = job.status === 'active' ? 'archived' : 'active';
               await updateJob(job.id, { status: newStatus });
             }}
-            className={`inline-flex items-center px-3 py-1.5 border shadow-sm text-xs font-medium rounded focus:outline-none focus:ring-2 focus:ring-offset-2 transition-all ${
-              job.status === 'active'
-                ? 'border-green-300 text-green-700 bg-green-50 hover:bg-green-100 focus:ring-green-500'
-                : 'border-gray-300 text-gray-700 bg-white hover:bg-gray-50 focus:ring-gray-500'
-            }`}
+            variant={job.status === 'active' ? 'secondary' : 'outline'}
+            size="sm"
           >
             {job.status === 'active' ? (
-              <><ArchiveBoxIcon className="h-3 w-3 mr-1" />Archive</>
+              <><ArchiveBoxIcon className="h-3 w-3" />Archive</>
             ) : (
-              <><CheckIcon className="h-3 w-3 mr-1" />Activate</>
+              <><CheckIcon className="h-3 w-3" />Activate</>
             )}
-          </button>
-          <button
+          </Button>
+          <Button
             onClick={() => onAssessmentClick(job.id)}
-            className={`inline-flex items-center px-3 py-1.5 border shadow-sm text-xs font-medium rounded focus:outline-none focus:ring-2 focus:ring-offset-2 transition-all ${
-              hasAssessment
-                ? 'border-blue-300 text-blue-700 bg-blue-50 hover:bg-blue-100 focus:ring-blue-500'
-                : 'border-gray-300 text-gray-500 bg-gray-50 hover:bg-gray-100 focus:ring-gray-500 opacity-60'
-            }`}
+            variant={hasAssessment ? "primary" : "outline"}
+            size="sm"
+            className={!hasAssessment ? "opacity-60" : ""}
             title={hasAssessment ? 'View Assessment' : 'No Assessment'}
           >
-            <DocumentTextIcon className="h-3 w-3 mr-1" />
+            <DocumentTextIcon className="h-3 w-3" />
             {hasAssessment ? 'Assessment' : 'No Assessment'}
-          </button>
+          </Button>
         </div>
       </div>
     </div>
@@ -591,40 +577,28 @@ export function JobsBoard() {
   };
 
   // Get status badge styles
-  const getStatusBadge = (status: Job['status']) => {
-    const baseClasses = 'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium';
-    
-    switch (status) {
-      case 'active':
-        return `${baseClasses} bg-green-100 text-green-800`;
-      case 'archived':
-        return `${baseClasses} bg-gray-100 text-gray-800`;
-      default:
-        return `${baseClasses} bg-gray-100 text-gray-800`;
-    }
-  };
-
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 dark:bg-slate-900 transition-colors">
       <Toaster position="top-right" />
       
       {/* Header */}
-      <div className="bg-white shadow-sm border-b border-gray-200">
+      <div className="bg-white dark:bg-slate-800 shadow-sm border-b border-gray-200 dark:border-slate-700">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center py-6">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900">Jobs Board</h1>
-              <p className="mt-1 text-sm text-gray-500">
+              <h1 className="text-3xl font-bold text-gray-900 dark:text-slate-100">Jobs Board</h1>
+              <p className="mt-1 text-sm text-gray-500 dark:text-slate-400">
                 Manage your job postings and track applications
               </p>
             </div>
-            <button
+            <Button
               onClick={() => setShowCreateModal(true)}
-              className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-lg shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
+              variant="primary"
+              size="md"
             >
-              <PlusIcon className="h-4 w-4 mr-2" />
+              <PlusIcon className="h-4 w-4" />
               Create Job
-            </button>
+            </Button>
           </div>
         </div>
       </div>
@@ -632,7 +606,7 @@ export function JobsBoard() {
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Filters and Controls */}
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
+        <div className="bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-gray-200 dark:border-slate-700 p-6 mb-6">
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
             {/* Search and Filters */}
             <div className="flex flex-col sm:flex-row gap-4 flex-1">
@@ -646,7 +620,7 @@ export function JobsBoard() {
                   placeholder="Search jobs..."
                   value={localFilters.search}
                   onChange={(e) => handleSearchChange(e.target.value)}
-                  className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
+                  className="block w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg leading-5 bg-white dark:bg-slate-700 text-gray-900 dark:text-slate-100 placeholder-gray-500 dark:placeholder-slate-400 focus:outline-none focus:placeholder-gray-400 dark:focus:placeholder-slate-500 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
                 />
               </div>
 
@@ -654,7 +628,7 @@ export function JobsBoard() {
               <select
                 value={localFilters.status}
                 onChange={(e) => handleStatusFilter(e.target.value)}
-                className="block w-full sm:w-auto px-3 py-2 border border-gray-300 bg-white rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
+                className="block w-full sm:w-auto px-3 py-2 border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-900 dark:text-slate-100 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
               >
                 <option value="">All Status</option>
                 <option value="active">Active</option>
@@ -663,36 +637,37 @@ export function JobsBoard() {
 
               {/* Clear Filters */}
               {(localFilters.search || localFilters.status || localFilters.tags.length > 0) && (
-                <button
+                <Button
                   onClick={clearFilters}
-                  className="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                  variant="outline"
+                  size="sm"
                 >
-                  <XMarkIcon className="h-4 w-4 mr-1" />
+                  <XMarkIcon className="h-4 w-4" />
                   Clear
-                </button>
+                </Button>
               )}
             </div>
 
             {/* View Toggle */}
             <div className="flex items-center space-x-2">
-              <span className="text-sm text-gray-500">View:</span>
-              <div className="flex border border-gray-300 rounded-lg overflow-hidden">
+              <span className="text-sm text-gray-500 dark:text-slate-400">View:</span>
+              <div className="flex border border-gray-300 dark:border-slate-600 rounded-lg overflow-hidden">
                 <button
                   onClick={() => setViewMode('table')}
-                  className={`px-3 py-2 text-sm font-medium ${
+                  className={`px-3 py-2 text-sm font-medium transition-colors ${
                     viewMode === 'table'
-                      ? 'bg-blue-600 text-white'
-                      : 'bg-white text-gray-700 hover:bg-gray-50'
+                      ? 'bg-blue-600 text-white dark:bg-blue-500'
+                      : 'bg-white dark:bg-slate-700 text-gray-700 dark:text-slate-300 hover:bg-gray-50 dark:hover:bg-slate-600'
                   }`}
                 >
                   <ViewColumnsIcon className="h-4 w-4" />
                 </button>
                 <button
                   onClick={() => setViewMode('cards')}
-                  className={`px-3 py-2 text-sm font-medium ${
+                  className={`px-3 py-2 text-sm font-medium transition-colors ${
                     viewMode === 'cards'
-                      ? 'bg-blue-600 text-white'
-                      : 'bg-white text-gray-700 hover:bg-gray-50'
+                      ? 'bg-blue-600 text-white dark:bg-blue-500'
+                      : 'bg-white dark:bg-slate-700 text-gray-700 dark:text-slate-300 hover:bg-gray-50 dark:hover:bg-slate-600'
                   }`}
                 >
                   <Squares2X2Icon className="h-4 w-4" />
@@ -732,7 +707,7 @@ export function JobsBoard() {
 
         {/* Loading State */}
         {loading && (
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-8">
+          <div className="bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-gray-200 dark:border-slate-700 p-8">
             <div className="animate-pulse">
               <div className="space-y-4">
                 {[...Array(5)].map((_, i) => (
@@ -750,13 +725,13 @@ export function JobsBoard() {
 
         {/* Jobs Table/Cards */}
         {!loading && jobs.length === 0 && (
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-12 text-center">
+          <div className="bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-gray-200 dark:border-slate-700 p-12 text-center">
             <div className="mx-auto w-24 h-24 text-gray-400 mb-4">
               <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2-2v2m8 0V6a2 2 0 012 2v6M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2m-8 0V6a2 2 0 00-2 2v6M8 6h8" />
               </svg>
             </div>
-            <h3 className="text-lg font-medium text-gray-900 mb-2">No jobs found</h3>
+            <h3 className="text-lg font-medium text-gray-900 dark:text-slate-100 mb-2">No jobs found</h3>
             <p className="text-gray-500 mb-4">
               {localFilters.search || localFilters.status
                 ? 'Try adjusting your filters to see more results.'
@@ -780,27 +755,27 @@ export function JobsBoard() {
             onDragStart={handleDragStart}
             onDragEnd={handleDragEnd}
           >
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+            <div className="bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-gray-200 dark:border-slate-700 overflow-hidden">
               <div className="overflow-x-auto">
-                <table className="min-w-full divide-y divide-gray-200">
-                  <thead className="bg-gray-50">
+                <table className="min-w-full divide-y divide-gray-200 dark:divide-slate-600">
+                  <thead className="bg-gray-50 dark:bg-slate-700">
                     <tr>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                         Job
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                         Status
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                         Tags
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                         Created
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                         Order
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                         Assessment
                       </th>
                       <th className="relative px-6 py-3">
@@ -809,7 +784,7 @@ export function JobsBoard() {
                     </tr>
                   </thead>
                   <SortableContext items={jobs.map(job => job.id)} strategy={verticalListSortingStrategy}>
-                    <tbody className="bg-white divide-y divide-gray-200">
+                    <tbody className="bg-white dark:bg-slate-800 divide-y divide-gray-200 dark:divide-slate-700">
                       {jobs.map((job) => (
                         <SortableJobRow
                           key={job.id}
@@ -817,7 +792,6 @@ export function JobsBoard() {
                           openEditModal={openEditModal}
                           openViewModal={openViewModal}
                           updateJob={updateJob}
-                          getStatusBadge={getStatusBadge}
                           formatDate={formatDate}
                           hasAssessment={getAssessmentStatus(job.id).hasAssessment}
                           onAssessmentClick={handleAssessmentClick}
@@ -830,8 +804,8 @@ export function JobsBoard() {
             </div>
             <DragOverlay>
               {activeId ? (
-                <div className="bg-white border border-gray-300 rounded-lg shadow-xl p-4 opacity-90">
-                  <div className="text-sm font-medium text-gray-900">
+                <div className="bg-white dark:bg-slate-800 border border-gray-300 dark:border-slate-600 rounded-lg shadow-xl p-4 opacity-90">
+                  <div className="text-sm font-medium text-gray-900 dark:text-white">
                     {jobs.find(job => job.id.toString() === activeId)?.title}
                   </div>
                 </div>
@@ -856,7 +830,6 @@ export function JobsBoard() {
                     job={job}
                     openEditModal={openEditModal}
                     updateJob={updateJob}
-                    getStatusBadge={getStatusBadge}
                     formatDate={formatDate}
                     hasAssessment={getAssessmentStatus(job.id).hasAssessment}
                     onAssessmentClick={handleAssessmentClick}
@@ -866,8 +839,8 @@ export function JobsBoard() {
             </SortableContext>
             <DragOverlay>
               {activeId ? (
-                <div className="bg-white border border-gray-300 rounded-lg shadow-xl p-4 opacity-90">
-                  <div className="text-sm font-medium text-gray-900">
+                <div className="bg-white dark:bg-slate-800 border border-gray-300 dark:border-slate-600 rounded-lg shadow-xl p-4 opacity-90">
+                  <div className="text-sm font-medium text-gray-900 dark:text-white">
                     {jobs.find(job => job.id.toString() === activeId)?.title}
                   </div>
                 </div>
@@ -878,10 +851,10 @@ export function JobsBoard() {
 
         {/* Pagination */}
         {!loading && jobs.length > 0 && (
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 px-6 py-4 mt-6">
+          <div className="bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-gray-200 dark:border-slate-700 px-6 py-4 mt-6">
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-4">
-                <span className="text-sm text-gray-700">
+                <span className="text-sm text-gray-700 dark:text-slate-300">
                   {pagination.totalPages > 1 ? (
                     <>
                       Showing {((pagination.page - 1) * pagination.pageSize) + 1} to{' '}
@@ -895,7 +868,7 @@ export function JobsBoard() {
                 
                 {/* Show All Toggle */}
                 {pagination.totalCount > 10 && (
-                  <button
+                  <Button
                     onClick={() => {
                       if (pagination.totalPages > 1) {
                         // Show all jobs
@@ -905,23 +878,25 @@ export function JobsBoard() {
                         updatePagination({ pageSize: 10, page: 1 });
                       }
                     }}
-                    className="inline-flex items-center px-3 py-1.5 border border-gray-300 shadow-sm text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                    variant="outline"
+                    size="sm"
                   >
                     {pagination.totalPages > 1 ? 'Show All' : 'Show Pages'}
-                  </button>
+                  </Button>
                 )}
               </div>
               
               {pagination.totalPages > 1 && (
                 <div className="flex items-center space-x-2">
-                  <button
+                  <Button
                     onClick={() => updatePagination({ page: pagination.page - 1 })}
                     disabled={pagination.page === 1}
-                    className="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                    variant="outline"
+                    size="sm"
                   >
-                    <ChevronLeftIcon className="h-4 w-4 mr-1" />
+                    <ChevronLeftIcon className="h-4 w-4" />
                     Previous
-                  </button>
+                  </Button>
                   
                   <div className="flex space-x-1">
                     {[...Array(Math.min(5, pagination.totalPages))].map((_, i) => {
@@ -930,10 +905,10 @@ export function JobsBoard() {
                         <button
                           key={pageNum}
                           onClick={() => updatePagination({ page: pageNum })}
-                          className={`px-3 py-2 text-sm font-medium rounded-lg ${
+                          className={`px-3 py-2 text-sm font-medium rounded-lg transition-colors ${
                             pagination.page === pageNum
-                              ? 'bg-blue-600 text-white'
-                              : 'text-gray-700 bg-white border border-gray-300 hover:bg-gray-50'
+                              ? 'bg-blue-600 text-white dark:bg-blue-500'
+                              : 'text-gray-700 dark:text-slate-300 bg-white dark:bg-slate-700 border border-gray-300 dark:border-slate-600 hover:bg-gray-50 dark:hover:bg-slate-600'
                           }`}
                         >
                           {pageNum}
@@ -942,14 +917,15 @@ export function JobsBoard() {
                     })}
                   </div>
                   
-                  <button
+                  <Button
                     onClick={() => updatePagination({ page: pagination.page + 1 })}
                     disabled={pagination.page === pagination.totalPages}
-                    className="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                    variant="outline"
+                    size="sm"
                   >
                     Next
-                    <ChevronRightIcon className="h-4 w-4 ml-1" />
-                  </button>
+                    <ChevronRightIcon className="h-4 w-4" />
+                  </Button>
                 </div>
               )}
             </div>
@@ -961,29 +937,29 @@ export function JobsBoard() {
       {showCreateModal && (
         <div className="fixed inset-0 z-50 overflow-y-auto">
           <div className="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-            <div className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" onClick={() => setShowCreateModal(false)}></div>
+            <div className="fixed inset-0 bg-gray-900 bg-opacity-50 dark:bg-black dark:bg-opacity-75 transition-opacity" onClick={() => setShowCreateModal(false)}></div>
             
             <span className="hidden sm:inline-block sm:align-middle sm:h-screen">&#8203;</span>
             
-            <div className="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+            <div className="inline-block align-bottom bg-white dark:bg-slate-800 rounded-xl text-left overflow-hidden shadow-2xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
               <form onSubmit={createForm.handleSubmit(handleCreateJob)}>
-                <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                <div className="bg-white dark:bg-slate-800 px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
                   <div className="sm:flex sm:items-start">
                     <div className="mt-3 text-center sm:mt-0 sm:text-left w-full">
-                      <h3 className="text-lg leading-6 font-medium text-gray-900 mb-4">
+                      <h3 className="text-lg leading-6 font-semibold text-gray-900 dark:text-white mb-4">
                         Create New Job
                       </h3>
                       
                       <div className="space-y-4">
                         <div>
-                          <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-1">
+                          <label htmlFor="title" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                             Job Title *
                           </label>
                           <input
                             {...createForm.register('title', { required: 'Job title is required' })}
                             type="text"
                             id="title"
-                            className="block w-full border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                            className="block w-full border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-900 dark:text-white rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500"
                             placeholder="e.g. Senior React Developer"
                           />
                           {createForm.formState.errors.title && (
@@ -992,13 +968,13 @@ export function JobsBoard() {
                         </div>
 
                         <div>
-                          <label htmlFor="status" className="block text-sm font-medium text-gray-700 mb-1">
+                          <label htmlFor="status" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                             Status
                           </label>
                           <select
                             {...createForm.register('status')}
                             id="status"
-                            className="block w-full border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                            className="block w-full border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-900 dark:text-white rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500"
                           >
                             <option value="active">Active</option>
                             <option value="archived">Archived</option>
@@ -1006,21 +982,21 @@ export function JobsBoard() {
                         </div>
 
                         <div>
-                          <label htmlFor="tags" className="block text-sm font-medium text-gray-700 mb-1">
+                          <label htmlFor="tags" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                             Tags
                           </label>
                           <input
                             {...createForm.register('tags')}
                             type="text"
                             id="tags"
-                            className="block w-full border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                            className="block w-full border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-900 dark:text-white rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500"
                             placeholder="remote, senior, react, typescript"
                           />
-                          <p className="mt-1 text-sm text-gray-500">Separate tags with commas</p>
+                          <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">Separate tags with commas</p>
                         </div>
 
                         <div>
-                          <label htmlFor="order" className="block text-sm font-medium text-gray-700 mb-1">
+                          <label htmlFor="order" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                             Order (optional)
                           </label>
                           <input
@@ -1028,30 +1004,32 @@ export function JobsBoard() {
                             type="number"
                             min="1"
                             id="order"
-                            className="block w-full border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                            className="block w-full border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-900 dark:text-white rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500"
                             placeholder="Leave empty to add at end"
                           />
-                          <p className="mt-1 text-sm text-gray-500">Specify position in job list. Other jobs will be reordered automatically.</p>
+                          <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">Specify position in job list. Other jobs will be reordered automatically.</p>
                         </div>
                       </div>
                     </div>
                   </div>
                 </div>
                 
-                <div className="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
-                  <button
+                <div className="bg-gray-50 dark:bg-slate-700 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+                  <Button
                     type="submit"
-                    className="w-full inline-flex justify-center rounded-lg border border-transparent shadow-sm px-4 py-2 bg-blue-600 text-base font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:ml-3 sm:w-auto sm:text-sm"
+                    variant="primary"
+                    size="md"
                   >
                     Create Job
-                  </button>
-                  <button
+                  </Button>
+                  <Button
                     type="button"
                     onClick={() => setShowCreateModal(false)}
-                    className="mt-3 w-full inline-flex justify-center rounded-lg border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
+                    variant="outline"
+                    size="md"
                   >
                     Cancel
-                  </button>
+                  </Button>
                 </div>
               </form>
             </div>
@@ -1063,29 +1041,29 @@ export function JobsBoard() {
       {showEditModal && selectedJob && (
         <div className="fixed inset-0 z-50 overflow-y-auto">
           <div className="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-            <div className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" onClick={() => setShowEditModal(false)}></div>
+            <div className="fixed inset-0 bg-gray-900 bg-opacity-50 dark:bg-black dark:bg-opacity-75 transition-opacity" onClick={() => setShowEditModal(false)}></div>
             
             <span className="hidden sm:inline-block sm:align-middle sm:h-screen">&#8203;</span>
             
-            <div className="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+            <div className="inline-block align-bottom bg-white dark:bg-slate-800 rounded-xl text-left overflow-hidden shadow-2xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
               <form onSubmit={editForm.handleSubmit(handleEditJob)}>
-                <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                <div className="bg-white dark:bg-slate-800 px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
                   <div className="sm:flex sm:items-start">
                     <div className="mt-3 text-center sm:mt-0 sm:text-left w-full">
-                      <h3 className="text-lg leading-6 font-medium text-gray-900 mb-4">
+                      <h3 className="text-lg leading-6 font-semibold text-gray-900 dark:text-white mb-4">
                         Edit Job: {selectedJob.title}
                       </h3>
                       
                       <div className="space-y-4">
                         <div>
-                          <label htmlFor="edit-title" className="block text-sm font-medium text-gray-700 mb-1">
+                          <label htmlFor="edit-title" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                             Job Title *
                           </label>
                           <input
                             {...editForm.register('title', { required: 'Job title is required' })}
                             type="text"
                             id="edit-title"
-                            className="block w-full border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                            className="block w-full border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-900 dark:text-white rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500"
                             placeholder="e.g. Senior React Developer"
                           />
                           {editForm.formState.errors.title && (
@@ -1094,13 +1072,13 @@ export function JobsBoard() {
                         </div>
 
                         <div>
-                          <label htmlFor="edit-status" className="block text-sm font-medium text-gray-700 mb-1">
+                          <label htmlFor="edit-status" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                             Status
                           </label>
                           <select
                             {...editForm.register('status')}
                             id="edit-status"
-                            className="block w-full border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                            className="block w-full border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-900 dark:text-white rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500"
                           >
                             <option value="active">Active</option>
                             <option value="archived">Archived</option>
@@ -1108,21 +1086,21 @@ export function JobsBoard() {
                         </div>
 
                         <div>
-                          <label htmlFor="edit-tags" className="block text-sm font-medium text-gray-700 mb-1">
+                          <label htmlFor="edit-tags" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                             Tags
                           </label>
                           <input
                             {...editForm.register('tags')}
                             type="text"
                             id="edit-tags"
-                            className="block w-full border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                            className="block w-full border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-900 dark:text-white rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500"
                             placeholder="remote, senior, react, typescript"
                           />
-                          <p className="mt-1 text-sm text-gray-500">Separate tags with commas</p>
+                          <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">Separate tags with commas</p>
                         </div>
 
                         <div>
-                          <label htmlFor="edit-order" className="block text-sm font-medium text-gray-700 mb-1">
+                          <label htmlFor="edit-order" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                             Order
                           </label>
                           <input
@@ -1130,46 +1108,49 @@ export function JobsBoard() {
                             type="number"
                             min="1"
                             id="edit-order"
-                            className="block w-full border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                            className="block w-full border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-900 dark:text-white rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500"
                             placeholder="Position in job list"
                           />
-                          <p className="mt-1 text-sm text-gray-500">Change position in job list. Other jobs will be reordered automatically.</p>
+                          <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">Change position in job list. Other jobs will be reordered automatically.</p>
                         </div>
                       </div>
                     </div>
                   </div>
                 </div>
                 
-                <div className="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
-                  <button
+                <div className="bg-gray-50 dark:bg-slate-700 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+                  <Button
                     type="submit"
-                    className="w-full inline-flex justify-center rounded-lg border border-transparent shadow-sm px-4 py-2 bg-blue-600 text-base font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:ml-3 sm:w-auto sm:text-sm"
+                    variant="primary"
+                    size="md"
                   >
                     Update Job
-                  </button>
+                  </Button>
                   {getAssessmentStatus(selectedJob.id).hasAssessment && (
-                    <button
+                    <Button
                       type="button"
                       onClick={() => {
                         setShowEditModal(false);
                         selectJob(null);
                         navigate(`/job/${selectedJob.id}`);
                       }}
-                      className="w-full inline-flex justify-center rounded-lg border border-transparent shadow-sm px-4 py-2 bg-purple-600 text-base font-medium text-white hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 sm:ml-3 sm:w-auto sm:text-sm"
+                      variant="accent"
+                      size="md"
                     >
                       Edit Assessment
-                    </button>
+                    </Button>
                   )}
-                  <button
+                  <Button
                     type="button"
                     onClick={() => {
                       setShowEditModal(false);
                       selectJob(null);
                     }}
-                    className="mt-3 w-full inline-flex justify-center rounded-lg border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
+                    variant="outline"
+                    size="md"
                   >
                     Cancel
-                  </button>
+                  </Button>
                 </div>
               </form>
             </div>

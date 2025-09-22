@@ -90,7 +90,7 @@ function StageCandidateCard({ candidate, jobTitle, onClick }: CandidateCardProps
         e.stopPropagation();
         onClick?.(candidate);
       }}
-      className="bg-white rounded-lg border border-gray-200 p-3 cursor-grab hover:shadow-md transition-all duration-200 active:cursor-grabbing"
+      className="bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-600 p-3 cursor-grab hover:shadow-md transition-all duration-200 active:cursor-grabbing"
     >
       {/* Candidate Header */}
       <div className="flex items-center space-x-3 mb-2">
@@ -102,7 +102,7 @@ function StageCandidateCard({ candidate, jobTitle, onClick }: CandidateCardProps
           </div>
         </div>
         <div className="min-w-0 flex-1">
-          <h4 className="text-sm font-semibold text-gray-900 truncate">
+          <h4 className="text-sm font-semibold text-gray-900 dark:text-white truncate">
             {candidate.name}
           </h4>
           <p className="text-xs text-gray-500 truncate">{candidate.email}</p>
@@ -165,7 +165,7 @@ function StageColumn({ stage, candidates, jobs, draggedCandidate, isValidTransit
   return (
     <div
       ref={setNodeRef}
-      className={`flex-1 min-w-80 bg-white rounded-xl border-2 transition-all duration-300 ${
+      className={`flex-1 min-w-80 bg-white dark:bg-slate-800 rounded-xl border-2 transition-all duration-300 ${
         isOver && isValidDropTarget ? `${stage.borderColor} bg-opacity-10 ${stage.bgColor}` : 
         isOver && !isValidDropTarget ? 'border-red-400 bg-red-50' :
         isDragging && !isValidDropTarget ? 'border-gray-300 bg-gray-100 opacity-50' :
@@ -180,7 +180,7 @@ function StageColumn({ stage, candidates, jobs, draggedCandidate, isValidTransit
               <StageIcon className="h-5 w-5 text-white" />
             </div>
             <div>
-              <h3 className="text-base font-semibold text-gray-900">
+              <h3 className="text-base font-semibold text-gray-900 dark:text-white">
                 {stage.title}
               </h3>
               <p className="text-sm text-gray-500">{stage.description}</p>
@@ -517,7 +517,7 @@ export function CandidateStageBoard({ candidates, jobs = [], onStageChange, onCa
         {/* Loading Overlay */}
         {isUpdating && (
           <div className="absolute inset-0 bg-black bg-opacity-25 flex items-center justify-center">
-            <div className="bg-white rounded-lg p-6 flex items-center space-x-3 shadow-lg">
+            <div className="bg-white dark:bg-slate-800 rounded-lg p-6 flex items-center space-x-3 shadow-lg">
               <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
               <span className="text-gray-900">Updating candidate stage...</span>
             </div>
@@ -532,10 +532,10 @@ export function CandidateStageBoard({ candidates, jobs = [], onStageChange, onCa
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-gray-50 rounded-xl max-w-7xl w-full max-h-full m-4 flex flex-col">
         {/* Header */}
-        <div className="p-6 border-b border-gray-200 bg-white rounded-t-xl">
+        <div className="p-6 border-b border-gray-200 dark:border-slate-600 bg-white dark:bg-slate-800 rounded-t-xl">
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="text-xl font-semibold text-gray-900">Candidate Stage Board</h2>
+              <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Candidate Stage Board</h2>
               <p className="text-gray-600">Drag candidates between stages to update their status</p>
             </div>
             {onClose && (
@@ -584,7 +584,7 @@ export function CandidateStageBoard({ candidates, jobs = [], onStageChange, onCa
         {/* Loading Overlay */}
         {isUpdating && (
           <div className="absolute inset-0 bg-black bg-opacity-25 flex items-center justify-center rounded-xl">
-            <div className="bg-white rounded-lg p-6 flex items-center space-x-3">
+            <div className="bg-white dark:bg-slate-800 rounded-lg p-6 flex items-center space-x-3">
               <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
               <span className="text-gray-900">Updating candidate stage...</span>
             </div>

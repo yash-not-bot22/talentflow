@@ -91,7 +91,7 @@ function CandidateCard({ candidate, isActive = false, isDragging = false }: Cand
       {...attributes}
       {...listeners}
       className={`
-        bg-white rounded-lg border shadow-sm p-3 cursor-grab hover:shadow-md transition-all duration-200
+        bg-white dark:bg-slate-800 rounded-lg border dark:border-slate-600 shadow-sm p-3 cursor-grab hover:shadow-md transition-all duration-200
         ${isActive ? 'ring-2 ring-blue-500 shadow-lg' : ''}
         ${isOver ? 'ring-2 ring-green-400' : ''}
         ${isDragging ? 'rotate-2 scale-105' : ''}
@@ -107,7 +107,7 @@ function CandidateCard({ candidate, isActive = false, isDragging = false }: Cand
           </div>
         </div>
         <div className="min-w-0 flex-1">
-          <h4 className="text-sm font-semibold text-gray-900 truncate">
+          <h4 className="text-sm font-semibold text-gray-900 dark:text-white truncate">
             {candidate.name}
           </h4>
           <p className="text-xs text-gray-500 truncate">{candidate.email}</p>
@@ -131,7 +131,7 @@ function CandidateCard({ candidate, isActive = false, isDragging = false }: Cand
 
       {/* Drag Indicator */}
       <div className="mt-2 flex justify-center">
-        <div className="w-6 h-1 bg-gray-200 rounded-full"></div>
+        <div className="w-6 h-1 bg-gray-200 dark:bg-slate-600 rounded-full"></div>
       </div>
     </div>
   );
@@ -159,7 +159,7 @@ function KanbanColumn({ stage, isActive, isCompleted, onCandidateClick }: Kanban
     <div
       ref={setNodeRef}
       className={`
-        w-full bg-white rounded-lg border-2 transition-all duration-300 min-h-96 flex flex-col
+        w-full bg-white dark:bg-slate-800 rounded-lg border-2 dark:border-slate-600 transition-all duration-300 min-h-96 flex flex-col
         ${isOver ? 'border-blue-400 bg-blue-50' : 'border-gray-200'}
         ${isActive ? 'ring-2 ring-blue-500 ring-opacity-50 border-blue-400' : ''}
         ${isCompleted ? 'bg-green-50 border-green-300' : ''}
@@ -170,12 +170,12 @@ function KanbanColumn({ stage, isActive, isCompleted, onCandidateClick }: Kanban
       }}
     >
       {/* Column Header */}
-      <div className={`p-4 border-b border-gray-200 ${isActive ? 'bg-blue-50' : ''}`}>
+      <div className={`p-4 border-b border-gray-200 dark:border-slate-600 ${isActive ? 'bg-blue-50 dark:bg-blue-900/30' : ''}`}>
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-3">
             <div className={`
               p-2 rounded-lg transition-all duration-200
-              ${isCompleted ? 'bg-green-100' : isActive ? stage.bgColor : 'bg-white'}
+              ${isCompleted ? 'bg-green-100 dark:bg-green-900/50' : isActive ? stage.bgColor : 'bg-white dark:bg-slate-700'}
             `}>
               {isCompleted ? (
                 <IconSolid className={`h-5 w-5 ${isCompleted ? 'text-green-600' : stage.color}`} />
@@ -186,7 +186,7 @@ function KanbanColumn({ stage, isActive, isCompleted, onCandidateClick }: Kanban
             <div>
               <h3 className={`
                 text-base font-semibold transition-colors
-                ${isCompleted ? 'text-green-800' : 'text-gray-900'}
+                ${isCompleted ? 'text-green-800 dark:text-green-400' : 'text-gray-900 dark:text-white'}
               `}>
                 {stage.title}
               </h3>
@@ -194,7 +194,7 @@ function KanbanColumn({ stage, isActive, isCompleted, onCandidateClick }: Kanban
             </div>
           </div>
           <div className="flex items-center space-x-2">
-            <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-gray-100 text-gray-800">
+            <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-gray-100 dark:bg-slate-700 text-gray-800 dark:text-gray-200">
               {stage.candidates.length}
             </span>
             {isCompleted && (
@@ -208,7 +208,7 @@ function KanbanColumn({ stage, isActive, isCompleted, onCandidateClick }: Kanban
       <div className="p-4 flex-1 relative">
         {/* Enhanced drop zone overlay */}
         {isOver && (
-          <div className="absolute inset-2 border-2 border-dashed border-blue-400 bg-blue-50 bg-opacity-75 rounded-lg flex items-center justify-center z-10 pointer-events-none">
+          <div className="absolute inset-2 border-2 border-dashed border-blue-400 dark:border-blue-500 bg-blue-50 dark:bg-blue-900/30 bg-opacity-75 rounded-lg flex items-center justify-center z-10 pointer-events-none">
             <div className="text-center">
               <IconSolid className="h-12 w-12 mx-auto mb-2 text-blue-500" />
               <p className="text-lg font-medium text-blue-700">Drop candidate here</p>
@@ -450,9 +450,9 @@ export function CandidateKanbanBoard({
   return (
     <div className="w-full">
       {/* Progress Bar */}
-      <div className="mb-6 bg-white rounded-lg p-4 shadow-sm border">
+      <div className="mb-6 bg-white dark:bg-slate-800 rounded-lg p-4 shadow-sm border dark:border-slate-600">
         <div className="flex items-center justify-between mb-2">
-          <h3 className="text-sm font-semibold text-gray-900">Recruitment Progress</h3>
+          <h3 className="text-sm font-semibold text-gray-900 dark:text-white">Recruitment Progress</h3>
           <span className="text-xs text-gray-500">
             Stage {currentStageIndex + 1} of {stages.length - 1} {/* Excluding rejected */}
           </span>
@@ -465,7 +465,7 @@ export function CandidateKanbanBoard({
                 flex items-center justify-center w-8 h-8 rounded-full transition-all duration-300
                 ${index <= currentStageIndex ? 
                   'bg-green-500 text-white' : 
-                  'bg-gray-200 text-gray-400'}
+                  'bg-gray-200 dark:bg-slate-600 text-gray-400 dark:text-gray-500'}
               `}>
                 {index < currentStageIndex ? (
                   <CheckCircleSolidIcon className="h-5 w-5" />
@@ -479,7 +479,7 @@ export function CandidateKanbanBoard({
               {index < stages.length - 2 && (
                 <div className={`
                   w-12 h-1 transition-all duration-300
-                  ${index < currentStageIndex ? 'bg-green-500' : 'bg-gray-200'}
+                  ${index < currentStageIndex ? 'bg-green-500' : 'bg-gray-200 dark:bg-slate-600'}
                 `} />
               )}
             </div>
@@ -522,9 +522,9 @@ export function CandidateKanbanBoard({
       {/* Loading Overlay */}
       {isUpdating && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 flex items-center space-x-3">
+          <div className="bg-white dark:bg-slate-800 rounded-lg p-6 flex items-center space-x-3">
             <div className="animate-spin rounded-full h-6 w-6 border-2 border-gray-300 border-t-blue-600"></div>
-            <span className="text-gray-900 font-medium">Updating candidate stage...</span>
+            <span className="text-gray-900 dark:text-white font-medium">Updating candidate stage...</span>
           </div>
         </div>
       )}

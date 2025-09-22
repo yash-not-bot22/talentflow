@@ -42,11 +42,11 @@ export function SimpleCandidatesPage() {
           <p className="text-gray-500 text-center py-8">No candidates found</p>
         ) : (
           candidates.map((candidate: Candidate) => (
-            <div key={candidate.id} className="bg-white p-6 rounded-lg shadow border">
+            <div key={candidate.id} className="bg-white dark:bg-slate-800 p-6 rounded-lg shadow border border-gray-200 dark:border-slate-600">
               <div className="flex justify-between items-start mb-4">
                 <div>
-                  <h3 className="text-lg font-semibold text-gray-900">{candidate.name}</h3>
-                  <p className="text-gray-600">{candidate.email}</p>
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white">{candidate.name}</h3>
+                  <p className="text-gray-600 dark:text-gray-300">{candidate.email}</p>
                 </div>
                 <span className={`px-3 py-1 rounded-full text-sm font-medium ${getStageColor(candidate.stage)}`}>
                   {candidate.stage}
@@ -55,7 +55,7 @@ export function SimpleCandidatesPage() {
               
               {candidate.notes && candidate.notes.length > 0 && (
                 <div className="mt-4">
-                  <h4 className="text-sm font-medium text-gray-700 mb-2">Notes:</h4>
+                  <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Notes:</h4>
                   <div className="space-y-2">
                     {candidate.notes.map((note, index) => (
                       <div key={index} className="text-gray-600 text-sm bg-gray-50 p-2 rounded">

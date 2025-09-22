@@ -157,8 +157,8 @@ export function AssessmentDetail() {
     const currentValue = candidateResponses[questionKey] || '';
 
     return (
-      <div key={question.id} className="mb-6 p-4 border border-gray-200 rounded-lg">
-        <label className="block text-sm font-medium text-gray-900 mb-2">
+      <div key={question.id} className="mb-6 p-4 border border-gray-200 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700">
+        <label className="block text-sm font-medium text-gray-900 dark:text-white mb-2">
           {sectionIndex + 1}.{questionIndex + 1} {question.text}
           {question.required && <span className="text-red-500 ml-1">*</span>}
         </label>
@@ -168,7 +168,7 @@ export function AssessmentDetail() {
             type="text"
             value={currentValue as string}
             onChange={(e) => handleResponseChange(questionKey, e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             placeholder="Your answer..."
             maxLength={question.maxLength}
           />
@@ -179,7 +179,7 @@ export function AssessmentDetail() {
             value={currentValue as string}
             onChange={(e) => handleResponseChange(questionKey, e.target.value)}
             rows={4}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             placeholder="Your answer..."
             maxLength={question.maxLength}
           />
@@ -197,7 +197,7 @@ export function AssessmentDetail() {
                   onChange={(e) => handleResponseChange(questionKey, e.target.value)}
                   className="mr-2 text-blue-600 focus:ring-blue-500"
                 />
-                <span className="text-sm text-gray-700">{option}</span>
+                <span className="text-sm text-gray-700 dark:text-gray-300">{option}</span>
               </label>
             ))}
           </div>
@@ -221,7 +221,7 @@ export function AssessmentDetail() {
                   }}
                   className="mr-2 text-blue-600 focus:ring-blue-500"
                 />
-                <span className="text-sm text-gray-700">{option}</span>
+                <span className="text-sm text-gray-700 dark:text-gray-300">{option}</span>
               </label>
             ))}
           </div>
@@ -232,7 +232,7 @@ export function AssessmentDetail() {
             type="number"
             value={currentValue as number || ''}
             onChange={(e) => handleResponseChange(questionKey, e.target.value ? parseFloat(e.target.value) : null)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             placeholder="Enter a number..."
             min={question.min}
             max={question.max}
@@ -246,7 +246,7 @@ export function AssessmentDetail() {
               const file = e.target.files?.[0];
               handleResponseChange(questionKey, file ? file.name : null);
             }}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
           />
         )}
         
@@ -290,7 +290,7 @@ export function AssessmentDetail() {
         <div className="flex items-center space-x-4">
           <Link
             to="/jobs"
-            className="inline-flex items-center text-sm text-gray-500 hover:text-gray-700"
+            className="inline-flex items-center text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"
           >
             <ChevronLeftIcon className="h-4 w-4 mr-1" />
             Back to Jobs
@@ -299,16 +299,16 @@ export function AssessmentDetail() {
       </div>
 
       {/* Job Info */}
-      <div className="bg-white border border-gray-200 rounded-xl p-6">
+      <div className="bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-600 rounded-xl p-6">
         <div className="flex items-center justify-between mb-4">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">{job.title}</h1>
-            <p className="text-gray-600 mt-1">{job.slug}</p>
+            <h1 className="text-2xl font-bold text-gray-900 dark:text-white">{job.title}</h1>
+            <p className="text-gray-600 dark:text-gray-400 mt-1">{job.slug}</p>
           </div>
           <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${
             job.status === 'active' 
-              ? 'bg-green-100 text-green-700' 
-              : 'bg-gray-100 text-gray-600'
+              ? 'bg-green-100 dark:bg-green-900/50 text-green-700 dark:text-green-400' 
+              : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400'
           }`}>
             {job.status === 'active' && <CheckCircleIcon className="h-4 w-4 mr-1" />}
             {job.status}
@@ -320,7 +320,7 @@ export function AssessmentDetail() {
             {job.tags.map((tag) => (
               <span
                 key={tag}
-                className="inline-flex items-center px-2 py-1 rounded-md text-sm bg-gray-100 text-gray-700"
+                className="inline-flex items-center px-2 py-1 rounded-md text-sm bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-gray-300"
               >
                 {tag}
               </span>
@@ -330,9 +330,9 @@ export function AssessmentDetail() {
       </div>
 
       {/* Assessment Section */}
-      <div className="bg-white border border-gray-200 rounded-xl p-6">
+      <div className="bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-600 rounded-xl p-6">
         <div className="flex items-center justify-between mb-6">
-          <h2 className="text-xl font-semibold text-gray-900">Assessment</h2>
+          <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Assessment</h2>
           <div className="flex space-x-3">
             {assessment ? (
               <>
@@ -347,8 +347,8 @@ export function AssessmentDetail() {
                   onClick={() => setPreviewMode(!previewMode)}
                   className={`inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-lg transition-colors ${
                     previewMode 
-                      ? 'text-blue-600 bg-blue-50 hover:bg-blue-100' 
-                      : 'text-gray-600 bg-gray-50 hover:bg-gray-100'
+                      ? 'text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/50 hover:bg-blue-100 dark:hover:bg-blue-900/70' 
+                      : 'text-gray-600 dark:text-gray-400 bg-gray-50 dark:bg-slate-700 hover:bg-gray-100 dark:hover:bg-slate-600'
                   }`}
                 >
                   {previewMode ? (
@@ -379,18 +379,18 @@ export function AssessmentDetail() {
         {assessment ? (
           <div className="space-y-6">
             {/* Assessment Overview */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 bg-gray-50 rounded-lg">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 bg-gray-50 dark:bg-slate-700 rounded-lg">
               <div className="text-center">
-                <div className="text-2xl font-bold text-blue-600">{assessment.sections.length}</div>
-                <div className="text-sm text-gray-600">Sections</div>
+                <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">{assessment.sections.length}</div>
+                <div className="text-sm text-gray-600 dark:text-gray-400">Sections</div>
               </div>
               <div className="text-center">
-                <div className="text-2xl font-bold text-green-600">{getTotalQuestions(assessment)}</div>
-                <div className="text-sm text-gray-600">Questions</div>
+                <div className="text-2xl font-bold text-green-600 dark:text-green-400">{getTotalQuestions(assessment)}</div>
+                <div className="text-sm text-gray-600 dark:text-gray-400">Questions</div>
               </div>
               <div className="text-center">
-                <div className="text-sm text-gray-600">Last Updated</div>
-                <div className="text-sm font-medium text-gray-900">
+                <div className="text-sm text-gray-600 dark:text-gray-400">Last Updated</div>
+                <div className="text-sm font-medium text-gray-900 dark:text-white">
                   <ClockIcon className="h-4 w-4 inline mr-1" />
                   {formatDate(assessment.updatedAt)}
                 </div>
@@ -400,23 +400,23 @@ export function AssessmentDetail() {
             {/* Assessment Sections */}
             {!previewMode ? (
               <div className="space-y-4">
-                <h3 className="text-lg font-medium text-gray-900">Sections</h3>
+                <h3 className="text-lg font-medium text-gray-900 dark:text-white">Sections</h3>
                 {assessment.sections.map((section, index) => (
-                  <div key={section.id} className="border border-gray-200 rounded-lg p-4">
+                  <div key={section.id} className="border border-gray-200 dark:border-slate-600 bg-white dark:bg-slate-700 rounded-lg p-4">
                     <div className="flex items-center justify-between mb-3">
-                      <h4 className="text-md font-medium text-gray-900">
+                      <h4 className="text-md font-medium text-gray-900 dark:text-white">
                         {index + 1}. {section.name}
                       </h4>
-                      <span className="text-sm text-gray-500">
+                      <span className="text-sm text-gray-500 dark:text-gray-400">
                         {section.questions.length} question{section.questions.length !== 1 ? 's' : ''}
                       </span>
                     </div>
                     
                     <div className="space-y-2">
                       {section.questions.map((question, qIndex) => (
-                        <div key={question.id} className="text-sm text-gray-600">
+                        <div key={question.id} className="text-sm text-gray-600 dark:text-gray-300">
                           <span className="font-medium">{qIndex + 1}.</span> {question.text}
-                          <span className="ml-2 text-xs text-gray-500">
+                          <span className="ml-2 text-xs text-gray-500 dark:text-gray-400">
                             ({question.type})
                           </span>
                         </div>
@@ -427,41 +427,41 @@ export function AssessmentDetail() {
               </div>
             ) : (
               <div className="space-y-6">
-                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
                   <div className="flex items-center">
-                    <UserIcon className="h-5 w-5 text-blue-600 mr-2" />
-                    <h3 className="text-lg font-medium text-blue-900">Candidate View</h3>
+                    <UserIcon className="h-5 w-5 text-blue-600 dark:text-blue-400 mr-2" />
+                    <h3 className="text-lg font-medium text-blue-900 dark:text-blue-200">Candidate View</h3>
                   </div>
-                  <p className="text-sm text-blue-700 mt-1">
+                  <p className="text-sm text-blue-700 dark:text-blue-300 mt-1">
                     This is how candidates will see and complete the assessment.
                   </p>
                 </div>
 
                 {/* Candidate Selection */}
-                <div className="bg-white border border-gray-200 rounded-lg p-4">
+                <div className="bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-600 rounded-lg p-4">
                   <div className="flex items-center justify-between">
                     <div>
-                      <h4 className="text-sm font-medium text-gray-900">Simulating as:</h4>
+                      <h4 className="text-sm font-medium text-gray-900 dark:text-white">Simulating as:</h4>
                       {selectedCandidate ? (
                         <div className="flex items-center mt-2">
-                          <div className="h-8 w-8 bg-blue-100 rounded-full flex items-center justify-center mr-3">
-                            <span className="text-sm font-medium text-blue-700">
-                              {selectedCandidate.name.split(' ').map(n => n[0]).join('').toUpperCase()}
+                          <div className="h-8 w-8 bg-blue-100 dark:bg-blue-900/50 rounded-full flex items-center justify-center mr-3">
+                            <span className="text-blue-600 dark:text-blue-400 text-sm font-medium">
+                              {selectedCandidate.name.split(' ').map(n => n[0]).join('').slice(0, 2)}
                             </span>
                           </div>
                           <div>
-                            <p className="text-sm font-medium text-gray-900">{selectedCandidate.name}</p>
-                            <p className="text-xs text-gray-500">{selectedCandidate.email}</p>
+                            <p className="text-sm font-medium text-gray-900 dark:text-white">{selectedCandidate.name}</p>
+                            <p className="text-xs text-gray-500 dark:text-gray-400">{selectedCandidate.email}</p>
                           </div>
                         </div>
                       ) : (
-                        <p className="text-sm text-gray-500 mt-1">No candidate selected</p>
+                        <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">No candidate selected</p>
                       )}
                     </div>
                     <button
                       type="button"
                       onClick={() => setShowCandidateModal(true)}
-                      className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+                      className="px-4 py-2 border border-gray-300 dark:border-slate-600 text-gray-700 dark:text-gray-300 bg-white dark:bg-slate-700 rounded-lg hover:bg-gray-50 dark:hover:bg-slate-600 transition-colors"
                     >
                       {selectedCandidate ? 'Change Candidate' : 'Select Candidate'}
                     </button>
@@ -470,8 +470,8 @@ export function AssessmentDetail() {
                 
                 <form onSubmit={(e) => { e.preventDefault(); handleSubmitResponse(); }} className="space-y-6">
                   {assessment.sections.map((section, sectionIndex) => (
-                    <div key={section.id} className="bg-white border border-gray-200 rounded-lg p-6">
-                      <h3 className="text-lg font-medium text-gray-900 mb-4">
+                    <div key={section.id} className="bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-600 rounded-lg p-6">
+                      <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">
                         {sectionIndex + 1}. {section.name}
                       </h3>
                       
@@ -487,7 +487,7 @@ export function AssessmentDetail() {
                     <button
                       type="button"
                       onClick={() => setPreviewMode(false)}
-                      className="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+                      className="px-6 py-2 border border-gray-300 dark:border-slate-600 text-gray-700 dark:text-gray-300 bg-white dark:bg-slate-700 rounded-lg hover:bg-gray-50 dark:hover:bg-slate-600 transition-colors"
                     >
                       Cancel
                     </button>
@@ -505,9 +505,9 @@ export function AssessmentDetail() {
           </div>
         ) : (
           <div className="text-center py-8">
-            <DocumentTextIcon className="h-16 w-16 text-gray-300 mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-gray-900 mb-2">No Assessment Created</h3>
-            <p className="text-gray-600 mb-6">
+            <DocumentTextIcon className="h-16 w-16 text-gray-300 dark:text-gray-600 mx-auto mb-4" />
+            <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">No Assessment Created</h3>
+            <p className="text-gray-600 dark:text-gray-400 mb-6">
               This job doesn't have an assessment yet. Create one to start evaluating candidates.
             </p>
             <button

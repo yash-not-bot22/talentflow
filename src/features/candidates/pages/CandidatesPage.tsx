@@ -47,7 +47,7 @@ const CandidateCard: React.FC<CandidateCardProps> = ({ candidate, getStageInfo, 
 
   // List view
   return (
-    <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 hover:shadow-md hover:border-gray-300 transition-all cursor-pointer group"
+    <div className="bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-gray-200 dark:border-slate-600 p-4 hover:shadow-md hover:border-gray-300 dark:hover:border-slate-500 transition-all cursor-pointer group"
          onClick={() => onViewCandidate(candidate)}>
         <div className="flex items-center justify-between">
           {/* Candidate Info */}
@@ -60,7 +60,7 @@ const CandidateCard: React.FC<CandidateCardProps> = ({ candidate, getStageInfo, 
             
             <div className="min-w-0 flex-1">
               <div className="flex items-center space-x-3 mb-1">
-                <h3 className="text-sm font-semibold text-gray-900 truncate group-hover:text-blue-600 transition-colors">
+                <h3 className="text-sm font-semibold text-gray-900 dark:text-white truncate group-hover:text-blue-600 transition-colors">
                   {candidate.name}
                 </h3>
                 <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${stageInfo.color}`}>
@@ -94,7 +94,7 @@ const CandidateCard: React.FC<CandidateCardProps> = ({ candidate, getStageInfo, 
                 onUpdateStage(candidate, e.target.value as Candidate['stage']);
               }}
               onClick={(e) => e.stopPropagation()}
-              className="text-xs border border-gray-300 rounded-md px-3 py-1.5 bg-white hover:border-blue-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+              className="text-xs border border-gray-300 dark:border-slate-600 rounded-md px-3 py-1.5 bg-white dark:bg-slate-700 text-gray-900 dark:text-white hover:border-blue-400 dark:hover:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
             >
               <option value="applied">Applied</option>
               <option value="screen">Screening</option>
@@ -109,7 +109,7 @@ const CandidateCard: React.FC<CandidateCardProps> = ({ candidate, getStageInfo, 
                 e.stopPropagation();
                 onViewCandidate(candidate);
               }}
-              className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+              className="p-2 text-gray-400 dark:text-gray-500 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-lg transition-colors"
               title="View candidate"
             >
               <EyeIcon className="h-4 w-4" />
@@ -138,7 +138,7 @@ const CandidateCardView: React.FC<CandidateCardProps> = ({ candidate, getStageIn
 
   // Card view
   return (
-    <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-lg hover:border-gray-300 transition-all cursor-pointer group"
+    <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-gray-200 dark:border-slate-600 p-6 hover:shadow-lg hover:border-gray-300 dark:hover:border-slate-500 transition-all cursor-pointer group"
          onClick={() => onViewCandidate(candidate)}>
       {/* Card Header */}
       <div className="flex items-center justify-between mb-4">
@@ -152,7 +152,7 @@ const CandidateCardView: React.FC<CandidateCardProps> = ({ candidate, getStageIn
 
       {/* Candidate Info */}
       <div className="mb-4">
-        <h3 className="text-lg font-semibold text-gray-900 mb-1 group-hover:text-blue-600 transition-colors">
+        <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-1 group-hover:text-blue-600 transition-colors">
           {candidate.name}
         </h3>
         <div className="flex items-center text-sm text-gray-500 mb-2">
@@ -186,7 +186,7 @@ const CandidateCardView: React.FC<CandidateCardProps> = ({ candidate, getStageIn
             onUpdateStage(candidate, e.target.value as Candidate['stage']);
           }}
           onClick={(e) => e.stopPropagation()}
-          className="flex-1 text-xs border border-gray-300 rounded-md px-3 py-2 bg-white hover:border-blue-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+          className="flex-1 text-xs border border-gray-300 dark:border-slate-600 rounded-md px-3 py-2 bg-white dark:bg-slate-700 text-gray-900 dark:text-white hover:border-blue-400 dark:hover:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
         >
           <option value="applied">Applied</option>
           <option value="screen">Screening</option>
@@ -285,13 +285,13 @@ export function CandidatesPage() {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center bg-white p-8 rounded-lg shadow-sm border border-gray-200">
-          <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-            <XMarkIcon className="w-6 h-6 text-red-600" />
+      <div className="min-h-screen bg-gray-50 dark:bg-slate-900 flex items-center justify-center">
+        <div className="text-center bg-white dark:bg-slate-800 p-8 rounded-lg shadow-sm border border-gray-200 dark:border-slate-600">
+          <div className="w-12 h-12 bg-red-100 dark:bg-red-900/50 rounded-full flex items-center justify-center mx-auto mb-4">
+            <XMarkIcon className="w-6 h-6 text-red-600 dark:text-red-400" />
           </div>
-          <h2 className="text-lg font-semibold text-gray-900 mb-2">Error Loading Candidates</h2>
-          <p className="text-gray-600 mb-4">{error}</p>
+          <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">Error Loading Candidates</h2>
+          <p className="text-gray-600 dark:text-gray-400 mb-4">{error}</p>
           <button
             onClick={refreshCandidates}
             className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-lg shadow-sm text-white bg-blue-600 hover:bg-blue-700 transition-colors"
@@ -304,28 +304,28 @@ export function CandidatesPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 dark:bg-slate-900">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 mb-6">
+        <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-gray-200 dark:border-slate-600 mb-6">
           <div className="px-6 py-6">
             <div className="flex items-center justify-between mb-6">
               <div>
-                <h1 className="text-3xl font-bold text-gray-900">Candidates</h1>
-                <p className="text-sm text-gray-500 mt-1">
+                <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Candidates</h1>
+                <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
                   {loading ? 'Loading...' : `${filteredCandidates.length} of ${candidates.length} candidates`}
                 </p>
               </div>
               
               <div className="flex items-center space-x-3">
                 {/* View Mode Toggle */}
-                <div className="flex items-center bg-gray-100 rounded-lg p-1">
+                <div className="flex items-center bg-gray-100 dark:bg-slate-700 rounded-lg p-1">
                   <button
                     onClick={() => setViewMode('list')}
                     className={`px-3 py-2 rounded-md transition-colors flex items-center ${
                       viewMode === 'list' 
-                        ? 'bg-white text-gray-900 shadow-sm' 
-                        : 'text-gray-500 hover:text-gray-700'
+                        ? 'bg-white dark:bg-slate-600 text-gray-900 dark:text-white shadow-sm' 
+                        : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
                     }`}
                     title="List view"
                   >
@@ -335,8 +335,8 @@ export function CandidatesPage() {
                     onClick={() => setViewMode('cards')}
                     className={`px-3 py-2 rounded-md transition-colors flex items-center ${
                       viewMode === 'cards' 
-                        ? 'bg-white text-gray-900 shadow-sm' 
-                        : 'text-gray-500 hover:text-gray-700'
+                        ? 'bg-white dark:bg-slate-600 text-gray-900 dark:text-white shadow-sm' 
+                        : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
                     }`}
                     title="Card view"
                   >
@@ -346,8 +346,8 @@ export function CandidatesPage() {
                     onClick={() => setViewMode('stages')}
                     className={`px-3 py-2 rounded-md transition-colors flex items-center space-x-2 ${
                       viewMode === 'stages' 
-                        ? 'bg-white text-gray-900 shadow-sm' 
-                        : 'text-gray-500 hover:text-gray-700'
+                        ? 'bg-white dark:bg-slate-600 text-gray-900 dark:text-white shadow-sm' 
+                        : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
                     }`}
                     title="Candidate Stage Board"
                   >
@@ -357,7 +357,7 @@ export function CandidatesPage() {
                 </div>
 
 
-                <button className="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 transition-colors">
+                <button className="inline-flex items-center px-4 py-2 border border-gray-300 dark:border-slate-600 shadow-sm text-sm font-medium rounded-lg text-gray-700 dark:text-gray-300 bg-white dark:bg-slate-700 hover:bg-gray-50 dark:hover:bg-slate-600 transition-colors">
                   <BriefcaseIcon className="h-4 w-4 mr-2" />
                   Import
                 </button>
@@ -372,13 +372,13 @@ export function CandidatesPage() {
             <div className="space-y-4">
               {/* Search Bar */}
               <div className="relative">
-                <MagnifyingGlassIcon className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+                <MagnifyingGlassIcon className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400 dark:text-gray-500" />
                 <input
                   type="text"
                   placeholder="Search candidates by name or email..."
                   value={searchTerm}
                   onChange={(e) => handleSearchChange(e.target.value)}
-                  className="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-gray-50 focus:bg-white transition-colors"
+                  className="w-full pl-12 pr-4 py-3 border border-gray-300 dark:border-slate-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-gray-50 dark:bg-slate-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:bg-white dark:focus:bg-slate-600 transition-colors"
                 />
               </div>
 
@@ -389,8 +389,8 @@ export function CandidatesPage() {
                     onClick={() => setShowFilters(!showFilters)}
                     className={`inline-flex items-center px-4 py-2 border text-sm font-medium rounded-lg transition-colors ${
                       showFilters 
-                        ? 'bg-blue-50 text-blue-700 border-blue-300 shadow-sm' 
-                        : 'border-gray-300 text-gray-700 bg-white hover:bg-gray-50'
+                        ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 border-blue-300 dark:border-blue-600 shadow-sm' 
+                        : 'border-gray-300 dark:border-slate-600 text-gray-700 dark:text-gray-300 bg-white dark:bg-slate-700 hover:bg-gray-50 dark:hover:bg-slate-600'
                     }`}
                   >
                     <FunnelIcon className="h-4 w-4 mr-2" />
@@ -401,7 +401,7 @@ export function CandidatesPage() {
                   {(searchTerm || stageFilter) && (
                     <div className="flex items-center space-x-2">
                       {searchTerm && (
-                        <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800 border border-blue-200">
+                        <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300 border border-blue-200 dark:border-blue-600">
                           Search: "{searchTerm}"
                           <button
                             onClick={() => handleSearchChange('')}
@@ -412,7 +412,7 @@ export function CandidatesPage() {
                         </span>
                       )}
                       {stageFilter && (
-                        <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800 border border-green-200">
+                        <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300 border border-green-200 dark:border-green-600">
                           Stage: {getStageInfo(stageFilter as Candidate['stage']).label}
                           <button
                             onClick={() => handleStageFilterChange('')}
@@ -424,7 +424,7 @@ export function CandidatesPage() {
                       )}
                       <button
                         onClick={clearFilters}
-                        className="text-xs text-gray-500 hover:text-gray-700 font-medium"
+                        className="text-xs text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 font-medium"
                       >
                         Clear all
                       </button>
@@ -432,23 +432,23 @@ export function CandidatesPage() {
                   )}
                 </div>
 
-                <div className="text-sm text-gray-500 font-medium">
+                <div className="text-sm text-gray-500 dark:text-gray-400 font-medium">
                   {filteredCandidates.length} results
                 </div>
               </div>
 
               {/* Expanded Filters */}
               {showFilters && (
-                <div className="border-t border-gray-200 pt-4">
+                <div className="border-t border-gray-200 dark:border-slate-600 pt-4">
                   <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                         Filter by Stage
                       </label>
                       <select
                         value={stageFilter}
                         onChange={(e) => handleStageFilterChange(e.target.value)}
-                        className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white"
+                        className="w-full border border-gray-300 dark:border-slate-600 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-slate-700 text-gray-900 dark:text-white"
                       >
                         <option value="">All Stages</option>
                         {getStageOptions().map((stage: any) => (
@@ -460,10 +460,10 @@ export function CandidatesPage() {
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                         Sort By
                       </label>
-                      <select className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white">
+                      <select className="w-full border border-gray-300 dark:border-slate-600 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-slate-700 text-gray-900 dark:text-white">
                         <option value="created_desc">Recently Added</option>
                         <option value="created_asc">Oldest First</option>
                         <option value="name_asc">Name A-Z</option>
@@ -473,19 +473,19 @@ export function CandidatesPage() {
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                         Job Filter
                       </label>
-                      <select className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white">
+                      <select className="w-full border border-gray-300 dark:border-slate-600 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-slate-700 text-gray-900 dark:text-white">
                         <option value="">All Jobs</option>
                       </select>
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                         Date Range
                       </label>
-                      <select className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white">
+                      <select className="w-full border border-gray-300 dark:border-slate-600 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-slate-700 text-gray-900 dark:text-white">
                         <option value="">All Time</option>
                         <option value="today">Today</option>
                         <option value="week">This Week</option>
@@ -501,21 +501,21 @@ export function CandidatesPage() {
         </div>
 
         {/* Candidates List */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200">
+        <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-gray-200 dark:border-slate-600">
           {loading ? (
             <div className="flex items-center justify-center py-16">
               <div className="text-center">
                 <LoadingSpinner size="lg" />
-                <p className="mt-4 text-sm text-gray-500">Loading candidates...</p>
+                <p className="mt-4 text-sm text-gray-500 dark:text-gray-400">Loading candidates...</p>
               </div>
             </div>
           ) : filteredCandidates.length === 0 ? (
             <div className="text-center py-16">
-              <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <UserIcon className="h-8 w-8 text-gray-400" />
+              <div className="w-16 h-16 bg-gray-100 dark:bg-slate-700 rounded-full flex items-center justify-center mx-auto mb-4">
+                <UserIcon className="h-8 w-8 text-gray-400 dark:text-gray-500" />
               </div>
-              <h3 className="text-lg font-medium text-gray-900 mb-2">No candidates found</h3>
-              <p className="text-sm text-gray-500 mb-6">
+              <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">No candidates found</h3>
+              <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">
                 {searchTerm || stageFilter 
                   ? 'Try adjusting your search or filters to find what you\'re looking for'
                   : 'Get started by adding your first candidate to the system'
@@ -569,13 +569,13 @@ export function CandidatesPage() {
 
               {/* Pagination */}
               {pagination.totalPages > 1 && (
-                <div className="flex items-center justify-between pt-6 border-t border-gray-200 mt-6">
-                  <div className="flex items-center space-x-2 text-sm text-gray-500">
+                <div className="flex items-center justify-between pt-6 border-t border-gray-200 dark:border-slate-600 mt-6">
+                  <div className="flex items-center space-x-2 text-sm text-gray-500 dark:text-gray-400">
                     <span>Show</span>
                     <select 
                       value={pagination.pageSize} 
                       onChange={(e) => handlePageSizeChange(Number(e.target.value))}
-                      className="border border-gray-300 rounded-md px-2 py-1 text-sm"
+                      className="border border-gray-300 dark:border-slate-600 rounded-md px-2 py-1 text-sm bg-white dark:bg-slate-700 text-gray-900 dark:text-white"
                     >
                       <option value={10}>10</option>
                       <option value={25}>25</option>
@@ -591,7 +591,7 @@ export function CandidatesPage() {
                     <button
                       onClick={() => handlePageChange(pagination.page - 1)}
                       disabled={pagination.page <= 1}
-                      className="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="px-3 py-2 text-sm font-medium text-gray-500 dark:text-gray-400 bg-white dark:bg-slate-700 border border-gray-300 dark:border-slate-600 rounded-md hover:bg-gray-50 dark:hover:bg-slate-600 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       Previous
                     </button>
@@ -608,7 +608,7 @@ export function CandidatesPage() {
                             className={`px-3 py-2 text-sm font-medium rounded-md ${
                               page === pagination.page
                                 ? 'bg-blue-600 text-white'
-                                : 'text-gray-500 bg-white border border-gray-300 hover:bg-gray-50'
+                                : 'text-gray-500 dark:text-gray-400 bg-white dark:bg-slate-700 border border-gray-300 dark:border-slate-600 hover:bg-gray-50 dark:hover:bg-slate-600'
                             }`}
                           >
                             {page}
@@ -620,7 +620,7 @@ export function CandidatesPage() {
                     <button
                       onClick={() => handlePageChange(pagination.page + 1)}
                       disabled={pagination.page >= pagination.totalPages}
-                      className="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="px-3 py-2 text-sm font-medium text-gray-500 dark:text-gray-400 bg-white dark:bg-slate-700 border border-gray-300 dark:border-slate-600 rounded-md hover:bg-gray-50 dark:hover:bg-slate-600 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       Next
                     </button>
