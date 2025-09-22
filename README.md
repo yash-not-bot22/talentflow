@@ -64,9 +64,9 @@ src/
 
 ### Design Decisions
 
-**Feature-Based Architecture**: We organized code by features rather than file types to improve maintainability and team collaboration. Each feature contains its own components, hooks, and pages.
+**Feature-Based Architecture**: We organized code by features rather than file types to improve maintainability. Each feature contains its own components, hooks, and pages.
 
-**Client-Side Data Persistence**: Used Dexie (IndexedDB) instead of a traditional backend to create a fully functional demo without server dependencies. This allows for immediate user interaction while maintaining data across sessions.
+**Client-Side Data Persistence**: Used Dexie (IndexedDB) instead of a traditional backend (as described) to create a fully functional demo without server dependencies. This allows for immediate user interaction while maintaining data across sessions.
 
 **@dnd-kit for Drag & Drop**: Chosen for its accessibility features, TypeScript support, and modern approach to drag-and-drop interactions. Provides smooth animations and proper keyboard navigation.
 
@@ -126,10 +126,4 @@ npm run preview
 - **Analytics Dashboard**: Hiring metrics and performance insights
 - **Collaborative Features**: Team-based candidate evaluation and comments
 
-## Contributing
 
-This project follows conventional commit standards and uses ESLint for code quality. All drag-and-drop interactions should maintain accessibility standards provided by @dnd-kit.
-
-## License
-
-MIT License - see LICENSE file for details.
