@@ -110,6 +110,43 @@ export function AssessmentDetail() {
       return;
     }
 
+    // Validate required fields
+    const allQuestions = assessment.sections.flatMap(section => section.questions);
+    const requiredQuestions = allQuestions.filter(q => q.required);
+    const missingAnswers: string[] = [];
+
+    for (const question of requiredQuestions) {
+      const answer = candidateResponses[question.id];
+      if (answer === null || answer === undefined || answer === '' || 
+          (Array.isArray(answer) && answer.length === 0)) {
+        missingAnswers.push(question.id);
+      }
+    }
+
+    // If there are missing required answers, scroll to first missing field and show error
+    if (missingAnswers.length > 0) {
+      // Find the first missing question element and scroll to it
+      const firstMissingElement = document.getElementById(`question-${missingAnswers[0]}`);
+      if (firstMissingElement) {
+        firstMissingElement.scrollIntoView({ 
+          behavior: 'smooth', 
+          block: 'center' 
+        });
+        // Add a visual highlight to the missing field
+        firstMissingElement.classList.add('ring-2', 'ring-red-500', 'ring-opacity-50');
+        setTimeout(() => {
+          firstMissingElement.classList.remove('ring-2', 'ring-red-500', 'ring-opacity-50');
+        }, 3000);
+      }
+      
+      addNotification({
+        type: 'error',
+        title: 'Required Fields Missing',
+        message: `Please fill in all required fields before submitting. ${missingAnswers.length} field(s) are missing.`
+      });
+      return;
+    }
+
     setSubmitting(true);
     try {
       const submissionData: SubmissionData = {
@@ -155,13 +192,27 @@ export function AssessmentDetail() {
   const renderCandidateQuestion = (question: any, sectionIndex: number, questionIndex: number) => {
     const questionKey = `${question.id}`;
     const currentValue = candidateResponses[questionKey] || '';
+    const hasError = question.required && (!candidateResponses[questionKey] || candidateResponses[questionKey] === '' || 
+      (Array.isArray(candidateResponses[questionKey]) && candidateResponses[questionKey].length === 0));
 
     return (
-      <div key={question.id} className="mb-6 p-4 border border-gray-200 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700">
+      <div 
+        key={question.id} 
+        id={`question-${question.id}`}
+        className={`mb-6 p-4 border rounded-lg bg-white dark:bg-slate-700 transition-all duration-300 ${
+          hasError ? 'border-red-300 dark:border-red-600 bg-red-50 dark:bg-red-900/10' : 'border-gray-200 dark:border-slate-600'
+        }`}
+      >
         <label className="block text-sm font-medium text-gray-900 dark:text-white mb-2">
           {sectionIndex + 1}.{questionIndex + 1} {question.text}
           {question.required && <span className="text-red-500 ml-1">*</span>}
         </label>
+        
+        {hasError && (
+          <p className="text-red-600 dark:text-red-400 text-xs mb-2 font-medium">
+            This field is required
+          </p>
+        )}
         
         {question.type === 'short-text' && (
           <input

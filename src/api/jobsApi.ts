@@ -125,7 +125,8 @@ export const jobsApi = {
 
   // GET /jobs/:id (for getting single job details if needed)
   getJob: async (jobId: number): Promise<Job> => {
-    return apiClient.get<Job>(`/jobs/${jobId}`);
+    const response = await apiClient.get<{ data: Job }>(`/jobs/${jobId}`);
+    return response.data;
   },
 };
 
