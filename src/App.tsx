@@ -1,5 +1,6 @@
 import { BrowserRouter as Router, Routes, Route, Navigate, Link, useLocation } from 'react-router-dom';
 import { useEffect } from 'react';
+import { Toaster } from 'react-hot-toast';
 import { db } from './db';
 import { JobsBoard } from './features/jobs/pages/JobsBoard';
 import { JobDetails } from './features/jobs/pages/JobDetails';
@@ -131,6 +132,33 @@ function App() {
               </Routes>
             </div>
           </main>
+
+          {/* Toast notifications */}
+          <Toaster
+            position="top-right"
+            toastOptions={{
+              duration: 4000,
+              style: {
+                background: `rgb(var(--toast-bg))`,
+                color: `rgb(var(--toast-color))`,
+                border: `1px solid rgb(var(--toast-border))`,
+              },
+              success: {
+                duration: 3000,
+                iconTheme: {
+                  primary: '#10b981',
+                  secondary: '#ffffff',
+                },
+              },
+              error: {
+                duration: 5000,
+                iconTheme: {
+                  primary: '#ef4444',
+                  secondary: '#ffffff',
+                },
+              },
+            }}
+          />
         </div>
       </Router>
     </ThemeProvider>

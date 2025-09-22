@@ -177,6 +177,51 @@ class AssessmentsApiClient {
             errors.push(`Section ${sectionIndex + 1}, Question ${questionIndex + 1}: Short text max length should be ≤ 500 characters`);
           }
         }
+
+        // Validate sub-questions for conditional questions
+        if (question.conditional && question.subQuestions) {
+          if (!Array.isArray(question.subQuestions)) {
+            errors.push(`Section ${sectionIndex + 1}, Question ${questionIndex + 1}: Sub-questions must be an array`);
+          } else {
+            question.subQuestions.forEach((subQuestion, subQuestionIndex) => {
+              if (!subQuestion.id || typeof subQuestion.id !== 'string') {
+                errors.push(`Section ${sectionIndex + 1}, Question ${questionIndex + 1}, Sub-question ${subQuestionIndex + 1}: Must have a valid ID`);
+              }
+
+              if (!subQuestion.text || typeof subQuestion.text !== 'string') {
+                errors.push(`Section ${sectionIndex + 1}, Question ${questionIndex + 1}, Sub-question ${subQuestionIndex + 1}: Must have question text`);
+              }
+
+              if (!subQuestion.type || !['single-choice', 'multi-choice', 'short-text', 'long-text', 'numeric', 'file-upload'].includes(subQuestion.type)) {
+                errors.push(`Section ${sectionIndex + 1}, Question ${questionIndex + 1}, Sub-question ${subQuestionIndex + 1}: Must have a valid type`);
+              }
+
+              // Validate sub-question choice questions have options
+              if (['single-choice', 'multi-choice'].includes(subQuestion.type)) {
+                if (!subQuestion.options || !Array.isArray(subQuestion.options) || subQuestion.options.length < 2) {
+                  errors.push(`Section ${sectionIndex + 1}, Question ${questionIndex + 1}, Sub-question ${subQuestionIndex + 1}: Choice questions must have at least 2 options`);
+                }
+              }
+
+              // Validate sub-question numeric questions have valid min/max
+              if (subQuestion.type === 'numeric') {
+                if (subQuestion.min !== undefined && subQuestion.max !== undefined && subQuestion.min >= subQuestion.max) {
+                  errors.push(`Section ${sectionIndex + 1}, Question ${questionIndex + 1}, Sub-question ${subQuestionIndex + 1}: Min value must be less than max value`);
+                }
+              }
+
+              // Validate sub-question text questions have reasonable maxLength
+              if (['short-text', 'long-text'].includes(subQuestion.type) && subQuestion.maxLength !== undefined) {
+                if (subQuestion.maxLength <= 0) {
+                  errors.push(`Section ${sectionIndex + 1}, Question ${questionIndex + 1}, Sub-question ${subQuestionIndex + 1}: Max length must be positive`);
+                }
+                if (subQuestion.type === 'short-text' && subQuestion.maxLength > 500) {
+                  errors.push(`Section ${sectionIndex + 1}, Question ${questionIndex + 1}, Sub-question ${subQuestionIndex + 1}: Short text max length should be ≤ 500 characters`);
+                }
+              }
+            });
+          }
+        }
       });
     });
 

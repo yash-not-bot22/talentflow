@@ -22,6 +22,11 @@
     --color-accent-error: 244 63 94; /* #f43f5e */
     --color-accent-warning: 245 158 11; /* #f59e0b */
     --color-accent-success: 16 185 129; /* #10b981 */
+
+    /* Toast theming */
+    --toast-bg: 255 255 255; /* #ffffff */
+    --toast-color: 15 23 42; /* #0f172a */
+    --toast-border: 226 232 240; /* #e2e8f0 */
   }
 
   .dark {
@@ -43,6 +48,11 @@
     --color-accent-error: 248 113 113; /* #f87171 */
     --color-accent-warning: 251 191 36; /* #fbbf24 */
     --color-accent-success: 74 222 128; /* #4ade80 */
+
+    /* Toast theming for dark mode */
+    --toast-bg: 30 41 59; /* #1e293b */
+    --toast-color: 248 250 252; /* #f8fafc */
+    --toast-border: 71 85 105; /* #475569 */
   }
 
   * {

@@ -38,6 +38,8 @@ export interface Question {
   maxLength?: number; // For short/long-text (e.g., 100 or 1000)
   min?: number; // For numeric
   max?: number; // For numeric
+  conditional?: boolean; // If true, this question can have sub-questions
+  subQuestions?: Question[]; // Sub-questions that appear when this question is answered
   dependsOn?: { questionId: string; value: string | number | string[] }; // Conditional logic
 }
 
