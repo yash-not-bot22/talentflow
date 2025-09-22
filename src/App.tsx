@@ -1,11 +1,13 @@
 import { BrowserRouter as Router, Routes, Route, Navigate, Link, useLocation } from 'react-router-dom';
 import { useEffect } from 'react';
 import { db } from './db';
-import { DatabaseStatus } from './components/DatabaseStatus';
 import { JobsBoard } from './features/jobs/pages/JobsBoard';
 import { JobDetails } from './features/jobs/pages/JobDetails';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { ThemeToggle } from './components/ui/ThemeToggle';
+
+// Import Dashboard
+import { Dashboard } from './features/dashboard/pages/Dashboard';
 
 // Import candidate components
 import { CandidatesPage } from './features/candidates/pages/CandidatesPage';
@@ -25,6 +27,7 @@ function Navigation() {
   };
 
   const navItems = [
+    { path: '/dashboard', label: 'Dashboard', icon: '📊' },
     { path: '/jobs', label: 'Jobs', icon: '💼' },
     { path: '/candidates', label: 'Candidates', icon: '👥' },
   ];
@@ -113,9 +116,9 @@ function App() {
           {/* Main Content */}
           <main>
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-              <DatabaseStatus />
               <Routes>
-                <Route path="/" element={<Navigate to="/jobs" replace />} />
+                <Route path="/" element={<Navigate to="/dashboard" replace />} />
+                <Route path="/dashboard" element={<Dashboard />} />
                 <Route path="/jobs" element={<JobsBoard />} />
                 <Route path="/jobs/:jobId" element={<JobDetails />} />
                 <Route path="/candidates" element={<CandidatesPage />} />

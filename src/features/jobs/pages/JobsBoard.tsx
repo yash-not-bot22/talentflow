@@ -33,7 +33,6 @@ import {
   PencilIcon,
   ArchiveBoxIcon,
   CalendarIcon,
-  TagIcon,
   ChevronLeftIcon,
   ChevronRightIcon,
   Bars3Icon,
@@ -49,6 +48,10 @@ interface CreateJobForm {
   status: 'active' | 'archived';
   tags: string;
   order?: string;
+  salary?: string;
+  location?: string;
+  department?: string;
+  employmentType?: 'full-time' | 'part-time' | 'contract' | 'internship';
 }
 
 interface JobFilters {
@@ -189,13 +192,14 @@ function SortableJobRow({ job, openEditModal, openViewModal, updateJob, formatDa
 interface SortableJobCardProps {
   job: Job;
   openEditModal: (job: Job) => void;
+  openViewModal: (job: Job) => void;
   updateJob: (jobId: number, updates: any) => Promise<Job>;
   formatDate: (timestamp: number) => string;
   hasAssessment: boolean;
   onAssessmentClick: (jobId: number) => void;
 }
 
-function SortableJobCard({ job, openEditModal, updateJob, formatDate, hasAssessment, onAssessmentClick }: SortableJobCardProps) {
+function SortableJobCard({ job, openEditModal, openViewModal, updateJob, formatDate, hasAssessment, onAssessmentClick }: SortableJobCardProps) {
   const {
     attributes,
     listeners,
@@ -216,8 +220,14 @@ function SortableJobCard({ job, openEditModal, updateJob, formatDate, hasAssessm
     <div
       ref={setNodeRef}
       style={style}
-      className={`bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-gray-200 dark:border-slate-700 p-6 hover:shadow-md dark:hover:shadow-lg transition-shadow ${isDragging ? 'z-50 shadow-lg' : ''}`}
+      onClick={() => openViewModal(job)}
+      className={`group relative backdrop-blur-lg bg-white/70 dark:bg-slate-800/70 rounded-2xl shadow-xl border border-white/30 dark:border-slate-700/30 p-8 hover:bg-white/80 dark:hover:bg-slate-800/80 transition-all duration-500 hover:scale-105 hover:rotate-1 overflow-hidden cursor-pointer ${isDragging ? 'z-50 shadow-2xl scale-110' : ''}`}
     >
+      {/* Gradient border effect */}
+      <div className="absolute inset-0 bg-gradient-to-br from-blue-500/20 via-purple-500/20 to-pink-500/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-2xl"></div>
+      
+      {/* Content */}
+      <div className="relative z-10">
       <div className="flex items-start justify-between mb-4">
         <div className="flex items-start space-x-3 flex-1">
           <Button
@@ -248,7 +258,6 @@ function SortableJobCard({ job, openEditModal, updateJob, formatDate, hasAssessm
                 size="sm"
                 outline
               >
-                <TagIcon className="h-3 w-3 mr-1" />
                 {tag}
               </GradientBadge>
             ))}
@@ -265,17 +274,18 @@ function SortableJobCard({ job, openEditModal, updateJob, formatDate, hasAssessm
       </div>
 
       <div className="flex items-center justify-between">
-        <div className="flex space-x-2">
+        <div className="flex space-x-3">
           <Button
             onClick={(e) => {
               e.stopPropagation();
               openEditModal(job);
             }}
-            variant="outline"
+            className="group relative overflow-hidden bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 text-white border-0 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
             size="sm"
           >
-            <PencilIcon className="h-3 w-3" />
-            Edit
+            <div className="absolute inset-0 bg-white/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+            <PencilIcon className="h-3 w-3 relative z-10 group-hover:rotate-12 transition-transform duration-300" />
+            <span className="relative z-10">Edit</span>
           </Button>
           <Button
             onClick={async (e) => {
@@ -283,26 +293,42 @@ function SortableJobCard({ job, openEditModal, updateJob, formatDate, hasAssessm
               const newStatus = job.status === 'active' ? 'archived' : 'active';
               await updateJob(job.id, { status: newStatus });
             }}
-            variant={job.status === 'active' ? 'secondary' : 'outline'}
+            className={`group relative overflow-hidden border-0 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 ${
+              job.status === 'active' 
+                ? 'bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white' 
+                : 'bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white'
+            }`}
             size="sm"
           >
+            <div className="absolute inset-0 bg-white/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
             {job.status === 'active' ? (
-              <><ArchiveBoxIcon className="h-3 w-3" />Archive</>
+              <>
+                <ArchiveBoxIcon className="h-3 w-3 relative z-10 group-hover:rotate-12 transition-transform duration-300" />
+                <span className="relative z-10">Archive</span>
+              </>
             ) : (
-              <><CheckIcon className="h-3 w-3" />Activate</>
+              <>
+                <CheckIcon className="h-3 w-3 relative z-10 group-hover:scale-125 transition-transform duration-300" />
+                <span className="relative z-10">Activate</span>
+              </>
             )}
           </Button>
           <Button
             onClick={() => onAssessmentClick(job.id)}
-            variant={hasAssessment ? "primary" : "outline"}
+            className={`group relative overflow-hidden border-0 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 min-w-[120px] ${
+              hasAssessment 
+                ? 'bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white' 
+                : 'bg-gradient-to-r from-gray-400 to-gray-500 hover:from-gray-500 hover:to-gray-600 text-white opacity-60'
+            }`}
             size="sm"
-            className={!hasAssessment ? "opacity-60" : ""}
             title={hasAssessment ? 'View Assessment' : 'No Assessment'}
           >
-            <DocumentTextIcon className="h-3 w-3" />
-            {hasAssessment ? 'Assessment' : 'No Assessment'}
+            <div className="absolute inset-0 bg-white/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+            <DocumentTextIcon className="h-3 w-3 relative z-10 group-hover:rotate-12 transition-transform duration-300" />
+            <span className="relative z-10">{hasAssessment ? 'Assessment' : 'Assessment'}</span>
           </Button>
         </div>
+      </div>
       </div>
     </div>
   );
@@ -363,6 +389,10 @@ export function JobsBoard() {
       status: 'active',
       tags: '',
       order: '',
+      salary: '',
+      location: '',
+      department: '',
+      employmentType: undefined,
     },
   });
 
@@ -372,6 +402,10 @@ export function JobsBoard() {
       status: 'active',
       tags: '',
       order: '',
+      salary: '',
+      location: '',
+      department: '',
+      employmentType: undefined,
     },
   });
 
@@ -494,6 +528,20 @@ export function JobsBoard() {
         tags: data.tags.split(',').map(tag => tag.trim()).filter(Boolean),
       };
 
+      // Add optional fields if provided
+      if (data.salary && data.salary.trim()) {
+        jobData.salary = data.salary.trim();
+      }
+      if (data.location && data.location.trim()) {
+        jobData.location = data.location.trim();
+      }
+      if (data.department && data.department.trim()) {
+        jobData.department = data.department.trim();
+      }
+      if (data.employmentType) {
+        jobData.employmentType = data.employmentType;
+      }
+
       if (data.order && data.order.trim() !== '') {
         const orderNum = parseInt(data.order.trim());
         if (!isNaN(orderNum) && orderNum > 0) {
@@ -522,6 +570,20 @@ export function JobsBoard() {
         tags: data.tags.split(',').map(tag => tag.trim()).filter(Boolean),
       };
 
+      // Add optional fields if provided
+      if (data.salary !== undefined) {
+        updateData.salary = data.salary.trim() || undefined;
+      }
+      if (data.location !== undefined) {
+        updateData.location = data.location.trim() || undefined;
+      }
+      if (data.department !== undefined) {
+        updateData.department = data.department.trim() || undefined;
+      }
+      if (data.employmentType !== undefined) {
+        updateData.employmentType = data.employmentType;
+      }
+
       if (data.order && data.order.trim() !== '') {
         const orderNum = parseInt(data.order.trim());
         if (!isNaN(orderNum) && orderNum > 0) {
@@ -548,6 +610,10 @@ export function JobsBoard() {
       status: job.status,
       tags: job.tags ? job.tags.join(', ') : '',
       order: job.order.toString(),
+      salary: job.salary || '',
+      location: job.location || '',
+      department: job.department || '',
+      employmentType: job.employmentType || undefined,
     });
     setShowEditModal(true);
   };
@@ -578,35 +644,63 @@ export function JobsBoard() {
 
   // Get status badge styles
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-slate-900 transition-colors">
-      <Toaster position="top-right" />
+    <div className="min-h-screen relative overflow-hidden transition-colors">
+      {/* Glassmorphism Background */}
+      <div className="absolute inset-0 bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 dark:from-slate-900 dark:via-blue-900/20 dark:to-purple-900/20"></div>
+      <div className="absolute inset-0 opacity-40" style={{
+        backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%239C92AC' fill-opacity='0.05'%3E%3Ccircle cx='30' cy='30' r='2'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`
+      }}></div>
       
-      {/* Header */}
-      <div className="bg-white dark:bg-slate-800 shadow-sm border-b border-gray-200 dark:border-slate-700">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center py-6">
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900 dark:text-slate-100">Jobs Board</h1>
-              <p className="mt-1 text-sm text-gray-500 dark:text-slate-400">
-                Manage your job postings and track applications
-              </p>
+      {/* Floating orbs for extra glassmorphism effect */}
+      <div className="absolute top-20 left-20 w-64 h-64 bg-gradient-to-r from-blue-400/20 to-purple-400/20 rounded-full blur-3xl animate-pulse"></div>
+      <div className="absolute bottom-20 right-20 w-96 h-96 bg-gradient-to-r from-pink-400/20 to-indigo-400/20 rounded-full blur-3xl animate-pulse" style={{animationDelay: '2s'}}></div>
+      
+      <div className="relative z-10">
+        <Toaster 
+          position="top-right" 
+          toastOptions={{
+            duration: 4000,
+            style: {
+              marginTop: '80px', // Push below navbar
+            },
+          }}
+          containerStyle={{
+            zIndex: 30, // Below navbar but above content
+          }}
+        />
+      
+        {/* Header */}
+        <div className="sticky top-0 z-20 backdrop-blur-xl bg-white/70 dark:bg-slate-800/70 shadow-lg border-b border-white/20 dark:border-slate-700/30">
+          <div className="absolute inset-0 bg-gradient-to-r from-blue-500/5 via-purple-500/5 to-pink-500/5 dark:from-blue-400/10 dark:via-purple-400/10 dark:to-pink-400/10"></div>
+          <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex justify-between items-center py-8">
+              <div className="relative">
+                <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent animate-pulse">
+                  Jobs Board
+                </h1>
+                <p className="mt-2 text-sm text-gray-600 dark:text-slate-300 font-medium">
+                  Manage your job postings and track applications
+                </p>
+              </div>
+              <div className="group">
+                <Button
+                  onClick={() => setShowCreateModal(true)}
+                  className="relative overflow-hidden bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 hover:from-blue-600 hover:via-purple-600 hover:to-pink-600 text-white border-0 shadow-xl hover:shadow-2xl transform hover:scale-105 transition-all duration-300 hover:rotate-1"
+                  size="lg"
+                >
+                  <div className="absolute inset-0 bg-white/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                  <PlusIcon className="h-5 w-5 relative z-10 group-hover:rotate-90 transition-transform duration-300" />
+                  <span className="relative z-10 font-semibold">Create Job</span>
+                </Button>
+              </div>
             </div>
-            <Button
-              onClick={() => setShowCreateModal(true)}
-              variant="primary"
-              size="md"
-            >
-              <PlusIcon className="h-4 w-4" />
-              Create Job
-            </Button>
           </div>
-        </div>
-      </div>
-
-      {/* Main Content */}
+        </div>      {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Filters and Controls */}
-        <div className="bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-gray-200 dark:border-slate-700 p-6 mb-6">
+        <div className="backdrop-blur-lg bg-white/60 dark:bg-slate-800/60 rounded-2xl shadow-xl border border-white/30 dark:border-slate-700/30 p-8 mb-8 relative overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 via-transparent to-purple-500/5"></div>
+          <div className="relative z-10">
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
             {/* Search and Filters */}
             <div className="flex flex-col sm:flex-row gap-4 flex-1">
@@ -649,28 +743,30 @@ export function JobsBoard() {
             </div>
 
             {/* View Toggle */}
-            <div className="flex items-center space-x-2">
-              <span className="text-sm text-gray-500 dark:text-slate-400">View:</span>
-              <div className="flex border border-gray-300 dark:border-slate-600 rounded-lg overflow-hidden">
+            <div className="flex items-center space-x-3">
+              <span className="text-sm font-medium text-gray-600 dark:text-slate-300">View:</span>
+              <div className="flex backdrop-blur-lg bg-white/50 dark:bg-slate-800/50 rounded-xl p-1 border border-white/30 dark:border-slate-700/30 shadow-lg">
                 <button
                   onClick={() => setViewMode('table')}
-                  className={`px-3 py-2 text-sm font-medium transition-colors ${
+                  className={`group relative px-4 py-2 text-sm font-medium rounded-lg transition-all duration-300 overflow-hidden ${
                     viewMode === 'table'
-                      ? 'bg-blue-600 text-white dark:bg-blue-500'
-                      : 'bg-white dark:bg-slate-700 text-gray-700 dark:text-slate-300 hover:bg-gray-50 dark:hover:bg-slate-600'
+                      ? 'bg-gradient-to-r from-blue-500 to-indigo-500 text-white shadow-lg transform scale-105'
+                      : 'text-gray-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-white/50 dark:hover:bg-slate-700/50 hover:scale-105'
                   }`}
                 >
-                  <ViewColumnsIcon className="h-4 w-4" />
+                  <div className="absolute inset-0 bg-white/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                  <ViewColumnsIcon className="h-4 w-4 relative z-10 group-hover:rotate-12 transition-transform duration-300" />
                 </button>
                 <button
                   onClick={() => setViewMode('cards')}
-                  className={`px-3 py-2 text-sm font-medium transition-colors ${
+                  className={`group relative px-4 py-2 text-sm font-medium rounded-lg transition-all duration-300 overflow-hidden ${
                     viewMode === 'cards'
-                      ? 'bg-blue-600 text-white dark:bg-blue-500'
-                      : 'bg-white dark:bg-slate-700 text-gray-700 dark:text-slate-300 hover:bg-gray-50 dark:hover:bg-slate-600'
+                      ? 'bg-gradient-to-r from-blue-500 to-indigo-500 text-white shadow-lg transform scale-105'
+                      : 'text-gray-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-white/50 dark:hover:bg-slate-700/50 hover:scale-105'
                   }`}
                 >
-                  <Squares2X2Icon className="h-4 w-4" />
+                  <div className="absolute inset-0 bg-white/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                  <Squares2X2Icon className="h-4 w-4 relative z-10 group-hover:rotate-12 transition-transform duration-300" />
                 </button>
               </div>
             </div>
@@ -696,26 +792,29 @@ export function JobsBoard() {
               ))}
             </div>
           )}
+          </div>
         </div>
 
         {/* Jobs Content */}
         {error && (
-          <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
-            <p className="text-sm text-red-600">{error}</p>
+          <div className="backdrop-blur-lg bg-red-500/10 border border-red-400/30 rounded-2xl p-6 mb-8 relative overflow-hidden">
+            <div className="absolute inset-0 bg-gradient-to-r from-red-500/5 to-pink-500/5"></div>
+            <p className="text-sm text-red-600 dark:text-red-400 font-medium relative z-10">{error}</p>
           </div>
         )}
 
         {/* Loading State */}
         {loading && (
-          <div className="bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-gray-200 dark:border-slate-700 p-8">
-            <div className="animate-pulse">
-              <div className="space-y-4">
+          <div className="backdrop-blur-lg bg-white/60 dark:bg-slate-800/60 rounded-2xl shadow-xl border border-white/30 dark:border-slate-700/30 p-12 relative overflow-hidden">
+            <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 via-transparent to-purple-500/5"></div>
+            <div className="animate-pulse relative z-10">
+              <div className="space-y-6">
                 {[...Array(5)].map((_, i) => (
-                  <div key={i} className="flex items-center space-x-4">
-                    <div className="h-4 bg-gray-200 rounded w-1/4"></div>
-                    <div className="h-4 bg-gray-200 rounded w-1/6"></div>
-                    <div className="h-4 bg-gray-200 rounded w-1/3"></div>
-                    <div className="h-4 bg-gray-200 rounded w-1/6"></div>
+                  <div key={i} className="flex items-center space-x-6 animate-pulse" style={{animationDelay: `${i * 0.2}s`}}>
+                    <div className="h-6 bg-gradient-to-r from-blue-200 to-purple-200 dark:from-blue-800 dark:to-purple-800 rounded-lg w-1/4"></div>
+                    <div className="h-6 bg-gradient-to-r from-indigo-200 to-pink-200 dark:from-indigo-800 dark:to-pink-800 rounded-lg w-1/6"></div>
+                    <div className="h-6 bg-gradient-to-r from-purple-200 to-blue-200 dark:from-purple-800 dark:to-blue-800 rounded-lg w-1/3"></div>
+                    <div className="h-6 bg-gradient-to-r from-pink-200 to-indigo-200 dark:from-pink-800 dark:to-indigo-800 rounded-lg w-1/6"></div>
                   </div>
                 ))}
               </div>
@@ -725,25 +824,30 @@ export function JobsBoard() {
 
         {/* Jobs Table/Cards */}
         {!loading && jobs.length === 0 && (
-          <div className="bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-gray-200 dark:border-slate-700 p-12 text-center">
-            <div className="mx-auto w-24 h-24 text-gray-400 mb-4">
-              <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2-2v2m8 0V6a2 2 0 012 2v6M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2m-8 0V6a2 2 0 00-2 2v6M8 6h8" />
-              </svg>
+          <div className="backdrop-blur-lg bg-white/60 dark:bg-slate-800/60 rounded-3xl shadow-xl border border-white/30 dark:border-slate-700/30 p-16 text-center relative overflow-hidden">
+            <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 via-purple-500/5 to-pink-500/5"></div>
+            <div className="relative z-10">
+              <div className="mx-auto w-32 h-32 text-gradient-to-r from-blue-400 to-purple-400 mb-8 relative">
+                <div className="absolute inset-0 bg-gradient-to-r from-blue-400/20 to-purple-400/20 rounded-full blur-xl animate-pulse"></div>
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" className="relative z-10 text-blue-500 dark:text-blue-400">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2-2v2m8 0V6a2 2 0 012 2v6M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2m-8 0V6a2 2 0 00-2 2v6M8 6h8" />
+                </svg>
+              </div>
+              <h3 className="text-2xl font-bold bg-gradient-to-r from-gray-900 to-gray-600 dark:from-slate-100 dark:to-slate-300 bg-clip-text text-transparent mb-4">No jobs found</h3>
+              <p className="text-gray-600 dark:text-slate-400 mb-8 text-lg">
+                {localFilters.search || localFilters.status
+                  ? 'Try adjusting your filters to see more results.'
+                  : 'Get started by creating your first job posting.'}
+              </p>
+              <button
+                onClick={() => setShowCreateModal(true)}
+                className="group relative overflow-hidden bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 hover:from-blue-600 hover:via-purple-600 hover:to-pink-600 text-white border-0 shadow-xl hover:shadow-2xl transform hover:scale-105 transition-all duration-300 px-8 py-4 rounded-xl text-lg font-semibold"
+              >
+                <div className="absolute inset-0 bg-white/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                <PlusIcon className="h-5 w-5 mr-3 relative z-10 group-hover:rotate-90 transition-transform duration-300 inline-block" />
+                <span className="relative z-10">Create Your First Job</span>
+              </button>
             </div>
-            <h3 className="text-lg font-medium text-gray-900 dark:text-slate-100 mb-2">No jobs found</h3>
-            <p className="text-gray-500 mb-4">
-              {localFilters.search || localFilters.status
-                ? 'Try adjusting your filters to see more results.'
-                : 'Get started by creating your first job posting.'}
-            </p>
-            <button
-              onClick={() => setShowCreateModal(true)}
-              className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-lg shadow-sm text-white bg-blue-600 hover:bg-blue-700"
-            >
-              <PlusIcon className="h-4 w-4 mr-2" />
-              Create Your First Job
-            </button>
           </div>
         )}
 
@@ -804,10 +908,16 @@ export function JobsBoard() {
             </div>
             <DragOverlay>
               {activeId ? (
-                <div className="bg-white dark:bg-slate-800 border border-gray-300 dark:border-slate-600 rounded-lg shadow-xl p-4 opacity-90">
-                  <div className="text-sm font-medium text-gray-900 dark:text-white">
-                    {jobs.find(job => job.id.toString() === activeId)?.title}
+                <div className="backdrop-blur-lg bg-white/80 dark:bg-slate-800/80 rounded-2xl shadow-2xl border border-white/40 dark:border-slate-700/40 p-6 opacity-95 transform rotate-3 scale-105">
+                  <div className="relative z-10">
+                    <div className="text-lg font-medium bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-2">
+                      {jobs.find(job => job.id.toString() === activeId)?.title}
+                    </div>
+                    <div className="text-sm text-gray-600 dark:text-slate-400">
+                      {jobs.find(job => job.id.toString() === activeId)?.slug}
+                    </div>
                   </div>
+                  <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 via-purple-500/10 to-pink-500/10 rounded-2xl"></div>
                 </div>
               ) : null}
             </DragOverlay>
@@ -829,6 +939,7 @@ export function JobsBoard() {
                     key={job.id}
                     job={job}
                     openEditModal={openEditModal}
+                    openViewModal={openViewModal}
                     updateJob={updateJob}
                     formatDate={formatDate}
                     hasAssessment={getAssessmentStatus(job.id).hasAssessment}
@@ -839,10 +950,16 @@ export function JobsBoard() {
             </SortableContext>
             <DragOverlay>
               {activeId ? (
-                <div className="bg-white dark:bg-slate-800 border border-gray-300 dark:border-slate-600 rounded-lg shadow-xl p-4 opacity-90">
-                  <div className="text-sm font-medium text-gray-900 dark:text-white">
-                    {jobs.find(job => job.id.toString() === activeId)?.title}
+                <div className="backdrop-blur-lg bg-white/80 dark:bg-slate-800/80 rounded-2xl shadow-2xl border border-white/40 dark:border-slate-700/40 p-6 opacity-95 transform rotate-3 scale-105">
+                  <div className="relative z-10">
+                    <div className="text-lg font-medium bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-2">
+                      {jobs.find(job => job.id.toString() === activeId)?.title}
+                    </div>
+                    <div className="text-sm text-gray-600 dark:text-slate-400">
+                      {jobs.find(job => job.id.toString() === activeId)?.slug}
+                    </div>
                   </div>
+                  <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 via-purple-500/10 to-pink-500/10 rounded-2xl"></div>
                 </div>
               ) : null}
             </DragOverlay>
@@ -935,68 +1052,139 @@ export function JobsBoard() {
 
       {/* Create Job Modal */}
       {showCreateModal && (
-        <div className="fixed inset-0 z-50 overflow-y-auto">
-          <div className="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-            <div className="fixed inset-0 bg-gray-900 bg-opacity-50 dark:bg-black dark:bg-opacity-75 transition-opacity" onClick={() => setShowCreateModal(false)}></div>
+        <div className="fixed inset-0 z-[80] overflow-y-auto">
+          <div className="flex items-center justify-center min-h-screen pt-16 pb-8 px-4 text-center sm:block sm:p-16">
+            <div className="fixed inset-0 bg-black/60 backdrop-blur-md transition-all duration-300" onClick={() => setShowCreateModal(false)}></div>
             
             <span className="hidden sm:inline-block sm:align-middle sm:h-screen">&#8203;</span>
             
-            <div className="inline-block align-bottom bg-white dark:bg-slate-800 rounded-xl text-left overflow-hidden shadow-2xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+            <div className="inline-block align-middle bg-gradient-to-br from-slate-50 via-blue-50/30 to-purple-50/30 dark:from-slate-900 dark:via-slate-800/50 dark:to-slate-700/30 rounded-3xl text-left overflow-hidden shadow-2xl transform transition-all duration-300 hover:scale-[1.01] sm:my-8 sm:align-middle sm:max-w-xl sm:w-full border-2 border-gray-200 dark:border-slate-700 relative">
+              {/* Geometric background pattern */}
+              <div className="absolute inset-0 opacity-30 dark:opacity-20 rounded-3xl overflow-hidden">
+                <svg className="absolute inset-0 h-full w-full" xmlns="http://www.w3.org/2000/svg">
+                  <defs>
+                    <pattern id="create-modal-pattern" x="0" y="0" width="50" height="50" patternUnits="userSpaceOnUse">
+                      <circle cx="25" cy="25" r="0.5" fill="currentColor" className="text-blue-400 dark:text-blue-500" opacity="0.4"/>
+                      <circle cx="0" cy="0" r="0.5" fill="currentColor" className="text-purple-400 dark:text-purple-500" opacity="0.3"/>
+                      <circle cx="50" cy="0" r="0.5" fill="currentColor" className="text-pink-400 dark:text-pink-500" opacity="0.3"/>
+                      <circle cx="0" cy="50" r="0.5" fill="currentColor" className="text-blue-400 dark:text-blue-500" opacity="0.3"/>
+                      <circle cx="50" cy="50" r="0.5" fill="currentColor" className="text-purple-400 dark:text-purple-500" opacity="0.3"/>
+                    </pattern>
+                  </defs>
+                  <rect width="100%" height="100%" fill="url(#create-modal-pattern)" />
+                </svg>
+              </div>
               <form onSubmit={createForm.handleSubmit(handleCreateJob)}>
-                <div className="bg-white dark:bg-slate-800 px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                <div className="relative bg-white dark:bg-slate-800 px-6 pt-6 pb-6 sm:p-6 rounded-3xl">
                   <div className="sm:flex sm:items-start">
                     <div className="mt-3 text-center sm:mt-0 sm:text-left w-full">
-                      <h3 className="text-lg leading-6 font-semibold text-gray-900 dark:text-white mb-4">
+                      <h3 className="text-xl leading-6 font-bold text-gray-900 dark:text-slate-100 mb-6 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">
                         Create New Job
                       </h3>
                       
-                      <div className="space-y-4">
-                        <div>
-                          <label htmlFor="title" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="md:col-span-2">
+                          <label htmlFor="title" className="block text-sm font-semibold text-gray-700 dark:text-slate-300 mb-2">
                             Job Title *
                           </label>
                           <input
                             {...createForm.register('title', { required: 'Job title is required' })}
                             type="text"
                             id="title"
-                            className="block w-full border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-900 dark:text-white rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                            className="block w-full backdrop-blur-lg bg-white/60 dark:bg-slate-700/60 border border-white/30 dark:border-slate-600/30 text-gray-900 dark:text-slate-100 rounded-xl shadow-lg focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all duration-300 hover:shadow-xl px-4 py-3"
                             placeholder="e.g. Senior React Developer"
                           />
                           {createForm.formState.errors.title && (
-                            <p className="mt-1 text-sm text-red-600">{createForm.formState.errors.title.message}</p>
+                            <p className="mt-2 text-sm text-red-600 dark:text-red-400 font-medium">{createForm.formState.errors.title.message}</p>
                           )}
                         </div>
 
                         <div>
-                          <label htmlFor="status" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                          <label htmlFor="salary" className="block text-sm font-semibold text-gray-700 dark:text-slate-300 mb-2">
+                            Salary Range
+                          </label>
+                          <input
+                            {...createForm.register('salary')}
+                            type="text"
+                            id="salary"
+                            className="block w-full backdrop-blur-lg bg-white/60 dark:bg-slate-700/60 border border-white/30 dark:border-slate-600/30 text-gray-900 dark:text-slate-100 rounded-xl shadow-lg focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all duration-300 hover:shadow-xl px-4 py-3"
+                            placeholder="e.g. $80,000 - $120,000"
+                          />
+                        </div>
+
+                        <div>
+                          <label htmlFor="location" className="block text-sm font-semibold text-gray-700 dark:text-slate-300 mb-2">
+                            Location
+                          </label>
+                          <input
+                            {...createForm.register('location')}
+                            type="text"
+                            id="location"
+                            className="block w-full backdrop-blur-lg bg-white/60 dark:bg-slate-700/60 border border-white/30 dark:border-slate-600/30 text-gray-900 dark:text-slate-100 rounded-xl shadow-lg focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all duration-300 hover:shadow-xl px-4 py-3"
+                            placeholder="e.g. San Francisco, CA or Remote"
+                          />
+                        </div>
+
+                        <div>
+                          <label htmlFor="department" className="block text-sm font-semibold text-gray-700 dark:text-slate-300 mb-2">
+                            Department
+                          </label>
+                          <input
+                            {...createForm.register('department')}
+                            type="text"
+                            id="department"
+                            className="block w-full backdrop-blur-lg bg-white/60 dark:bg-slate-700/60 border border-white/30 dark:border-slate-600/30 text-gray-900 dark:text-slate-100 rounded-xl shadow-lg focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all duration-300 hover:shadow-xl px-4 py-3"
+                            placeholder="e.g. Engineering, Product, Marketing"
+                          />
+                        </div>
+
+                        <div>
+                          <label htmlFor="employmentType" className="block text-sm font-semibold text-gray-700 dark:text-slate-300 mb-2">
+                            Employment Type
+                          </label>
+                          <select
+                            {...createForm.register('employmentType')}
+                            id="employmentType"
+                            className="block w-full backdrop-blur-lg bg-white/60 dark:bg-slate-700/60 border border-white/30 dark:border-slate-600/30 text-gray-900 dark:text-slate-100 rounded-xl shadow-lg focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all duration-300 hover:shadow-xl px-4 py-3"
+                          >
+                            <option value="">Select type</option>
+                            <option value="full-time">Full-time</option>
+                            <option value="part-time">Part-time</option>
+                            <option value="contract">Contract</option>
+                            <option value="internship">Internship</option>
+                          </select>
+                        </div>
+
+                        <div>
+                          <label htmlFor="status" className="block text-sm font-semibold text-gray-700 dark:text-slate-300 mb-2">
                             Status
                           </label>
                           <select
                             {...createForm.register('status')}
                             id="status"
-                            className="block w-full border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-900 dark:text-white rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                            className="block w-full backdrop-blur-lg bg-white/60 dark:bg-slate-700/60 border border-white/30 dark:border-slate-600/30 text-gray-900 dark:text-slate-100 rounded-xl shadow-lg focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all duration-300 hover:shadow-xl px-4 py-3"
                           >
                             <option value="active">Active</option>
                             <option value="archived">Archived</option>
                           </select>
                         </div>
 
-                        <div>
-                          <label htmlFor="tags" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                        <div className="md:col-span-2">
+                          <label htmlFor="tags" className="block text-sm font-semibold text-gray-700 dark:text-slate-300 mb-2">
                             Tags
                           </label>
                           <input
                             {...createForm.register('tags')}
                             type="text"
                             id="tags"
-                            className="block w-full border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-900 dark:text-white rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                            className="block w-full backdrop-blur-lg bg-white/60 dark:bg-slate-700/60 border border-white/30 dark:border-slate-600/30 text-gray-900 dark:text-slate-100 rounded-xl shadow-lg focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all duration-300 hover:shadow-xl px-4 py-3"
                             placeholder="remote, senior, react, typescript"
                           />
-                          <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">Separate tags with commas</p>
+                          <p className="mt-2 text-sm text-gray-500 dark:text-slate-400">Separate tags with commas</p>
                         </div>
 
-                        <div>
-                          <label htmlFor="order" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                        <div className="md:col-span-2">
+                          <label htmlFor="order" className="block text-sm font-semibold text-gray-700 dark:text-slate-300 mb-2">
                             Order (optional)
                           </label>
                           <input
@@ -1004,31 +1192,33 @@ export function JobsBoard() {
                             type="number"
                             min="1"
                             id="order"
-                            className="block w-full border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-900 dark:text-white rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                            className="block w-full backdrop-blur-lg bg-white/60 dark:bg-slate-700/60 border border-white/30 dark:border-slate-600/30 text-gray-900 dark:text-slate-100 rounded-xl shadow-lg focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all duration-300 hover:shadow-xl px-4 py-3"
                             placeholder="Leave empty to add at end"
                           />
-                          <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">Specify position in job list. Other jobs will be reordered automatically.</p>
+                          <p className="mt-2 text-sm text-gray-500 dark:text-slate-400">Specify position in job list. Other jobs will be reordered automatically.</p>
                         </div>
                       </div>
                     </div>
                   </div>
                 </div>
                 
-                <div className="bg-gray-50 dark:bg-slate-700 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+                <div className="relative backdrop-blur-lg bg-white/60 dark:bg-slate-700/60 px-6 py-4 sm:px-8 sm:flex sm:flex-row-reverse sm:gap-3 border-t border-white/30 dark:border-slate-600/30">
                   <Button
                     type="submit"
                     variant="primary"
                     size="md"
+                    className="group backdrop-blur-lg bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
                   >
-                    Create Job
+                    <span className="group-hover:scale-110 transition-transform duration-300 inline-block font-medium">Create Job</span>
                   </Button>
                   <Button
                     type="button"
                     onClick={() => setShowCreateModal(false)}
                     variant="outline"
                     size="md"
+                    className="group backdrop-blur-lg bg-white/60 dark:bg-slate-800/60 hover:bg-white/80 dark:hover:bg-slate-800/80 border border-white/30 dark:border-slate-700/30 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
                   >
-                    Cancel
+                    <span className="group-hover:scale-110 transition-transform duration-300 inline-block font-medium">Cancel</span>
                   </Button>
                 </div>
               </form>
@@ -1039,68 +1229,139 @@ export function JobsBoard() {
 
       {/* Edit Job Modal */}
       {showEditModal && selectedJob && (
-        <div className="fixed inset-0 z-50 overflow-y-auto">
-          <div className="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-            <div className="fixed inset-0 bg-gray-900 bg-opacity-50 dark:bg-black dark:bg-opacity-75 transition-opacity" onClick={() => setShowEditModal(false)}></div>
+        <div className="fixed inset-0 z-[80] overflow-y-auto">
+          <div className="flex items-center justify-center min-h-screen pt-16 pb-8 px-4 text-center sm:block sm:p-16">
+            <div className="fixed inset-0 bg-black/60 backdrop-blur-md transition-all duration-300" onClick={() => setShowEditModal(false)}></div>
             
             <span className="hidden sm:inline-block sm:align-middle sm:h-screen">&#8203;</span>
             
-            <div className="inline-block align-bottom bg-white dark:bg-slate-800 rounded-xl text-left overflow-hidden shadow-2xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+            <div className="inline-block align-middle bg-gradient-to-br from-slate-50 via-blue-50/30 to-purple-50/30 dark:from-slate-900 dark:via-slate-800/50 dark:to-slate-700/30 rounded-3xl text-left overflow-hidden shadow-2xl transform transition-all duration-300 hover:scale-[1.01] sm:my-8 sm:align-middle sm:max-w-xl sm:w-full border-2 border-gray-200 dark:border-slate-700 relative">
+              {/* Geometric background pattern */}
+              <div className="absolute inset-0 opacity-30 dark:opacity-20 rounded-3xl overflow-hidden">
+                <svg className="absolute inset-0 h-full w-full" xmlns="http://www.w3.org/2000/svg">
+                  <defs>
+                    <pattern id="edit-modal-pattern" x="0" y="0" width="50" height="50" patternUnits="userSpaceOnUse">
+                      <circle cx="25" cy="25" r="0.5" fill="currentColor" className="text-blue-400 dark:text-blue-500" opacity="0.4"/>
+                      <circle cx="0" cy="0" r="0.5" fill="currentColor" className="text-purple-400 dark:text-purple-500" opacity="0.3"/>
+                      <circle cx="50" cy="0" r="0.5" fill="currentColor" className="text-pink-400 dark:text-pink-500" opacity="0.3"/>
+                      <circle cx="0" cy="50" r="0.5" fill="currentColor" className="text-blue-400 dark:text-blue-500" opacity="0.3"/>
+                      <circle cx="50" cy="50" r="0.5" fill="currentColor" className="text-purple-400 dark:text-purple-500" opacity="0.3"/>
+                    </pattern>
+                  </defs>
+                  <rect width="100%" height="100%" fill="url(#edit-modal-pattern)" />
+                </svg>
+              </div>
               <form onSubmit={editForm.handleSubmit(handleEditJob)}>
-                <div className="bg-white dark:bg-slate-800 px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                <div className="relative bg-white dark:bg-slate-800 px-6 pt-6 pb-6 sm:p-6 rounded-3xl">
                   <div className="sm:flex sm:items-start">
                     <div className="mt-3 text-center sm:mt-0 sm:text-left w-full">
-                      <h3 className="text-lg leading-6 font-semibold text-gray-900 dark:text-white mb-4">
+                      <h3 className="text-2xl leading-6 font-bold text-gray-900 dark:text-slate-100 mb-8 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent drop-shadow-sm">
                         Edit Job: {selectedJob.title}
                       </h3>
                       
-                      <div className="space-y-4">
-                        <div>
-                          <label htmlFor="edit-title" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div className="md:col-span-2">
+                          <label htmlFor="edit-title" className="block text-sm font-semibold text-gray-700 dark:text-slate-300 mb-2">
                             Job Title *
                           </label>
                           <input
                             {...editForm.register('title', { required: 'Job title is required' })}
                             type="text"
                             id="edit-title"
-                            className="block w-full border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-900 dark:text-white rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                            className="block w-full backdrop-blur-lg bg-white/60 dark:bg-slate-700/60 border border-white/30 dark:border-slate-600/30 text-gray-900 dark:text-slate-100 rounded-xl shadow-lg focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all duration-300 hover:shadow-xl px-4 py-3"
                             placeholder="e.g. Senior React Developer"
                           />
                           {editForm.formState.errors.title && (
-                            <p className="mt-1 text-sm text-red-600">{editForm.formState.errors.title.message}</p>
+                            <p className="mt-2 text-sm text-red-600 dark:text-red-400 font-medium">{editForm.formState.errors.title.message}</p>
                           )}
                         </div>
 
                         <div>
-                          <label htmlFor="edit-status" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                          <label htmlFor="edit-salary" className="block text-sm font-semibold text-gray-700 dark:text-slate-300 mb-2">
+                            Salary Range
+                          </label>
+                          <input
+                            {...editForm.register('salary')}
+                            type="text"
+                            id="edit-salary"
+                            className="block w-full backdrop-blur-lg bg-white/60 dark:bg-slate-700/60 border border-white/30 dark:border-slate-600/30 text-gray-900 dark:text-slate-100 rounded-xl shadow-lg focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all duration-300 hover:shadow-xl px-4 py-3"
+                            placeholder="e.g. $80,000 - $120,000"
+                          />
+                        </div>
+
+                        <div>
+                          <label htmlFor="edit-location" className="block text-sm font-semibold text-gray-700 dark:text-slate-300 mb-2">
+                            Location
+                          </label>
+                          <input
+                            {...editForm.register('location')}
+                            type="text"
+                            id="edit-location"
+                            className="block w-full backdrop-blur-lg bg-white/60 dark:bg-slate-700/60 border border-white/30 dark:border-slate-600/30 text-gray-900 dark:text-slate-100 rounded-xl shadow-lg focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all duration-300 hover:shadow-xl px-4 py-3"
+                            placeholder="e.g. San Francisco, CA or Remote"
+                          />
+                        </div>
+
+                        <div>
+                          <label htmlFor="edit-department" className="block text-sm font-semibold text-gray-700 dark:text-slate-300 mb-2">
+                            Department
+                          </label>
+                          <input
+                            {...editForm.register('department')}
+                            type="text"
+                            id="edit-department"
+                            className="block w-full backdrop-blur-lg bg-white/60 dark:bg-slate-700/60 border border-white/30 dark:border-slate-600/30 text-gray-900 dark:text-slate-100 rounded-xl shadow-lg focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all duration-300 hover:shadow-xl px-4 py-3"
+                            placeholder="e.g. Engineering, Product, Marketing"
+                          />
+                        </div>
+
+                        <div>
+                          <label htmlFor="edit-employmentType" className="block text-sm font-semibold text-gray-700 dark:text-slate-300 mb-2">
+                            Employment Type
+                          </label>
+                          <select
+                            {...editForm.register('employmentType')}
+                            id="edit-employmentType"
+                            className="block w-full backdrop-blur-lg bg-white/60 dark:bg-slate-700/60 border border-white/30 dark:border-slate-600/30 text-gray-900 dark:text-slate-100 rounded-xl shadow-lg focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all duration-300 hover:shadow-xl px-4 py-3"
+                          >
+                            <option value="">Select type</option>
+                            <option value="full-time">Full-time</option>
+                            <option value="part-time">Part-time</option>
+                            <option value="contract">Contract</option>
+                            <option value="internship">Internship</option>
+                          </select>
+                        </div>
+
+                        <div>
+                          <label htmlFor="edit-status" className="block text-sm font-semibold text-gray-700 dark:text-slate-300 mb-2">
                             Status
                           </label>
                           <select
                             {...editForm.register('status')}
                             id="edit-status"
-                            className="block w-full border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-900 dark:text-white rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                            className="block w-full backdrop-blur-lg bg-white/60 dark:bg-slate-700/60 border border-white/30 dark:border-slate-600/30 text-gray-900 dark:text-slate-100 rounded-xl shadow-lg focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all duration-300 hover:shadow-xl px-4 py-3"
                           >
                             <option value="active">Active</option>
                             <option value="archived">Archived</option>
                           </select>
                         </div>
 
-                        <div>
-                          <label htmlFor="edit-tags" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                        <div className="md:col-span-2">
+                          <label htmlFor="edit-tags" className="block text-sm font-semibold text-gray-700 dark:text-slate-300 mb-2">
                             Tags
                           </label>
                           <input
                             {...editForm.register('tags')}
                             type="text"
                             id="edit-tags"
-                            className="block w-full border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-900 dark:text-white rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                            className="block w-full backdrop-blur-lg bg-white/60 dark:bg-slate-700/60 border border-white/30 dark:border-slate-600/30 text-gray-900 dark:text-slate-100 rounded-xl shadow-lg focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all duration-300 hover:shadow-xl px-4 py-3"
                             placeholder="remote, senior, react, typescript"
                           />
-                          <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">Separate tags with commas</p>
+                          <p className="mt-2 text-sm text-gray-500 dark:text-slate-400">Separate tags with commas</p>
                         </div>
 
-                        <div>
-                          <label htmlFor="edit-order" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                        <div className="md:col-span-2">
+                          <label htmlFor="edit-order" className="block text-sm font-semibold text-gray-700 dark:text-slate-300 mb-2">
                             Order
                           </label>
                           <input
@@ -1108,23 +1369,24 @@ export function JobsBoard() {
                             type="number"
                             min="1"
                             id="edit-order"
-                            className="block w-full border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-900 dark:text-white rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                            className="block w-full backdrop-blur-lg bg-white/60 dark:bg-slate-700/60 border border-white/30 dark:border-slate-600/30 text-gray-900 dark:text-slate-100 rounded-xl shadow-lg focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all duration-300 hover:shadow-xl px-4 py-3"
                             placeholder="Position in job list"
                           />
-                          <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">Change position in job list. Other jobs will be reordered automatically.</p>
+                          <p className="mt-2 text-sm text-gray-500 dark:text-slate-400">Change position in job list. Other jobs will be reordered automatically.</p>
                         </div>
                       </div>
                     </div>
                   </div>
                 </div>
                 
-                <div className="bg-gray-50 dark:bg-slate-700 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+                <div className="relative backdrop-blur-lg bg-white/60 dark:bg-slate-700/60 px-6 py-4 sm:px-8 sm:flex sm:flex-row-reverse sm:gap-3 border-t border-white/30 dark:border-slate-600/30">
                   <Button
                     type="submit"
                     variant="primary"
                     size="md"
+                    className="group backdrop-blur-lg bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
                   >
-                    Update Job
+                    <span className="group-hover:scale-110 transition-transform duration-300 inline-block font-medium">Update Job</span>
                   </Button>
                   {getAssessmentStatus(selectedJob.id).hasAssessment && (
                     <Button
@@ -1136,8 +1398,9 @@ export function JobsBoard() {
                       }}
                       variant="accent"
                       size="md"
+                      className="group backdrop-blur-lg bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
                     >
-                      Edit Assessment
+                      <span className="group-hover:scale-110 transition-transform duration-300 inline-block font-medium">Edit Assessment</span>
                     </Button>
                   )}
                   <Button
@@ -1148,8 +1411,9 @@ export function JobsBoard() {
                     }}
                     variant="outline"
                     size="md"
+                    className="group backdrop-blur-lg bg-white/60 dark:bg-slate-800/60 hover:bg-white/80 dark:hover:bg-slate-800/80 border border-white/30 dark:border-slate-700/30 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
                   >
-                    Cancel
+                    <span className="group-hover:scale-110 transition-transform duration-300 inline-block font-medium">Cancel</span>
                   </Button>
                 </div>
               </form>
@@ -1157,6 +1421,7 @@ export function JobsBoard() {
           </div>
         </div>
       )}
+      </div>
     </div>
   );
 }

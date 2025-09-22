@@ -168,7 +168,7 @@ export function AssessmentDetail() {
             type="text"
             value={currentValue as string}
             onChange={(e) => handleResponseChange(questionKey, e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            className="w-full backdrop-blur-lg bg-white/60 dark:bg-slate-700/60 border border-white/30 dark:border-slate-600/30 text-gray-900 dark:text-slate-100 rounded-xl shadow-lg focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all duration-300 hover:shadow-xl px-4 py-3"
             placeholder="Your answer..."
             maxLength={question.maxLength}
           />
@@ -179,7 +179,7 @@ export function AssessmentDetail() {
             value={currentValue as string}
             onChange={(e) => handleResponseChange(questionKey, e.target.value)}
             rows={4}
-            className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            className="w-full backdrop-blur-lg bg-white/60 dark:bg-slate-700/60 border border-white/30 dark:border-slate-600/30 text-gray-900 dark:text-slate-100 rounded-xl shadow-lg focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all duration-300 hover:shadow-xl px-4 py-3"
             placeholder="Your answer..."
             maxLength={question.maxLength}
           />
@@ -284,71 +284,78 @@ export function AssessmentDetail() {
   }
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-4">
-          <Link
-            to="/jobs"
-            className="inline-flex items-center text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"
-          >
-            <ChevronLeftIcon className="h-4 w-4 mr-1" />
-            Back to Jobs
-          </Link>
+    <div className="min-h-screen backdrop-blur-xl bg-gradient-to-br from-blue-50/80 via-purple-50/80 to-pink-50/80 dark:from-slate-900/80 dark:via-slate-800/80 dark:to-slate-900/80">
+      <div className="max-w-4xl mx-auto p-6 space-y-6">
+        {/* Header */}
+        <div className="flex items-center justify-between backdrop-blur-xl bg-white/80 dark:bg-slate-800/80 rounded-3xl p-6 border border-white/30 dark:border-slate-700/30 shadow-xl relative">
+          <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 via-purple-500/10 to-pink-500/10 rounded-3xl"></div>
+          <div className="flex items-center space-x-4 relative">
+            <Link
+              to="/jobs"
+              className="inline-flex items-center text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 px-4 py-2 rounded-xl backdrop-blur-lg bg-white/60 dark:bg-slate-700/60 border border-white/30 dark:border-slate-600/30 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
+            >
+              <ChevronLeftIcon className="h-4 w-4 mr-1" />
+              Back to Jobs
+            </Link>
+          </div>
         </div>
-      </div>
 
       {/* Job Info */}
-      <div className="bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-600 rounded-xl p-6">
-        <div className="flex items-center justify-between mb-4">
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900 dark:text-white">{job.title}</h1>
-            <p className="text-gray-600 dark:text-gray-400 mt-1">{job.slug}</p>
+      <div className="backdrop-blur-xl bg-white/80 dark:bg-slate-800/80 border border-white/30 dark:border-slate-700/30 rounded-3xl p-6 shadow-xl relative">
+        <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 via-purple-500/10 to-pink-500/10 rounded-3xl"></div>
+        <div className="relative">
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">{job.title}</h1>
+              <p className="text-gray-600 dark:text-gray-400 mt-1">{job.slug}</p>
+            </div>
+            <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium backdrop-blur-lg border transition-all duration-300 hover:scale-105 ${
+              job.status === 'active' 
+                ? 'bg-green-100/80 dark:bg-green-900/50 text-green-700 dark:text-green-400 border-green-200/50 dark:border-green-800/50' 
+                : 'bg-gray-100/80 dark:bg-gray-800/50 text-gray-600 dark:text-gray-400 border-gray-200/50 dark:border-gray-700/50'
+            }`}>
+              {job.status === 'active' && <CheckCircleIcon className="h-4 w-4 mr-1" />}
+              {job.status}
+            </span>
           </div>
-          <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${
-            job.status === 'active' 
-              ? 'bg-green-100 dark:bg-green-900/50 text-green-700 dark:text-green-400' 
-              : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400'
-          }`}>
-            {job.status === 'active' && <CheckCircleIcon className="h-4 w-4 mr-1" />}
-            {job.status}
-          </span>
-        </div>
 
-        {job.tags && job.tags.length > 0 && (
-          <div className="flex flex-wrap gap-2">
-            {job.tags.map((tag) => (
-              <span
-                key={tag}
-                className="inline-flex items-center px-2 py-1 rounded-md text-sm bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-gray-300"
-              >
-                {tag}
-              </span>
-            ))}
-          </div>
-        )}
+          {job.tags && job.tags.length > 0 && (
+            <div className="flex flex-wrap gap-2">
+              {job.tags.map((tag) => (
+                <span
+                  key={tag}
+                  className="inline-flex items-center px-3 py-1.5 rounded-xl text-sm backdrop-blur-lg bg-white/60 dark:bg-slate-700/60 text-gray-700 dark:text-gray-300 border border-white/30 dark:border-slate-600/30 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
+                >
+                  {tag}
+                </span>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Assessment Section */}
-      <div className="bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-600 rounded-xl p-6">
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Assessment</h2>
+      <div className="backdrop-blur-xl bg-white/80 dark:bg-slate-800/80 border border-white/30 dark:border-slate-700/30 rounded-3xl p-6 shadow-xl relative">
+        <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 via-purple-500/10 to-pink-500/10 rounded-3xl"></div>
+        <div className="relative">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-xl font-semibold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">Assessment</h2>
           <div className="flex space-x-3">
             {assessment ? (
               <>
                 <button
                   onClick={handleEditAssessment}
-                  className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-lg text-white bg-blue-600 hover:bg-blue-700 transition-colors"
+                  className="inline-flex items-center px-4 py-2 backdrop-blur-lg bg-white/60 dark:bg-slate-700/60 border border-white/30 dark:border-slate-600/30 shadow-lg text-sm font-medium rounded-xl text-blue-600 dark:text-blue-400 hover:shadow-xl transition-all duration-300 hover:scale-105 hover:rotate-1"
                 >
                   <PencilIcon className="h-4 w-4 mr-2" />
                   Edit Assessment
                 </button>
                 <button
                   onClick={() => setPreviewMode(!previewMode)}
-                  className={`inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-lg transition-colors ${
+                  className={`inline-flex items-center px-4 py-2 backdrop-blur-lg border border-white/30 dark:border-slate-600/30 shadow-lg text-sm font-medium rounded-xl transition-all duration-300 hover:scale-105 hover:shadow-xl ${
                     previewMode 
-                      ? 'text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/50 hover:bg-blue-100 dark:hover:bg-blue-900/70' 
-                      : 'text-gray-600 dark:text-gray-400 bg-gray-50 dark:bg-slate-700 hover:bg-gray-100 dark:hover:bg-slate-600'
+                      ? 'text-blue-600 dark:text-blue-400 bg-blue-100/80 dark:bg-blue-900/50 hover:bg-blue-200/80 dark:hover:bg-blue-900/70' 
+                      : 'text-gray-700 dark:text-gray-300 bg-white/60 dark:bg-slate-700/60 hover:bg-white/80 dark:hover:bg-slate-700/80'
                   }`}
                 >
                   {previewMode ? (
@@ -494,7 +501,7 @@ export function AssessmentDetail() {
                     <button
                       type="submit"
                       disabled={submitting}
-                      className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 transition-colors"
+                      className="px-6 py-3 backdrop-blur-lg bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-xl shadow-lg hover:shadow-xl disabled:opacity-50 transition-all duration-300 hover:scale-105 hover:rotate-1 font-medium"
                     >
                       {submitting ? 'Submitting...' : 'Submit Assessment'}
                     </button>
@@ -512,13 +519,14 @@ export function AssessmentDetail() {
             </p>
             <button
               onClick={handleCreateAssessment}
-              className="inline-flex items-center px-6 py-3 border border-transparent shadow-sm text-base font-medium rounded-lg text-white bg-green-600 hover:bg-green-700 transition-colors"
+              className="inline-flex items-center px-6 py-3 backdrop-blur-lg bg-gradient-to-r from-green-500 to-blue-600 text-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 hover:rotate-1 font-medium"
             >
               <DocumentTextIcon className="h-5 w-5 mr-2" />
               Create Assessment
             </button>
           </div>
         )}
+        </div>
       </div>
 
       {/* Candidate Search Modal */}
@@ -528,6 +536,7 @@ export function AssessmentDetail() {
         onSelectCandidate={handleCandidateSelect}
         jobId={parseInt(jobId || '0')}
       />
+      </div>
     </div>
   );
 }

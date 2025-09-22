@@ -92,7 +92,7 @@ export async function generateSeedData(): Promise<void> {
       await db.candidateResponses.clear();
     });
 
-    // Generate 25 jobs
+    // Generate 25 jobs (all active so they're all visible)
     const jobs: Omit<Job, 'id'>[] = [];
     const existingSlugs: string[] = [];
 
@@ -104,7 +104,7 @@ export async function generateSeedData(): Promise<void> {
       const job: Omit<Job, 'id'> = {
         title,
         slug,
-        status: Math.random() > 0.3 ? 'active' : 'archived', // 70% active, 30% archived
+        status: 'active', // All jobs are active to ensure they're visible
         tags: getRandomElements(TAGS, Math.floor(Math.random() * 4) + 1), // 1-4 tags
         order: i + 1,
         createdAt: Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000, // Random time in last 30 days

@@ -8,6 +8,10 @@ export interface Job {
   status: 'active' | 'archived';
   tags: string[]; // e.g., ['remote', 'senior']
   order: number; // For drag-and-drop reordering (1 to 25 initially)
+  salary?: string; // e.g., "$80,000 - $120,000" or "Competitive"
+  location?: string; // e.g., "San Francisco, CA" or "Remote"
+  department?: string; // e.g., "Engineering", "Product", "Marketing"
+  employmentType?: 'full-time' | 'part-time' | 'contract' | 'internship'; // Employment type
   createdAt: number; // Date.now()
   updatedAt: number; // Date.now() on update
 }

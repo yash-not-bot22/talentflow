@@ -218,12 +218,14 @@ function QuestionEditor({ question, onUpdate, onDelete }: QuestionEditorProps) {
   const needsOptions = question.type === 'single-choice' || question.type === 'multi-choice';
 
   return (
-    <div className="bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-600 rounded-lg">
-      {/* Question Header */}
-      <div 
-        className="p-4 border-b border-gray-100 dark:border-slate-600 cursor-pointer hover:bg-gray-50 dark:hover:bg-slate-700"
-        onClick={() => setIsExpanded(!isExpanded)}
-      >
+    <div className="backdrop-blur-xl bg-white/80 dark:bg-slate-800/80 border border-white/30 dark:border-slate-700/30 rounded-3xl shadow-xl relative">
+      <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 via-purple-500/10 to-pink-500/10 rounded-3xl"></div>
+      <div className="relative">
+        {/* Question Header */}
+        <div 
+          className="p-4 border-b border-white/20 dark:border-slate-600/30 cursor-pointer hover:bg-white/50 dark:hover:bg-slate-700/50 rounded-t-3xl transition-all duration-300"
+          onClick={() => setIsExpanded(!isExpanded)}
+        >
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-3">
             <div className="flex items-center space-x-2">
@@ -379,6 +381,7 @@ function QuestionEditor({ question, onUpdate, onDelete }: QuestionEditorProps) {
           )}
         </div>
       )}
+      </div>
     </div>
   );
 }
@@ -600,24 +603,27 @@ export function AssessmentBuilder({ initialAssessment, onSave, onCancel }: Asses
   const totalQuestions = assessment.sections.reduce((total, section) => total + section.questions.length, 0);
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-600 rounded-lg p-6">
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center space-x-4">
-            <button
-              onClick={handleCancel}
-              className="p-2 text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-slate-700"
-            >
-              <ArrowLeftIcon className="h-5 w-5" />
-            </button>
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-                {jobId === 'new' ? 'Create New Assessment' : `Edit Assessment for Job #${assessment.jobId}`}
-              </h1>
-              <p className="text-gray-600 dark:text-gray-400 mt-1">
-                Design questions and sections for candidate evaluation
-              </p>
+    <div className="min-h-screen backdrop-blur-xl bg-gradient-to-br from-blue-50/80 via-purple-50/80 to-pink-50/80 dark:from-slate-900/80 dark:via-slate-800/80 dark:to-slate-900/80">
+      <div className="max-w-6xl mx-auto p-6 space-y-6">
+        {/* Header */}
+        <div className="backdrop-blur-xl bg-white/80 dark:bg-slate-800/80 border border-white/30 dark:border-slate-700/30 rounded-3xl p-6 shadow-xl relative">
+          <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 via-purple-500/10 to-pink-500/10 rounded-3xl"></div>
+          <div className="relative">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center space-x-4">
+                <button
+                  onClick={handleCancel}
+                  className="p-2 backdrop-blur-lg bg-white/60 dark:bg-slate-700/60 border border-white/30 dark:border-slate-600/30 shadow-lg text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300 rounded-xl hover:shadow-xl transition-all duration-300 hover:scale-105"
+                >
+                  <ArrowLeftIcon className="h-5 w-5" />
+                </button>
+                <div>
+                  <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                    {jobId === 'new' ? 'Create New Assessment' : `Edit Assessment for Job #${assessment.jobId}`}
+                  </h1>
+                  <p className="text-gray-600 dark:text-gray-400 mt-1">
+                    Design questions and sections for candidate evaluation
+                  </p>
             </div>
           </div>
           
@@ -712,17 +718,19 @@ export function AssessmentBuilder({ initialAssessment, onSave, onCancel }: Asses
       ) : (
         <div className="space-y-6">
           {/* Section Tabs */}
-          <div className="bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-600 rounded-lg p-6">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Sections</h3>
-              <button
-                onClick={addSection}
-                className="inline-flex items-center px-3 py-2 border border-transparent text-sm font-medium rounded-md text-blue-700 dark:text-blue-300 bg-blue-100 dark:bg-blue-900/50 hover:bg-blue-200 dark:hover:bg-blue-900/70 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-              >
-                <PlusIcon className="h-4 w-4 mr-1" />
-                Add Section
-              </button>
-            </div>
+          <div className="backdrop-blur-xl bg-white/80 dark:bg-slate-800/80 border border-white/30 dark:border-slate-700/30 rounded-3xl p-6 shadow-xl relative">
+            <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 via-purple-500/10 to-pink-500/10 rounded-3xl"></div>
+            <div className="relative">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-semibold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">Sections</h3>
+                <button
+                  onClick={addSection}
+                  className="inline-flex items-center px-3 py-2 backdrop-blur-lg bg-white/60 dark:bg-slate-700/60 border border-white/30 dark:border-slate-600/30 shadow-lg text-sm font-medium rounded-xl text-blue-700 dark:text-blue-300 hover:shadow-xl transition-all duration-300 hover:scale-105 hover:rotate-1"
+                >
+                  <PlusIcon className="h-4 w-4 mr-1" />
+                  Add Section
+                </button>
+              </div>
             
             <div className="flex space-x-1 mb-4">
               {assessment.sections.map(section => (
@@ -765,19 +773,22 @@ export function AssessmentBuilder({ initialAssessment, onSave, onCancel }: Asses
                 />
               </div>
             )}
+            </div>
           </div>
 
           {/* Question Type Selector */}
-          <div className="bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-600 rounded-lg p-6">
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Question Types</h3>
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-              {questionTypes.map(type => (
-                <button
-                  key={type.type}
-                  onClick={() => addQuestion(type.type)}
-                  disabled={!currentSectionId}
-                  className="flex items-center p-3 border border-gray-200 dark:border-slate-600 rounded-lg hover:border-blue-300 dark:hover:border-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors text-left disabled:opacity-50 disabled:cursor-not-allowed bg-white dark:bg-slate-700"
-                >
+          <div className="backdrop-blur-xl bg-white/80 dark:bg-slate-800/80 border border-white/30 dark:border-slate-700/30 rounded-3xl p-6 shadow-xl relative">
+            <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 via-purple-500/10 to-pink-500/10 rounded-3xl"></div>
+            <div className="relative">
+              <h3 className="text-lg font-semibold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-4">Question Types</h3>
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                {questionTypes.map(type => (
+                  <button
+                    key={type.type}
+                    onClick={() => addQuestion(type.type)}
+                    disabled={!currentSectionId}
+                    className="flex items-center p-3 backdrop-blur-lg bg-white/60 dark:bg-slate-700/60 border border-white/30 dark:border-slate-600/30 rounded-xl hover:shadow-xl transition-all duration-300 hover:scale-105 hover:rotate-1 text-left disabled:opacity-50 disabled:cursor-not-allowed shadow-lg"
+                  >
                   <span className="text-2xl mr-3">{type.icon}</span>
                   <div>
                     <p className="font-medium text-gray-900 dark:text-white">{type.label}</p>
@@ -786,19 +797,22 @@ export function AssessmentBuilder({ initialAssessment, onSave, onCancel }: Asses
                 </button>
               ))}
             </div>
+            </div>
           </div>
 
           {/* Questions */}
-          <div className="bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-600 rounded-lg p-6">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-                Questions {currentSection && `- ${currentSection.name}`}
-              </h3>
-              <button
-                onClick={() => addQuestion()}
-                disabled={!currentSectionId}
-                className="px-4 py-2 bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 text-white rounded-lg text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
-              >
+          <div className="backdrop-blur-xl bg-white/80 dark:bg-slate-800/80 border border-white/30 dark:border-slate-700/30 rounded-3xl p-6 shadow-xl relative">
+            <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 via-purple-500/10 to-pink-500/10 rounded-3xl"></div>
+            <div className="relative">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-semibold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                  Questions {currentSection && `- ${currentSection.name}`}
+                </h3>
+                <button
+                  onClick={() => addQuestion()}
+                  disabled={!currentSectionId}
+                  className="px-4 py-2 backdrop-blur-lg bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-xl shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed text-sm font-medium transition-all duration-300 hover:scale-105 hover:rotate-1"
+                >
                 Add Question
               </button>
             </div>
@@ -825,9 +839,12 @@ export function AssessmentBuilder({ initialAssessment, onSave, onCancel }: Asses
                 ))
               )}
             </div>
+            </div>
           </div>
         </div>
       )}
+      </div>
+    </div>
     </div>
   );
 }

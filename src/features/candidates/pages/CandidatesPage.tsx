@@ -4,13 +4,10 @@ import { useCandidates, useCandidateStages, useCandidateOperations } from '../ho
 import { useJobs } from '../../jobs/hooks/useJobs';
 import type { Candidate } from '../../../db';
 import {
-  MagnifyingGlassIcon,
-  FunnelIcon,
   PlusIcon,
   UserIcon,
   EnvelopeIcon,
   CalendarIcon,
-  EyeIcon,
   Squares2X2Icon,
   ListBulletIcon,
   XMarkIcon,
@@ -47,8 +44,11 @@ const CandidateCard: React.FC<CandidateCardProps> = ({ candidate, getStageInfo, 
 
   // List view
   return (
-    <div className="bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-gray-200 dark:border-slate-600 p-4 hover:shadow-md hover:border-gray-300 dark:hover:border-slate-500 transition-all cursor-pointer group"
+    <div className="bg-white dark:bg-slate-800 rounded-3xl shadow-lg border border-gray-200 dark:border-slate-700 p-4 hover:shadow-2xl hover:border-blue-300 dark:hover:border-blue-600 transition-all duration-300 cursor-pointer group hover:scale-[1.02] hover:-translate-y-1 relative overflow-hidden"
          onClick={() => onViewCandidate(candidate)}>
+      {/* Hover gradient overlay */}
+      <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 via-purple-500/10 to-pink-500/10 rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+      <div className="relative">
         <div className="flex items-center justify-between">
           {/* Candidate Info */}
           <div className="flex items-center space-x-4 flex-1">
@@ -103,19 +103,9 @@ const CandidateCard: React.FC<CandidateCardProps> = ({ candidate, getStageInfo, 
               <option value="hired">Hired</option>
               <option value="rejected">Rejected</option>
             </select>
-
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                onViewCandidate(candidate);
-              }}
-              className="p-2 text-gray-400 dark:text-gray-500 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-lg transition-colors"
-              title="View candidate"
-            >
-              <EyeIcon className="h-4 w-4" />
-            </button>
           </div>
         </div>
+      </div>
     </div>
   );
 };
@@ -138,16 +128,19 @@ const CandidateCardView: React.FC<CandidateCardProps> = ({ candidate, getStageIn
 
   // Card view
   return (
-    <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-gray-200 dark:border-slate-600 p-6 hover:shadow-lg hover:border-gray-300 dark:hover:border-slate-500 transition-all cursor-pointer group"
+        <div className="bg-white dark:bg-slate-800 rounded-3xl shadow-lg border border-gray-200 dark:border-slate-700 p-6 hover:shadow-2xl hover:border-blue-300 dark:hover:border-blue-600 transition-all duration-300 cursor-pointer group hover:scale-[1.05] hover:-translate-y-2 hover:rotate-1 relative overflow-hidden"
          onClick={() => onViewCandidate(candidate)}>
-      {/* Card Header */}
-      <div className="flex items-center justify-between mb-4">
-        <div className="h-12 w-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-semibold">
-          {getInitials(candidate.name)}
-        </div>
-        <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${stageInfo.color}`}>
-          {stageInfo.label}
-        </span>
+      {/* Hover gradient overlay */}
+      <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 via-purple-500/10 to-pink-500/10 rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+      <div className="relative">
+        {/* Card Header */}
+        <div className="flex items-center justify-between mb-4">
+          <div className="h-12 w-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-semibold shadow-lg group-hover:scale-110 transition-transform duration-300">
+            {getInitials(candidate.name)}
+          </div>
+          <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium backdrop-blur-lg border border-white/30 transition-all duration-300 group-hover:scale-105 ${stageInfo.color}`}>
+            {stageInfo.label}
+          </span>
       </div>
 
       {/* Candidate Info */}
@@ -195,17 +188,7 @@ const CandidateCardView: React.FC<CandidateCardProps> = ({ candidate, getStageIn
           <option value="hired">Hired</option>
           <option value="rejected">Rejected</option>
         </select>
-
-        <button
-          onClick={(e) => {
-            e.stopPropagation();
-            onViewCandidate(candidate);
-          }}
-          className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
-          title="View candidate"
-        >
-          <EyeIcon className="h-4 w-4" />
-        </button>
+      </div>
       </div>
     </div>
   );
@@ -218,19 +201,11 @@ export function CandidatesPage() {
   const { updateCandidate } = useCandidateOperations();
   const { jobs } = useJobs();
   
-  const [searchTerm, setSearchTerm] = useState(filters.search || '');
   const [stageFilter, setStageFilter] = useState(filters.stage || '');
-  const [showFilters, setShowFilters] = useState(false);
   const [viewMode, setViewMode] = useState<'list' | 'cards' | 'stages'>('list');
 
   // Use server-side filtering - no client-side filtering needed
   const filteredCandidates = candidates;
-
-  // Handle search with debouncing
-  const handleSearchChange = useCallback((value: string) => {
-    setSearchTerm(value);
-    updateFilters({ search: value });
-  }, [updateFilters]);
 
   const handleStageFilterChange = (stage: string) => {
     setStageFilter(stage);
@@ -267,9 +242,8 @@ export function CandidatesPage() {
   }, [candidates, updateCandidate, refreshCandidates]);
 
   const clearFilters = () => {
-    setSearchTerm('');
     setStageFilter('');
-    updateFilters({ search: '', stage: '' });
+    updateFilters({ stage: '' });
   };
 
   // Pagination handlers
@@ -304,14 +278,29 @@ export function CandidatesPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-slate-900">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div className="min-h-screen relative bg-gradient-to-br from-slate-50 via-blue-50/30 to-purple-50/30 dark:from-slate-900 dark:via-slate-800/50 dark:to-slate-700/30">
+      {/* Minimalistic geometric background */}
+      <div className="absolute inset-0 opacity-30 dark:opacity-20">
+        <svg className="absolute inset-0 h-full w-full" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <pattern id="geometric-pattern" x="0" y="0" width="100" height="100" patternUnits="userSpaceOnUse">
+              <circle cx="50" cy="50" r="1" fill="currentColor" className="text-blue-300 dark:text-blue-600" opacity="0.3"/>
+              <circle cx="0" cy="0" r="1" fill="currentColor" className="text-purple-300 dark:text-purple-600" opacity="0.2"/>
+              <circle cx="100" cy="0" r="1" fill="currentColor" className="text-pink-300 dark:text-pink-600" opacity="0.2"/>
+              <circle cx="0" cy="100" r="1" fill="currentColor" className="text-blue-300 dark:text-blue-600" opacity="0.2"/>
+              <circle cx="100" cy="100" r="1" fill="currentColor" className="text-purple-300 dark:text-purple-600" opacity="0.2"/>
+            </pattern>
+          </defs>
+          <rect width="100%" height="100%" fill="url(#geometric-pattern)" />
+        </svg>
+      </div>
+      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
-        <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-gray-200 dark:border-slate-600 mb-6">
-          <div className="px-6 py-6">
+        <div className="backdrop-blur-xl bg-white/95 dark:bg-slate-800/95 rounded-3xl shadow-xl border border-white/50 dark:border-slate-700/50 mb-6 relative">
+          <div className="relative px-6 py-6">
             <div className="flex items-center justify-between mb-6">
               <div>
-                <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Candidates</h1>
+                <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">Candidates</h1>
                 <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
                   {loading ? 'Loading...' : `${filteredCandidates.length} of ${candidates.length} candidates`}
                 </p>
@@ -319,13 +308,13 @@ export function CandidatesPage() {
               
               <div className="flex items-center space-x-3">
                 {/* View Mode Toggle */}
-                <div className="flex items-center bg-gray-100 dark:bg-slate-700 rounded-lg p-1">
+                <div className="flex items-center backdrop-blur-lg bg-white/60 dark:bg-slate-700/60 rounded-xl p-1 border border-white/30 dark:border-slate-600/30 shadow-lg">
                   <button
                     onClick={() => setViewMode('list')}
-                    className={`px-3 py-2 rounded-md transition-colors flex items-center ${
+                    className={`px-3 py-2 rounded-lg transition-all duration-300 flex items-center hover:scale-105 ${
                       viewMode === 'list' 
-                        ? 'bg-white dark:bg-slate-600 text-gray-900 dark:text-white shadow-sm' 
-                        : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
+                        ? 'bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg transform scale-105' 
+                        : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:bg-white/50 dark:hover:bg-slate-600/50'
                     }`}
                     title="List view"
                   >
@@ -333,10 +322,10 @@ export function CandidatesPage() {
                   </button>
                   <button
                     onClick={() => setViewMode('cards')}
-                    className={`px-3 py-2 rounded-md transition-colors flex items-center ${
+                    className={`px-3 py-2 rounded-lg transition-all duration-300 flex items-center hover:scale-105 ${
                       viewMode === 'cards' 
-                        ? 'bg-white dark:bg-slate-600 text-gray-900 dark:text-white shadow-sm' 
-                        : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
+                        ? 'bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg transform scale-105' 
+                        : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:bg-white/50 dark:hover:bg-slate-600/50'
                     }`}
                     title="Card view"
                   >
@@ -344,10 +333,10 @@ export function CandidatesPage() {
                   </button>
                   <button
                     onClick={() => setViewMode('stages')}
-                    className={`px-3 py-2 rounded-md transition-colors flex items-center space-x-2 ${
+                    className={`px-3 py-2 rounded-lg transition-all duration-300 flex items-center space-x-2 hover:scale-105 ${
                       viewMode === 'stages' 
-                        ? 'bg-white dark:bg-slate-600 text-gray-900 dark:text-white shadow-sm' 
-                        : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
+                        ? 'bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg transform scale-105' 
+                        : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:bg-white/50 dark:hover:bg-slate-600/50'
                     }`}
                     title="Candidate Stage Board"
                   >
@@ -368,65 +357,46 @@ export function CandidatesPage() {
               </div>
             </div>
 
-            {/* Search and Filters */}
+            {/* Stage Filter */}
             <div className="space-y-4">
-              {/* Search Bar */}
-              <div className="relative">
-                <MagnifyingGlassIcon className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400 dark:text-gray-500" />
-                <input
-                  type="text"
-                  placeholder="Search candidates by name or email..."
-                  value={searchTerm}
-                  onChange={(e) => handleSearchChange(e.target.value)}
-                  className="w-full pl-12 pr-4 py-3 border border-gray-300 dark:border-slate-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-gray-50 dark:bg-slate-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:bg-white dark:focus:bg-slate-600 transition-colors"
-                />
-              </div>
-
               {/* Filter Controls */}
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-4">
-                  <button
-                    onClick={() => setShowFilters(!showFilters)}
-                    className={`inline-flex items-center px-4 py-2 border text-sm font-medium rounded-lg transition-colors ${
-                      showFilters 
-                        ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 border-blue-300 dark:border-blue-600 shadow-sm' 
-                        : 'border-gray-300 dark:border-slate-600 text-gray-700 dark:text-gray-300 bg-white dark:bg-slate-700 hover:bg-gray-50 dark:hover:bg-slate-600'
-                    }`}
-                  >
-                    <FunnelIcon className="h-4 w-4 mr-2" />
-                    Filters
-                  </button>
+                  <div className="flex items-center space-x-4">
+                    <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                      Filter by Stage:
+                    </label>
+                    <select
+                      value={stageFilter}
+                      onChange={(e) => handleStageFilterChange(e.target.value)}
+                      className="border border-gray-300 dark:border-slate-600 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-slate-700 text-gray-900 dark:text-white"
+                    >
+                      <option value="">All Stages</option>
+                      {getStageOptions().map((stage: any) => (
+                        <option key={stage.value} value={stage.value}>
+                          {stage.label}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
 
-                  {/* Active Filter Badges */}
-                  {(searchTerm || stageFilter) && (
+                  {/* Active Filter Badge */}
+                  {stageFilter && (
                     <div className="flex items-center space-x-2">
-                      {searchTerm && (
-                        <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300 border border-blue-200 dark:border-blue-600">
-                          Search: "{searchTerm}"
-                          <button
-                            onClick={() => handleSearchChange('')}
-                            className="ml-2 hover:text-blue-600"
-                          >
-                            <XMarkIcon className="h-3 w-3" />
-                          </button>
-                        </span>
-                      )}
-                      {stageFilter && (
-                        <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300 border border-green-200 dark:border-green-600">
-                          Stage: {getStageInfo(stageFilter as Candidate['stage']).label}
-                          <button
-                            onClick={() => handleStageFilterChange('')}
-                            className="ml-2 hover:text-green-600"
-                          >
-                            <XMarkIcon className="h-3 w-3" />
-                          </button>
-                        </span>
-                      )}
+                      <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300 border border-green-200 dark:border-green-600">
+                        Stage: {getStageInfo(stageFilter as Candidate['stage']).label}
+                        <button
+                          onClick={() => handleStageFilterChange('')}
+                          className="ml-2 hover:text-green-600"
+                        >
+                          <XMarkIcon className="h-3 w-3" />
+                        </button>
+                      </span>
                       <button
                         onClick={clearFilters}
                         className="text-xs text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 font-medium"
                       >
-                        Clear all
+                        Clear filter
                       </button>
                     </div>
                   )}
@@ -436,72 +406,14 @@ export function CandidatesPage() {
                   {filteredCandidates.length} results
                 </div>
               </div>
-
-              {/* Expanded Filters */}
-              {showFilters && (
-                <div className="border-t border-gray-200 dark:border-slate-600 pt-4">
-                  <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                        Filter by Stage
-                      </label>
-                      <select
-                        value={stageFilter}
-                        onChange={(e) => handleStageFilterChange(e.target.value)}
-                        className="w-full border border-gray-300 dark:border-slate-600 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-slate-700 text-gray-900 dark:text-white"
-                      >
-                        <option value="">All Stages</option>
-                        {getStageOptions().map((stage: any) => (
-                          <option key={stage.value} value={stage.value}>
-                            {stage.label}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                        Sort By
-                      </label>
-                      <select className="w-full border border-gray-300 dark:border-slate-600 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-slate-700 text-gray-900 dark:text-white">
-                        <option value="created_desc">Recently Added</option>
-                        <option value="created_asc">Oldest First</option>
-                        <option value="name_asc">Name A-Z</option>
-                        <option value="name_desc">Name Z-A</option>
-                        <option value="stage">Stage</option>
-                      </select>
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                        Job Filter
-                      </label>
-                      <select className="w-full border border-gray-300 dark:border-slate-600 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-slate-700 text-gray-900 dark:text-white">
-                        <option value="">All Jobs</option>
-                      </select>
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                        Date Range
-                      </label>
-                      <select className="w-full border border-gray-300 dark:border-slate-600 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-slate-700 text-gray-900 dark:text-white">
-                        <option value="">All Time</option>
-                        <option value="today">Today</option>
-                        <option value="week">This Week</option>
-                        <option value="month">This Month</option>
-                        <option value="quarter">This Quarter</option>
-                      </select>
-                    </div>
-                  </div>
-                </div>
-              )}
             </div>
           </div>
         </div>
 
         {/* Candidates List */}
-        <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-gray-200 dark:border-slate-600">
+        <div className="backdrop-blur-xl bg-white/80 dark:bg-slate-800/80 rounded-3xl shadow-xl border border-white/30 dark:border-slate-700/30 relative">
+          <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 via-purple-500/10 to-pink-500/10 rounded-3xl"></div>
+          <div className="relative">
           {loading ? (
             <div className="flex items-center justify-center py-16">
               <div className="text-center">
@@ -516,12 +428,12 @@ export function CandidatesPage() {
               </div>
               <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">No candidates found</h3>
               <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">
-                {searchTerm || stageFilter 
-                  ? 'Try adjusting your search or filters to find what you\'re looking for'
+                {stageFilter 
+                  ? 'Try adjusting your filter to find what you\'re looking for'
                   : 'Get started by adding your first candidate to the system'
                 }
               </p>
-              {!searchTerm && !stageFilter && (
+              {!stageFilter && (
                 <button className="inline-flex items-center px-6 py-3 border border-transparent text-sm font-medium rounded-lg text-white bg-blue-600 hover:bg-blue-700 transition-colors shadow-sm">
                   <PlusIcon className="h-4 w-4 mr-2" />
                   Add Your First Candidate
@@ -629,6 +541,7 @@ export function CandidatesPage() {
               )}
             </div>
           )}
+          </div>
         </div>
       </div>
     </div>

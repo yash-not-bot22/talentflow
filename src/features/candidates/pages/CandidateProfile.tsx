@@ -234,10 +234,22 @@ export function CandidateProfile() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 dark:bg-slate-900 flex items-center justify-center">
-        <div className="text-center">
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-purple-50/30 dark:from-slate-900 dark:via-slate-800/50 dark:to-slate-700/30 flex items-center justify-center relative overflow-hidden">
+        {/* Geometric background */}
+        <div className="absolute inset-0 opacity-20 dark:opacity-10">
+          <svg className="absolute inset-0 h-full w-full" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <pattern id="loading-pattern" x="0" y="0" width="50" height="50" patternUnits="userSpaceOnUse">
+                <circle cx="25" cy="25" r="1" fill="currentColor" className="text-blue-400" opacity="0.6"/>
+              </pattern>
+            </defs>
+            <rect width="100%" height="100%" fill="url(#loading-pattern)"/>
+          </svg>
+        </div>
+        
+        <div className="text-center bg-white/70 dark:bg-slate-800/70 backdrop-blur-xl rounded-2xl p-8 shadow-xl border border-white/20 dark:border-slate-700/50">
           <LoadingSpinner size="lg" />
-          <p className="mt-4 text-sm text-gray-500 dark:text-gray-400">Loading candidate profile...</p>
+          <p className="mt-4 text-sm text-gray-600 dark:text-gray-300">Loading candidate profile...</p>
         </div>
       </div>
     );
@@ -245,10 +257,22 @@ export function CandidateProfile() {
 
   if (error || !candidate) {
     return (
-      <div className="min-h-screen bg-gray-50 dark:bg-slate-900">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-gray-200 dark:border-slate-600 p-8 text-center">
-            <div className="w-12 h-12 bg-red-100 dark:bg-red-900/50 rounded-full flex items-center justify-center mx-auto mb-4">
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-purple-50/30 dark:from-slate-900 dark:via-slate-800/50 dark:to-slate-700/30 relative overflow-hidden">
+        {/* Geometric background */}
+        <div className="absolute inset-0 opacity-20 dark:opacity-10">
+          <svg className="absolute inset-0 h-full w-full" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <pattern id="error-pattern" x="0" y="0" width="60" height="60" patternUnits="userSpaceOnUse">
+                <circle cx="30" cy="30" r="1" fill="currentColor" className="text-red-400" opacity="0.5"/>
+              </pattern>
+            </defs>
+            <rect width="100%" height="100%" fill="url(#error-pattern)"/>
+          </svg>
+        </div>
+        
+        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="bg-white/70 dark:bg-slate-800/70 backdrop-blur-xl rounded-2xl shadow-xl border border-white/20 dark:border-slate-700/50 p-8 text-center hover:shadow-2xl transition-all duration-500">
+            <div className="w-12 h-12 bg-red-100/80 dark:bg-red-900/50 backdrop-blur-sm rounded-full flex items-center justify-center mx-auto mb-4">
               <XCircleIcon className="w-6 h-6 text-red-600 dark:text-red-400" />
             </div>
             <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
@@ -256,7 +280,7 @@ export function CandidateProfile() {
             </h2>
             <button
               onClick={() => navigate('/candidates')}
-              className="inline-flex items-center px-4 py-2 border border-gray-300 dark:border-slate-600 shadow-sm text-sm font-medium rounded-lg text-gray-700 dark:text-gray-300 bg-white dark:bg-slate-700 hover:bg-gray-50 dark:hover:bg-slate-600"
+              className="inline-flex items-center px-4 py-2 bg-white/50 dark:bg-slate-700/50 backdrop-blur-sm border border-white/20 dark:border-slate-600/50 shadow-lg text-sm font-medium rounded-xl text-gray-700 dark:text-gray-300 hover:bg-white/80 dark:hover:bg-slate-600/80 hover:shadow-xl transition-all duration-300"
             >
               <ArrowLeftIcon className="h-4 w-4 mr-2" />
               Back to Candidates
@@ -271,11 +295,34 @@ export function CandidateProfile() {
   const stages = getStageOptions();
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-slate-900">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-purple-50/30 dark:from-slate-900 dark:via-slate-800/50 dark:to-slate-700/30 relative overflow-hidden">
+      {/* Animated geometric background */}
+      <div className="absolute inset-0 opacity-30 dark:opacity-20">
+        <svg className="absolute inset-0 h-full w-full" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <pattern id="profile-geometric-pattern" x="0" y="0" width="100" height="100" patternUnits="userSpaceOnUse">
+              <circle cx="50" cy="50" r="1.5" fill="currentColor" className="text-blue-400 dark:text-blue-500" opacity="0.4"/>
+              <circle cx="0" cy="0" r="1" fill="currentColor" className="text-purple-400 dark:text-purple-500" opacity="0.3"/>
+              <circle cx="100" cy="0" r="1" fill="currentColor" className="text-pink-400 dark:text-pink-500" opacity="0.3"/>
+              <circle cx="0" cy="100" r="1" fill="currentColor" className="text-blue-400 dark:text-blue-500" opacity="0.3"/>
+              <circle cx="100" cy="100" r="1" fill="currentColor" className="text-purple-400 dark:text-purple-500" opacity="0.3"/>
+              <path d="M50,0 L100,50 L50,100 L0,50 Z" fill="none" stroke="currentColor" stroke-width="0.5" className="text-blue-300 dark:text-blue-600" opacity="0.2"/>
+            </pattern>
+          </defs>
+          <rect width="100%" height="100%" fill="url(#profile-geometric-pattern)"/>
+        </svg>
+      </div>
+      
+      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
-        <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-gray-200 dark:border-slate-600 mb-6">
-          <div className="px-6 py-6">
+        <div className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-2xl rounded-3xl shadow-2xl border border-white/30 dark:border-slate-700/50 mb-6 hover:shadow-3xl transition-all duration-700 relative overflow-hidden">
+          {/* Enhanced glassmorphism overlay */}
+          <div className="absolute inset-0 bg-gradient-to-br from-white/20 via-blue-50/20 to-purple-50/20 dark:from-slate-700/20 dark:via-slate-600/20 dark:to-slate-500/20 rounded-3xl"></div>
+          
+          {/* Animated shimmer effect */}
+          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent dark:via-slate-400/10 rounded-3xl opacity-0 hover:opacity-100 transition-opacity duration-1000 transform -skew-x-12 animate-pulse"></div>
+          
+          <div className="relative px-8 py-8">
             <div className="flex items-center justify-between mb-6">
               <div className="flex items-center space-x-4">
                 <button
@@ -319,10 +366,10 @@ export function CandidateProfile() {
               </div>
               
               <div className="flex items-center space-x-3">
-                <span className={`inline-flex items-center px-4 py-2 rounded-full text-sm font-medium ${getStageInfo(candidate.stage).color}`}>
+                <span className={`inline-flex items-center px-5 py-2.5 rounded-full text-sm font-semibold backdrop-blur-md border border-white/20 dark:border-slate-600/30 shadow-lg ${getStageInfo(candidate.stage).color}`}>
                   {getStageInfo(candidate.stage).label}
                 </span>
-                <button className="inline-flex items-center px-4 py-2 border border-gray-300 dark:border-slate-600 shadow-sm text-sm font-medium rounded-lg text-gray-700 dark:text-gray-300 bg-white dark:bg-slate-700 hover:bg-gray-50 dark:hover:bg-slate-600">
+                <button className="inline-flex items-center px-5 py-2.5 bg-white/60 dark:bg-slate-700/60 backdrop-blur-md border border-white/30 dark:border-slate-600/50 shadow-xl text-sm font-semibold rounded-2xl text-gray-700 dark:text-gray-200 hover:bg-white/90 dark:hover:bg-slate-600/90 hover:shadow-2xl hover:scale-105 transition-all duration-300">
                   <PencilIcon className="h-4 w-4 mr-2" />
                   Edit
                 </button>
@@ -330,8 +377,12 @@ export function CandidateProfile() {
             </div>
 
             {/* Progress Timeline */}
-            <div className="bg-gray-50 dark:bg-slate-700 rounded-xl p-6">
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-6">Application Progress</h3>
+            <div className="bg-gradient-to-br from-slate-100/90 via-blue-100/70 to-purple-100/70 dark:from-slate-700/70 dark:via-slate-600/60 dark:to-slate-500/60 backdrop-blur-xl rounded-3xl p-8 border border-white/40 dark:border-slate-600/40 shadow-xl hover:shadow-2xl transition-all duration-700 relative overflow-hidden">
+              {/* Glass overlay */}
+              <div className="absolute inset-0 bg-white/20 dark:bg-slate-800/20 backdrop-blur-sm rounded-3xl"></div>
+              
+              <div className="relative z-10">
+                <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-8">Application Progress</h3>
               <div className="flex items-center justify-between">
                 {stages.map((stage: { value: string; label: string; color: string }, index: number) => {
                   const isCompleted = index < currentStageIndex;
@@ -362,6 +413,7 @@ export function CandidateProfile() {
                   );
                 })}
               </div>
+              </div>
             </div>
           </div>
         </div>
@@ -369,16 +421,23 @@ export function CandidateProfile() {
         {/* Content - Full Width Layout */}
         <div className="space-y-6">
           {/* Stage Management */}
-          <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-gray-200 dark:border-slate-600 p-6">
+          <div className="bg-white/85 dark:bg-slate-800/85 backdrop-blur-2xl rounded-3xl shadow-2xl border border-white/40 dark:border-slate-700/60 p-8 hover:shadow-3xl transition-all duration-700 relative overflow-hidden">
+            {/* Enhanced glassmorphism overlay */}
+            <div className="absolute inset-0 bg-gradient-to-br from-white/15 via-blue-50/15 to-purple-50/15 dark:from-slate-700/15 dark:via-slate-600/15 dark:to-slate-500/15 rounded-3xl"></div>
+            
+            {/* Animated border effect */}
+            <div className="absolute inset-0 rounded-3xl bg-gradient-to-r from-blue-400/20 via-purple-400/20 to-pink-400/20 opacity-0 hover:opacity-100 transition-opacity duration-500"></div>
+            
+            <div className="relative z-10">
               <div className="flex items-center justify-between mb-6">
                 <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Stage Management</h3>
-                <div className="flex items-center space-x-1 bg-gray-100 dark:bg-slate-700 rounded-lg p-1">
+                <div className="flex items-center space-x-1 bg-white/50 dark:bg-slate-800/50 backdrop-blur-lg rounded-2xl p-1.5 border border-white/30 dark:border-slate-700/40 shadow-xl">
                   <button
                     onClick={() => setViewMode('timeline')}
-                    className={`px-3 py-2 text-sm font-medium rounded-md transition-colors ${
+                    className={`px-4 py-2.5 text-sm font-semibold rounded-xl transition-all duration-300 ${
                       viewMode === 'timeline' 
-                        ? 'bg-white dark:bg-slate-600 text-gray-900 dark:text-white shadow-sm' 
-                        : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
+                        ? 'bg-white/90 dark:bg-slate-700/90 text-blue-600 dark:text-blue-400 shadow-lg backdrop-blur-md border border-white/40 dark:border-slate-600/40' 
+                        : 'text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 hover:bg-white/60 dark:hover:bg-slate-700/60'
                     }`}
                   >
                     <ListBulletIcon className="h-4 w-4 mr-2 inline" />
@@ -386,10 +445,10 @@ export function CandidateProfile() {
                   </button>
                   <button
                     onClick={() => setViewMode('kanban')}
-                    className={`px-3 py-2 text-sm font-medium rounded-md transition-colors ${
+                    className={`px-4 py-2.5 text-sm font-semibold rounded-xl transition-all duration-300 ${
                       viewMode === 'kanban' 
-                        ? 'bg-white dark:bg-slate-600 text-gray-900 dark:text-white shadow-sm' 
-                        : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
+                        ? 'bg-white/90 dark:bg-slate-700/90 text-blue-600 dark:text-blue-400 shadow-lg backdrop-blur-md border border-white/40 dark:border-slate-600/40' 
+                        : 'text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 hover:bg-white/60 dark:hover:bg-slate-700/60'
                     }`}
                   >
                     <Squares2X2Icon className="h-4 w-4 mr-2 inline" />
@@ -407,17 +466,17 @@ export function CandidateProfile() {
                   }}
                 />
               ) : (
-                <div className="space-y-4">
+                <div className="space-y-6">
                   {timeline.map((entry, index) => (
-                    <div key={index} className="flex items-start space-x-4">
+                    <div key={index} className="flex items-start space-x-6 bg-white/60 dark:bg-slate-700/60 backdrop-blur-xl rounded-2xl p-6 border border-white/30 dark:border-slate-600/40 shadow-xl hover:shadow-2xl hover:bg-white/80 dark:hover:bg-slate-700/80 transition-all duration-500 hover:scale-[1.02]">
                       <div className="flex-shrink-0">
-                        <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                          entry.type === 'stage_change' ? 'bg-blue-100 dark:bg-blue-900/50' : 'bg-green-100 dark:bg-green-900/50'
+                        <div className={`w-10 h-10 rounded-full flex items-center justify-center backdrop-blur-lg border border-white/30 dark:border-slate-600/40 shadow-xl ${
+                          entry.type === 'stage_change' ? 'bg-blue-100/90 dark:bg-blue-900/70' : 'bg-green-100/90 dark:bg-green-900/70'
                         }`}>
                           {entry.type === 'stage_change' ? (
-                            <ArrowRightIcon className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                            <ArrowRightIcon className="h-5 w-5 text-blue-600 dark:text-blue-400" />
                           ) : (
-                            <ChatBubbleBottomCenterTextIcon className="h-4 w-4 text-green-600 dark:text-green-400" />
+                            <ChatBubbleBottomCenterTextIcon className="h-5 w-5 text-green-600 dark:text-green-400" />
                           )}
                         </div>
                       </div>
@@ -425,16 +484,16 @@ export function CandidateProfile() {
                       <div className="flex-1 min-w-0">
                         <div className="text-sm">
                           {entry.type === 'stage_change' && entry.stage && (
-                            <p className="text-gray-900 dark:text-white">
-                              Moved to <span className="font-medium">{getStageInfo(entry.stage).label}</span>
+                            <p className="text-gray-900 dark:text-white font-medium">
+                              Moved to <span className="font-semibold text-blue-600 dark:text-blue-400">{getStageInfo(entry.stage).label}</span>
                             </p>
                           )}
                           {entry.type === 'note' && entry.text && (
                             <p className="text-gray-900 dark:text-white">
-                              Added note: <span className="italic">"{entry.text}"</span>
+                              Added note: <span className="italic font-medium text-gray-700 dark:text-gray-300">"{entry.text}"</span>
                             </p>
                           )}
-                          <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                          <p className="text-xs text-gray-500 dark:text-gray-400 mt-2 bg-white/40 dark:bg-slate-600/40 backdrop-blur-sm rounded-lg px-3 py-1 inline-block">
                             {new Date(entry.timestamp).toLocaleString()}
                           </p>
                         </div>
@@ -443,9 +502,10 @@ export function CandidateProfile() {
                   ))}
                   
                   {timeline.length === 0 && (
-                    <div className="text-center py-8 text-gray-500 dark:text-gray-400">
-                      <ClockIcon className="h-8 w-8 mx-auto mb-2 opacity-50" />
-                      <p>No activity yet</p>
+                    <div className="text-center py-12 text-gray-500 dark:text-gray-400 bg-white/50 dark:bg-slate-700/50 backdrop-blur-lg rounded-2xl border border-white/30 dark:border-slate-600/40 shadow-xl">
+                      <ClockIcon className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                      <p className="text-lg font-medium">No activity yet</p>
+                      <p className="text-sm mt-2">Timeline entries will appear here as the candidate progresses</p>
                     </div>
                   )}
                 </div>
@@ -455,23 +515,31 @@ export function CandidateProfile() {
 
           {/* Notes Section */}
           <div>
-            <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-gray-200 dark:border-slate-600 p-6">
-              <div className="flex items-center justify-between mb-6">
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Notes & Comments</h3>
-                <div className="flex items-center space-x-2 text-sm text-gray-500 dark:text-gray-400">
-                  <ChatBubbleBottomCenterTextIcon className="h-4 w-4" />
-                  <span>{candidate.notes.length} notes</span>
-                </div>
-              </div>
+            <div className="bg-white/85 dark:bg-slate-800/85 backdrop-blur-2xl rounded-3xl shadow-2xl border border-white/40 dark:border-slate-700/60 p-8 hover:shadow-3xl transition-all duration-700 relative overflow-hidden">
+              {/* Enhanced glassmorphism overlay */}
+              <div className="absolute inset-0 bg-gradient-to-br from-white/15 via-blue-50/15 to-purple-50/15 dark:from-slate-700/15 dark:via-slate-600/15 dark:to-slate-500/15 rounded-3xl"></div>
               
-              <EnhancedNotesWithMentions
-                notes={candidate.notes}
-                onAddNote={handleAddNote}
-              />
+              {/* Animated shimmer effect */}
+              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent dark:via-slate-400/10 rounded-3xl opacity-0 hover:opacity-100 transition-opacity duration-1000 transform -skew-x-12"></div>
+              
+              <div className="relative z-10">
+                <div className="flex items-center justify-between mb-8">
+                  <h3 className="text-xl font-bold text-gray-900 dark:text-white">Notes & Comments</h3>
+                  <div className="flex items-center space-x-3 text-sm text-gray-600 dark:text-gray-300 bg-white/40 dark:bg-slate-700/40 backdrop-blur-lg rounded-xl px-4 py-2 border border-white/30 dark:border-slate-600/40 shadow-lg">
+                    <ChatBubbleBottomCenterTextIcon className="h-5 w-5" />
+                    <span className="font-semibold">{candidate.notes.length} notes</span>
+                  </div>
+                </div>
+                
+                <EnhancedNotesWithMentions
+                  notes={candidate.notes}
+                  onAddNote={handleAddNote}
+                />
+              </div>
             </div>
           </div>
-          </div>
         </div>
-     
+      </div>
+    </div>
   );
 }

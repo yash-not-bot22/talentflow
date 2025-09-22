@@ -8,13 +8,9 @@ import {
   useSensors,
   DragOverlay,
   useDroppable,
-  type DragStartEvent,
-  type DragEndEvent,
+  useDraggable,
 } from '@dnd-kit/core';
-import {
-  useSortable,
-} from '@dnd-kit/sortable';
-import { CSS } from '@dnd-kit/utilities';
+import type { DragStartEvent, DragEndEvent } from '@dnd-kit/core';
 import type { Candidate, Job } from '../../../db';
 import toast from 'react-hot-toast';
 import {
@@ -56,17 +52,16 @@ function StageCandidateCard({ candidate, jobTitle, onClick }: CandidateCardProps
     attributes,
     listeners,
     setNodeRef,
-    transform,
-    transition,
     isDragging,
-  } = useSortable({
+  } = useDraggable({
     id: candidate.id.toString(),
   });
 
   const style = {
-    transform: CSS.Transform.toString(transform),
-    transition,
-    opacity: isDragging ? 0.5 : 1,
+    opacity: isDragging ? 0 : 1,
+    cursor: isDragging ? 'grabbing' : 'grab',
+    touchAction: 'none',
+    userSelect: 'none' as const,
   };
 
   const formatDate = (timestamp: number) => {
@@ -90,14 +85,17 @@ function StageCandidateCard({ candidate, jobTitle, onClick }: CandidateCardProps
         e.stopPropagation();
         onClick?.(candidate);
       }}
-      className="bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-600 p-3 cursor-grab hover:shadow-md transition-all duration-200 active:cursor-grabbing"
+      className="bg-white dark:bg-slate-800 rounded-2xl border border-gray-200 dark:border-slate-700 p-3 cursor-grab hover:shadow-xl hover:border-blue-300 dark:hover:border-blue-600 transition-all duration-300 active:cursor-grabbing hover:scale-105 hover:-translate-y-1 hover:rotate-1 relative group overflow-hidden select-none"
     >
-      {/* Candidate Header */}
-      <div className="flex items-center space-x-3 mb-2">
-        <div className="flex-shrink-0">
-          <div className="h-8 w-8 bg-gradient-to-br from-blue-400 to-purple-500 rounded-full flex items-center justify-center">
-            <span className="text-white text-xs font-semibold">
-              {getInitials(candidate.name)}
+      {/* Hover gradient overlay */}
+      <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 via-purple-500/10 to-pink-500/10 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+      <div className="relative">
+        {/* Candidate Header */}
+        <div className="flex items-center space-x-3 mb-2">
+          <div className="flex-shrink-0">
+            <div className="h-8 w-8 bg-gradient-to-br from-blue-400 to-purple-500 rounded-full flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300">
+              <span className="text-white text-xs font-semibold">
+                {getInitials(candidate.name)}
             </span>
           </div>
         </div>
@@ -128,6 +126,7 @@ function StageCandidateCard({ candidate, jobTitle, onClick }: CandidateCardProps
             {candidate.notes.length}
           </span>
         </div>
+      </div>
       </div>
     </div>
   );
@@ -165,67 +164,90 @@ function StageColumn({ stage, candidates, jobs, draggedCandidate, isValidTransit
   return (
     <div
       ref={setNodeRef}
-      className={`flex-1 min-w-80 bg-white dark:bg-slate-800 rounded-xl border-2 transition-all duration-300 ${
-        isOver && isValidDropTarget ? `${stage.borderColor} bg-opacity-10 ${stage.bgColor}` : 
-        isOver && !isValidDropTarget ? 'border-red-400 bg-red-50' :
-        isDragging && !isValidDropTarget ? 'border-gray-300 bg-gray-100 opacity-50' :
-        'border-gray-200'
+      className={`flex-1 min-w-80 bg-white dark:bg-slate-800 rounded-3xl border-2 transition-all duration-300 shadow-lg relative ${
+        isOver && isValidDropTarget ? `${stage.borderColor} bg-opacity-20 shadow-2xl transform scale-105` : 
+        isOver && !isValidDropTarget ? 'border-red-400 bg-red-50/50 shadow-lg' :
+        isDragging && !isValidDropTarget ? 'border-gray-300 bg-gray-100/50 opacity-50' :
+        'border-gray-200 dark:border-slate-700'
       }`}
     >
-      {/* Column Header */}
-      <div className={`p-4 border-b border-gray-200 ${stage.bgColor} bg-opacity-5`}>
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-3">
-            <div className={`p-2 rounded-lg ${stage.bgColor}`}>
-              <StageIcon className="h-5 w-5 text-white" />
+      <div className="relative">
+        {/* Column Header */}
+        <div className={`p-4 border-b border-gray-200 dark:border-slate-600 bg-gray-50 dark:bg-slate-700/50 rounded-t-3xl`}>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-3">
+              <div className={`p-2 rounded-xl ${stage.bgColor} shadow-lg hover:scale-110 transition-transform duration-300`}>
+                <StageIcon className="h-5 w-5 text-white" />
+              </div>
+              <div>
+                <h3 className="text-base font-semibold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                  {stage.title}
+                </h3>
+                <p className="text-sm text-gray-500 dark:text-gray-400">{stage.description}</p>
+              </div>
             </div>
-            <div>
-              <h3 className="text-base font-semibold text-gray-900 dark:text-white">
-                {stage.title}
-              </h3>
-              <p className="text-sm text-gray-500">{stage.description}</p>
-            </div>
+            <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium backdrop-blur-lg border border-white/30 shadow-lg transition-all duration-300 hover:scale-105 ${stage.color}`}>
+              {candidates.length}
+            </span>
           </div>
-          <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${stage.color} bg-opacity-10`}>
-            {candidates.length}
-          </span>
         </div>
-      </div>
 
-      {/* Candidates List - Entire area is droppable */}
-      <div className={`p-4 min-h-96 max-h-96 overflow-y-auto relative ${
-        isOver && isValidDropTarget ? 'bg-opacity-5 ' + stage.bgColor : ''
-      }`}>
-        <div className="space-y-3">
-          {candidates.map((candidate) => (
-            <StageCandidateCard
-              key={candidate.id}
-              candidate={candidate}
-              jobTitle={getJobTitle(candidate.jobId)}
-              onClick={onCandidateClick}
-            />
-          ))}
-          
-          {/* Always visible drop zone at bottom */}
-          <div className={`mt-4 p-3 border-2 border-dashed rounded-lg flex items-center justify-center text-gray-400 transition-all duration-200 ${
-            isOver && isValidDropTarget ? `${stage.borderColor} bg-opacity-20 ${stage.bgColor} text-gray-600 border-solid` : 
-            isOver && !isValidDropTarget ? 'border-red-400 bg-red-50 text-red-600' :
-            isDragging && !isValidDropTarget ? 'border-gray-300 opacity-50' :
-            'border-gray-300'
-          } ${candidates.length === 0 ? 'h-32' : 'h-16'}`}>
-            <div className="text-center">
-              <StageIcon className={`h-6 w-6 mx-auto mb-1 transition-all duration-200 ${
-                isOver && isValidDropTarget ? 'opacity-80 scale-110' : 
-                isOver && !isValidDropTarget ? 'opacity-60 text-red-500' :
-                'opacity-50'
-              }`} />
-              <p className="text-xs">{
-                isOver && !isValidDropTarget ? 'Invalid transition' :
-                isOver && isValidDropTarget ? `Drop to move to ${stage.title}` : 
-                candidates.length === 0 ? 'Drop candidates here' : 'Drop here to add'
-              }</p>
-            </div>
+        {/* Candidates List - Entire area is droppable */}
+        <div className={`p-4 min-h-96 max-h-96 overflow-y-auto relative ${
+          isOver && isValidDropTarget ? 'bg-blue-50/50 dark:bg-blue-900/20' : ''
+        }`}>
+          <div className="space-y-3 relative z-10">
+            {candidates.map((candidate) => (
+              <StageCandidateCard
+                key={candidate.id}
+                candidate={candidate}
+                jobTitle={getJobTitle(candidate.jobId)}
+                onClick={onCandidateClick}
+              />
+            ))}
           </div>
+          
+          {/* Full area drop zone overlay */}
+          {isOver && (
+            <div className={`absolute inset-0 border-2 border-dashed rounded-lg flex items-center justify-center z-0 ${
+              isValidDropTarget ? `${stage.borderColor} bg-blue-50/30 dark:bg-blue-900/30` : 
+              'border-red-400 bg-red-50/50 dark:bg-red-900/30'
+            }`}>
+              <div className="text-center">
+                <StageIcon className={`h-8 w-8 mx-auto mb-2 ${
+                  isValidDropTarget ? stage.color.split(' ')[0] : 'text-red-500'
+                } opacity-70`} />
+                <p className={`text-sm font-medium ${
+                  isValidDropTarget ? stage.color.split(' ')[0] : 'text-red-600'
+                }`}>
+                  {isValidDropTarget ? `Drop to move to ${stage.title}` : 'Invalid transition'}
+                </p>
+              </div>
+            </div>
+          )}
+          
+          {/* Always visible drop zone at bottom when empty or small */}
+          {candidates.length === 0 && (
+            <div className={`p-6 border-2 border-dashed rounded-lg flex items-center justify-center text-gray-400 transition-all duration-200 ${
+              isOver && isValidDropTarget ? `${stage.borderColor} bg-opacity-20 text-gray-600 border-solid` : 
+              isOver && !isValidDropTarget ? 'border-red-400 bg-red-50 text-red-600' :
+              isDragging && !isValidDropTarget ? 'border-gray-300 opacity-50' :
+              'border-gray-300'
+            }`}>
+              <div className="text-center">
+                <StageIcon className={`h-6 w-6 mx-auto mb-1 transition-all duration-200 ${
+                  isOver && isValidDropTarget ? 'opacity-80 scale-110' : 
+                  isOver && !isValidDropTarget ? 'opacity-60 text-red-500' :
+                  'opacity-50'
+                }`} />
+                <p className="text-xs">{
+                  isOver && !isValidDropTarget ? 'Invalid transition' :
+                  isOver && isValidDropTarget ? `Drop to move to ${stage.title}` : 
+                  'Drop candidates here'
+                }</p>
+              </div>
+            </div>
+          )}
         </div>
         
         {/* Overlay for entire droppable area when dragging */}
@@ -260,7 +282,7 @@ export function CandidateStageBoard({ candidates, jobs = [], onStageChange, onCa
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: {
-        distance: 8,
+        distance: 5,
       },
     }),
     useSensor(KeyboardSensor)
@@ -481,16 +503,31 @@ export function CandidateStageBoard({ candidates, jobs = [], onStageChange, onCa
   // Inline rendering (no modal wrapper)
   if (isInline) {
     return (
-      <div className="relative">
+      <div className="relative bg-gradient-to-br from-slate-50 via-blue-50/30 to-purple-50/30 dark:from-slate-900 dark:via-slate-800/50 dark:to-slate-700/30 rounded-3xl">
+        {/* Minimalistic geometric background */}
+        <div className="absolute inset-0 opacity-30 dark:opacity-20 rounded-3xl overflow-hidden">
+          <svg className="absolute inset-0 h-full w-full" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <pattern id="board-geometric-pattern" x="0" y="0" width="100" height="100" patternUnits="userSpaceOnUse">
+                <circle cx="50" cy="50" r="1" fill="currentColor" className="text-blue-300 dark:text-blue-600" opacity="0.3"/>
+                <circle cx="0" cy="0" r="1" fill="currentColor" className="text-purple-300 dark:text-purple-600" opacity="0.2"/>
+                <circle cx="100" cy="0" r="1" fill="currentColor" className="text-pink-300 dark:text-pink-600" opacity="0.2"/>
+                <circle cx="0" cy="100" r="1" fill="currentColor" className="text-blue-300 dark:text-blue-600" opacity="0.2"/>
+                <circle cx="100" cy="100" r="1" fill="currentColor" className="text-purple-300 dark:text-purple-600" opacity="0.2"/>
+              </pattern>
+            </defs>
+            <rect width="100%" height="100%" fill="url(#board-geometric-pattern)" />
+          </svg>
+        </div>
         {/* Stage Board */}
-        <div className="overflow-x-auto">
+        <div className="overflow-x-auto p-6">
           <DndContext 
             sensors={sensors}
             collisionDetection={closestCenter}
             onDragStart={handleDragStart}
             onDragEnd={handleDragEnd}
           >
-            <div className="flex gap-4 min-w-max">
+            <div className="flex gap-6 min-w-max">
               {candidatesByStage.map((stage) => (
                 <StageColumn
                   key={stage.id}
@@ -504,11 +541,18 @@ export function CandidateStageBoard({ candidates, jobs = [], onStageChange, onCa
               ))}
             </div>
 
-            <DragOverlay>
+            <DragOverlay
+              dropAnimation={{
+                duration: 500,
+                easing: 'cubic-bezier(0.18, 0.67, 0.6, 1.22)',
+              }}
+            >
               {activeCandidate ? (
-                <StageCandidateCard
-                  candidate={activeCandidate}
-                />
+                <div className="rotate-3 scale-105 shadow-2xl">
+                  <StageCandidateCard
+                    candidate={activeCandidate}
+                  />
+                </div>
               ) : null}
             </DragOverlay>
           </DndContext>
@@ -529,19 +573,34 @@ export function CandidateStageBoard({ candidates, jobs = [], onStageChange, onCa
 
   // Modal rendering (original)
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-gray-50 rounded-xl max-w-7xl w-full max-h-full m-4 flex flex-col">
+    <div className="fixed inset-0 bg-black/60 backdrop-blur-md flex items-center justify-center z-[70]">
+      <div className="bg-gradient-to-br from-slate-50 via-blue-50/30 to-purple-50/30 dark:from-slate-900 dark:via-slate-800/50 dark:to-slate-700/30 rounded-3xl max-w-7xl w-full max-h-full m-4 flex flex-col border-2 border-gray-200 dark:border-slate-700 shadow-2xl relative">
+        {/* Minimalistic geometric background */}
+        <div className="absolute inset-0 opacity-30 dark:opacity-20 rounded-3xl overflow-hidden">
+          <svg className="absolute inset-0 h-full w-full" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <pattern id="modal-geometric-pattern" x="0" y="0" width="100" height="100" patternUnits="userSpaceOnUse">
+                <circle cx="50" cy="50" r="1" fill="currentColor" className="text-blue-300 dark:text-blue-600" opacity="0.3"/>
+                <circle cx="0" cy="0" r="1" fill="currentColor" className="text-purple-300 dark:text-purple-600" opacity="0.2"/>
+                <circle cx="100" cy="0" r="1" fill="currentColor" className="text-pink-300 dark:text-pink-600" opacity="0.2"/>
+                <circle cx="0" cy="100" r="1" fill="currentColor" className="text-blue-300 dark:text-blue-600" opacity="0.2"/>
+                <circle cx="100" cy="100" r="1" fill="currentColor" className="text-purple-300 dark:text-purple-600" opacity="0.2"/>
+              </pattern>
+            </defs>
+            <rect width="100%" height="100%" fill="url(#modal-geometric-pattern)" />
+          </svg>
+        </div>
         {/* Header */}
-        <div className="p-6 border-b border-gray-200 dark:border-slate-600 bg-white dark:bg-slate-800 rounded-t-xl">
+        <div className="relative p-6 border-b border-gray-200 dark:border-slate-600 bg-white dark:bg-slate-800 rounded-t-3xl">
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Candidate Stage Board</h2>
-              <p className="text-gray-600">Drag candidates between stages to update their status</p>
+              <h2 className="text-xl font-semibold bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">Candidate Stage Board</h2>
+              <p className="text-gray-600 dark:text-gray-400">Drag candidates between stages to update their status</p>
             </div>
             {onClose && (
               <button
                 onClick={onClose}
-                className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg"
+                className="p-2 bg-gray-100 dark:bg-slate-700 border border-gray-300 dark:border-slate-600 shadow-lg text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:shadow-xl rounded-xl transition-all duration-300 hover:scale-105 hover:rotate-3"
               >
                 <XCircleIcon className="h-6 w-6" />
               </button>
@@ -571,11 +630,18 @@ export function CandidateStageBoard({ candidates, jobs = [], onStageChange, onCa
               ))}
             </div>
 
-            <DragOverlay>
+            <DragOverlay
+              dropAnimation={{
+                duration: 500,
+                easing: 'cubic-bezier(0.18, 0.67, 0.6, 1.22)',
+              }}
+            >
               {activeCandidate ? (
-                <StageCandidateCard
-                  candidate={activeCandidate}
-                />
+                <div className="rotate-3 scale-105 shadow-2xl">
+                  <StageCandidateCard
+                    candidate={activeCandidate}
+                  />
+                </div>
               ) : null}
             </DragOverlay>
           </DndContext>
